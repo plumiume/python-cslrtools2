@@ -1,0 +1,23 @@
+[project]
+name = "python-cslrtools2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "clipar",
+    "loky>=3.5.6",
+    "numpy>=2.3.4",
+    "opencv-python>=4.11.0.86",
+    "torch>=2.9.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
+
+[[tool.uv.index]]
+url = "https://download.pytorch.org/whl/cu128"
+
+[tool.uv.sources]
+clipar = { git = "https://github.com/plumiume/python-clipar.git" }
