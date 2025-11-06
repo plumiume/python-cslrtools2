@@ -475,7 +475,7 @@ def annotate[E: EstimatorWithKey, K: str](
     Args:
         func (`InternalMethod`):
             Method that annotates landmarks on frames
-        options (`(KeyOptions[K] | None, optional)`):
+        options (`KeyOptions[K] | None, optional`):
             TypedDict containing key options
 
     Returns:
