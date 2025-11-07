@@ -22,9 +22,8 @@ class DummyExecutor(Executor):
         """Initialize the dummy executor.
         
         Args:
-            max_workers (int | None, optional): Ignored, kept for compatibility.
-            initializer (Callable): Function to call for initialization.
-            initargs (tuple): Arguments to pass to the initializer.
+            max_workers (`int | None`, optional): Ignored, kept for compatibility. Defaults to None.
+            initializer (`(() -> object)`): Function to call for initialization.
         """
 
         initializer()
@@ -39,12 +38,12 @@ class DummyExecutor(Executor):
         """Submit a callable to be executed immediately.
         
         Args:
-            fn (Callable): The callable to execute.
+            fn (`((...) -> T)`): The callable to execute.
             *args: Positional arguments to pass to the callable.
             **kwargs: Keyword arguments to pass to the callable.
             
         Returns:
-            Future[T]: A Future object representing the execution result.
+            :class:`Future[T]`: A Future object representing the execution result.
         """
 
         ftr = Future[T]()
@@ -74,7 +73,11 @@ class ProcessPoolExecutor(LokyExecutor):
         """Shut down the executor, optionally cancelling pending futures.
         
         Args:
-            wait (bool, optional): If True, wait for all running tasks to complete.
-            cancel_futures (bool, optional): If True, cancel all pending futures.
+            wait (`bool`, optional):
+                If :code:`True`, wait for all running tasks to complete.
+                Defaults to :code:`True`.
+            cancel_futures (`bool`, optional):
+                If :code:`True`, cancel all pending futures.
+                Defaults to :code:`False`.
         """
         super().shutdown(wait=wait, kill_workers=cancel_futures)

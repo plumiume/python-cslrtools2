@@ -15,6 +15,18 @@ def conv_size(
     padding: Tensor,
     dilation: Tensor
     ) -> Tensor:
+    """Calculate the output size of a convolution.
+
+    Args:
+        size (`Tensor`): Input size tensor.
+        kernel_size (`Tensor`): Kernel size tensor.
+        stride (`Tensor`): Stride tensor.
+        padding (`Tensor`): Padding tensor.
+        dilation (`Tensor`): Dilation tensor.
+
+    Returns:
+        :class:`Tensor`: Output size tensor.
+    """
 
     return torch.floor_divide(
         size + 2 * padding - dilation * (kernel_size - 1) - 1,
@@ -29,6 +41,19 @@ def conv_transpose_size(
     output_padding: Tensor,
     dilation: Tensor
     ) -> Tensor:
+    """Calculate the output size of a transposed convolution.
+
+    Args:
+        size (`Tensor`): Input size tensor.
+        kernel_size (`Tensor`): Kernel size tensor.
+        stride (`Tensor`): Stride tensor.
+        padding (`Tensor`): Padding tensor.
+        output_padding (`Tensor`): Output padding tensor.
+        dilation (`Tensor`): Dilation tensor.
+
+    Returns:
+        :class:`Tensor`: Output size tensor.
+    """
 
     return (
         (size - 1) * stride
@@ -46,11 +71,12 @@ class ConvSize(nn.Module, Generic[_ConvNd]):
     Calculate the output size of a convolutional layer.
 
     Parameters:
-        conv (`_ConvNd`): A convolutional layer instance (e.g., `nn.Conv1d`, `nn.Conv2d`, `nn.Conv3d`).
+        conv (`_ConvNd`): A convolutional layer instance
+        (e.g., :class:`nn.Conv1d`, :class:`nn.Conv2d`, :class:`nn.Conv3d`).
 
     Shape:
-        - Input: `Tensor` of shape `(batch_size, channels, ...)` or `Size`.
-        - Output: `Tensor` of shape `(batch_size, out_channels, ...)` or `Size`.
+        - Input: :class:`Tensor` of shape `(batch_size, channels, ...)` or :class:`Size`.
+        - Output: :class:`Tensor` of shape `(batch_size, out_channels, ...)` or :class:`Size`.
     """
 
     def __init__(self, conv: _ConvNd):
@@ -126,11 +152,12 @@ class ConvTransposeSize(nn.Module, Generic[_ConvTransposeNd]):
     Calculate the output size of a transposed convolutional layer.
 
     Parameters:
-        conv (`_ConvTransposeNd`): A transposed convolutional layer instance (e.g., `nn.ConvTranspose1d`, `nn.ConvTranspose2d`, `nn.ConvTranspose3d`).
+        conv (`_ConvTransposeNd`): A transposed convolutional layer instance
+        (e.g., :class:`nn.ConvTranspose1d`, :class:`nn.ConvTranspose2d`, :class:`nn.ConvTranspose3d`).
 
     Shape:
-        - Input: `Tensor` of shape `(batch_size, channels, ...)` or `Size`.
-        - Output: `Tensor` of shape `(batch_size, out_channels, ...)` or `Size`.
+        - Input: :class:`Tensor` of shape `(batch_size, channels, ...)` or :class:`Size`.
+        - Output: :class:`Tensor` of shape `(batch_size, out_channels, ...)` or :class:`Size`.
     """
 
     def __init__(self, conv: _ConvTransposeNd):

@@ -1,0 +1,79 @@
+from typing import Any
+from clipar import namespace, mixin
+from clipar.entities import NamespaceWrapper
+
+from ..options import LMPipeOptionsGroup
+from .plugins import loader, PluginInfo
+
+def _set_ns_chain(
+    plugins: dict[str, PluginInfo[Any, Any]],
+    parent: NamespaceWrapper[Any],
+    *children: tuple[str, NamespaceWrapper[Any]],
+    ):
+    for pl_info in plugins.values():
+        for child_name, child in children:
+            pl_info["nswrapper"].add_wrapper(child_name, child)
+        parent.add_wrapper(pl_info["name"], pl_info["nswrapper"])
+
+plugins = loader()
+
+@namespace
+class FaceArgs(mixin.ReprMixin, mixin.CommandMixin): pass
+_set_ns_chain(plugins["face"], FaceArgs)
+
+@namespace
+class HandArgs(mixin.ReprMixin, mixin.CommandMixin): pass
+_set_ns_chain(
+    plugins["hand"], HandArgs,
+    ("face", FaceArgs)
+)
+
+@namespace
+class RightHandArgs(mixin.ReprMixin, mixin.CommandMixin): pass
+_set_ns_chain(
+    plugins["righthand"], RightHandArgs,
+    ("hand", HandArgs), ("face", FaceArgs)
+)
+
+@namespace
+class LeftHandArgs(mixin.ReprMixin, mixin.CommandMixin): pass
+_set_ns_chain(
+    plugins["lefthand"], LeftHandArgs,
+    ("right_hand", RightHandArgs),
+)
+
+@namespace
+class PoseArgs(mixin.ReprMixin, mixin.CommandMixin): pass
+_set_ns_chain(
+    plugins["pose"], PoseArgs,
+    ("face", FaceArgs),
+    ("left_hand", LeftHandArgs),
+    ("hand", HandArgs),
+)
+
+@namespace
+class HolisticArgs(mixin.ReprMixin, mixin.CommandMixin): pass
+_set_ns_chain(plugins["holistic"], HolisticArgs)
+
+@namespace
+class GlobalArgs(mixin.ReprMixin, mixin.CommandMixin):
+
+    src: str
+    "source path"
+    dst: str
+    "destination directory path"
+
+    lmpipe_options = LMPipeOptionsGroup
+    "lmpipe options group"
+
+    holistic = HolisticArgs
+    "holistic estimator arguments"
+    pose = PoseArgs
+    "pose estimator arguments"
+    hand = HandArgs
+    "hand estimator arguments"
+    left_hand = LeftHandArgs # requires right_hand
+    "left hand estimator arguments"
+    face = FaceArgs
+    "face estimator arguments"
+

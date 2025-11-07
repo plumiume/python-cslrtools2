@@ -83,7 +83,6 @@ def shape[E: EstimatorWithKey, K: str](
     ],
     options: KeyOptions[K] | None = None, /
     ) -> Callable[[E], Mapping[K, tuple[int, int]]]:
-    # No Type Section
     """Decorator overload definition for shape without key options.
 
     Wraps the :meth:`shape` method of :class:`Estimator` class
@@ -93,14 +92,14 @@ def shape[E: EstimatorWithKey, K: str](
     item type: :class:`ArrayLikeStr` -> :class:`NDArrayStr`
 
     Args:
-        func (`() -> Mapping[K, tuple[int, int]] | tuple[int, int]`):
-            Method that returns shape information
-        options (`(KeyOptions[K] | None, optional)`):
-            TypedDict containing key options
+        func (`Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]]`):
+            Method that returns shape information.
+        options (`KeyOptions[K] | None`, optional):
+            TypedDict containing key options. Defaults to None.
 
     Returns:
-        :code:`((self) -> Mapping[K, tuple[int, int]])`:
-            Decorated method
+        :class:`Callable[[E], Mapping[K, tuple[int, int]]]`:
+            Decorated method.
     """
 
 @overload
@@ -122,11 +121,11 @@ def shape[E: EstimatorWithKey, K: str](
 
     Args:
         options (`KeyOptions[K]`):
-            TypedDict containing key options
+            TypedDict containing key options.
 
     Returns:
-        :code:`((self) -> Mapping[K, tuple[int, int]])`:
-            Decorated method
+        :class:`Callable[[Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]]], Callable[[E], Mapping[K, tuple[int, int]]]]`:
+            Decorated method.
     """
 
 # implementation
@@ -204,20 +203,15 @@ def headers[E: EstimatorWithKey, K: str](
     mapping type: wrapping to :class:`Mapping[K@headers, <item type>]`
     item type: :class:`ArrayLikeStr` -> :class:`NDArrayStr`
 
-    Types:
-        InternalMethod:
-            (:class:`E@headers`)
-            -> :class:`Mapping[K, ArrayLikeStr]` | :class:`ArrayLikeStr` | :code:`None`
-
     Args:
-        func (`InternalMethod`):
-            Method that returns header array
-        options (`(KeyOptions[K] | None, optional)`):
-            TypedDict containing key options
+        func (`Callable[[E], Mapping[K, ArrayLikeStr] | ArrayLikeStr | None]`):
+            Method that returns header array.
+        options (`KeyOptions[K] | None`, optional):
+            TypedDict containing key options. Defaults to None.
 
     Returns:
-        :code:`((self) -> Mapping[K, NDArrayStr])`:
-            Decorated method
+        :class:`Callable[[E], Mapping[K, NDArrayStr]]`:
+            Decorated method.
     """
 
 @overload
@@ -239,11 +233,11 @@ def headers[E: EstimatorWithKey, K: str](
 
     Args:
         options (`KeyOptions[K]`):
-            TypedDict containing key options
+            TypedDict containing key options.
 
     Returns:
-        :class:`ConverterDecorator`:
-            Decorator that converts the return type of the decorated method
+        :class:`Callable[[Callable[[E], Mapping[K, ArrayLikeStr] | ArrayLikeStr | None]], Callable[[E], Mapping[K, NDArrayStr]]]`:
+            Decorator that converts the return type of the decorated method.
     """
 
 def headers[E: EstimatorWithKey, K: str](
@@ -325,20 +319,15 @@ def estimate[E: EstimatorWithKey, K: str](
     mapping type: wrapping to :class:`Mapping[K@estimate, <item type>]`
     item type: :class:`ArrayLikeFloat` -> :class:`NDArrayFloat`
 
-    Types:
-        InternalMethod:
-            (:class:`E@estimate`, :class:`MatLike`, :class:`int`)
-            -> :class:`Mapping[K, ArrayLikeFloat]` | :class:`ArrayLikeFloat` | :code:`None`
-
     Args:
-        func (`InternalMethod`):
-            Method that performs estimation processing
-        options (`(KeyOptions[K] | None, optional)`):
-            TypedDict containing key options
+        func (`Callable[[E, MatLike, int], Mapping[K, ArrayLikeFloat] | ArrayLikeFloat | None]`):
+            Method that performs estimation processing.
+        options (`KeyOptions[K] | None`, optional):
+            TypedDict containing key options. Defaults to None.
 
     Returns:
-        :code:`((self, frame_src: MatLike | None, frame_idx: int) -> Mapping[K, NDArrayFloat])`:
-            Decorated method
+        :class:`Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]`:
+            Decorated method.
 
     """
 
@@ -362,11 +351,11 @@ def estimate[E: EstimatorWithKey, K: str](
 
     Args:
         options (`KeyOptions[K]`):
-            TypedDict containing key options
+            TypedDict containing key options.
 
     Returns:
-        :code:`((self, frame_src: MatLike | None, frame_idx: int) -> Mapping[K, NDArrayFloat])`:
-            Decorated method
+        :class:`Callable[[Callable[[E, MatLike, int], Mapping[K, ArrayLikeFloat] | ArrayLikeFloat | None]], Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]]`:
+            Decorated method.
     """
 
 # implementation
