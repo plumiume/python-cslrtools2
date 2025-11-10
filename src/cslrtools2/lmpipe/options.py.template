@@ -1,0 +1,51 @@
+#! /usr/bin/env python3
+
+from .typings import ExecutorMode, ExecutorType, ExistRule
+
+
+class RuntimeResources:
+    """specification of runtime resource allocation"""
+    cpu: float = 1.0
+    "amount of CPU resources to allocate"
+    cpu_tags: list[str] = []
+    "tags for CPU resource allocation"
+    gpu: float = 0.0
+    "amount of GPU resources to allocate"
+    gpu_tags: list[str] = []
+    "tags for GPU resource allocation"
+
+class ExecutorOptions:
+    """options for executor configuration"""
+    max_cpus: int = 1
+    "maximum number of CPUs to allocate for the executor"
+    executor_mode: ExecutorMode = None
+    "execution mode for the executor"
+    executor_type: ExecutorType = None
+    "type of executor to use"
+
+class CollectorOptions:
+    """options for collector configuration"""
+
+    # landmark matrix save options
+    landmark_matrix_save_file_format: str | None = None
+    "file format for saving landmark matrix files"
+    landmark_matrix_save_exist_rule: ExistRule = "skip"
+    "existence rule for saving landmark matrix files"
+
+    # annotated frames save options
+    annotated_frames_save_file_format: str = ".mp4"
+    "file format for saving annotated frame files"
+    annotated_frames_save_framework: str | None = None
+    "framework to use for saving annotated frames (e.g., 'cv2')"
+    # video file ext -> annotated_frames{ext}
+    # image file ext -> annotated_frames/{seq_id}{ext}
+    annotated_frames_save_exist_rule: ExistRule = "skip"
+    "existence rule for saving annotated frame files"
+
+    # annotated frames show options
+    annotated_frames_show_framework: str | None = None
+    "framework to use for displaying annotated frames (e.g., 'cv2')"
+
+
+class LMPipeOptions(RuntimeResources, ExecutorOptions, CollectorOptions):
+    pass

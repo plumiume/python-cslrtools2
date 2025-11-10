@@ -162,8 +162,8 @@ wheels = [
 
 [[package]]
 name = "clipar"
-version = "0.2.5.dev2+g7481148a3"
-source = { git = "https://github.com/plumiume/python-clipar.git#7481148a383df100e8621b2d144ce6e1fb6c3226" }
+version = "0.2.5.dev5+gf4733c62c"
+source = { git = "https://github.com/plumiume/python-clipar.git#f4733c62c8cc7491b7455f98fecb090ab2833ac5" }
 dependencies = [
     { name = "argcomplete" },
     { name = "typing-extensions" },
@@ -296,6 +296,50 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/91/c6/a6050e0c64fd73c67a97da96cb59f08b05111e00b958fb87ecdce99f17ac/crc32c-2.8-cp314-cp314t-win32.whl", hash = "sha256:2e8fe863fbbd8bdb6b414a2090f1b0f52106e76e9a9c96a413495dbe5ebe492a", size = 64869, upload-time = "2025-10-17T06:19:49.197Z" },
     { url = "https://files.pythonhosted.org/packages/08/1f/c7735034e401cb1ea14f996a224518e3a3fa9987cb13680e707328a7d779/crc32c-2.8-cp314-cp314t-win_amd64.whl", hash = "sha256:20a9cfb897693eb6da19e52e2a7be2026fd4d9fc8ae318f086c0d71d5dd2d8e0", size = 66633, upload-time = "2025-10-17T06:19:50.003Z" },
 ]
+
+[[package]]
+name = "cslrtools2"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "clipar" },
+    { name = "loky" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "opencv-python" },
+    { name = "requests" },
+    { name = "rich" },
+    { name = "safetensors" },
+    { name = "torch" },
+    { name = "torchvision", version = "0.24.0", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "platform_machine == 'aarch64' and sys_platform == 'linux'" },
+    { name = "torchvision", version = "0.24.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
+    { name = "types-requests" },
+    { name = "zarr" },
+]
+
+[package.dev-dependencies]
+mediapipe = [
+    { name = "mediapipe" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "clipar", git = "https://github.com/plumiume/python-clipar.git" },
+    { name = "loky", specifier = ">=3.5.6" },
+    { name = "matplotlib", specifier = ">=3.10.7" },
+    { name = "numpy", specifier = ">=2.3.4" },
+    { name = "opencv-python", specifier = ">=4.11.0.86" },
+    { name = "requests", specifier = ">=2.32.5" },
+    { name = "rich", specifier = ">=14.2.0" },
+    { name = "safetensors", specifier = ">=0.6.2" },
+    { name = "torch", specifier = ">=2.9.0" },
+    { name = "torchvision", specifier = ">=0.24.0" },
+    { name = "types-requests", specifier = ">=2.32.4.20250913" },
+    { name = "zarr", specifier = ">=3.1.3" },
+]
+
+[package.metadata.requires-dev]
+mediapipe = [{ name = "mediapipe", specifier = ">=0.10.14" }]
 
 [[package]]
 name = "cycler"
@@ -1132,50 +1176,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/f2/a5/181488fc2b9d093e3
 wheels = [
     { url = "https://files.pythonhosted.org/packages/10/5e/1aa9a93198c6b64513c9d7752de7422c06402de6600a8767da1524f9570b/pyparsing-3.2.5-py3-none-any.whl", hash = "sha256:e38a4f02064cf41fe6593d328d0512495ad1f3d8a91c4f73fc401b3079a59a5e", size = 113890, upload-time = "2025-09-21T04:11:04.117Z" },
 ]
-
-[[package]]
-name = "python-cslrtools2"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "clipar" },
-    { name = "loky" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-    { name = "opencv-python" },
-    { name = "requests" },
-    { name = "rich" },
-    { name = "safetensors" },
-    { name = "torch" },
-    { name = "torchvision", version = "0.24.0", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "platform_machine == 'aarch64' and sys_platform == 'linux'" },
-    { name = "torchvision", version = "0.24.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
-    { name = "types-requests" },
-    { name = "zarr" },
-]
-
-[package.dev-dependencies]
-mediapipe = [
-    { name = "mediapipe" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "clipar", git = "https://github.com/plumiume/python-clipar.git" },
-    { name = "loky", specifier = ">=3.5.6" },
-    { name = "matplotlib", specifier = ">=3.10.7" },
-    { name = "numpy", specifier = ">=2.3.4" },
-    { name = "opencv-python", specifier = ">=4.11.0.86" },
-    { name = "requests", specifier = ">=2.32.5" },
-    { name = "rich", specifier = ">=14.2.0" },
-    { name = "safetensors", specifier = ">=0.6.2" },
-    { name = "torch", specifier = ">=2.9.0" },
-    { name = "torchvision", specifier = ">=0.24.0" },
-    { name = "types-requests", specifier = ">=2.32.4.20250913" },
-    { name = "zarr", specifier = ">=3.1.3" },
-]
-
-[package.metadata.requires-dev]
-mediapipe = [{ name = "mediapipe", specifier = ">=0.10.14" }]
 
 [[package]]
 name = "python-dateutil"
