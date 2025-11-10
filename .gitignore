@@ -9,4 +9,5 @@ wheels/
 # Virtual environments
 .venv
 
-**/*.task
+# Assets
+src/cslrtools2/assets/
