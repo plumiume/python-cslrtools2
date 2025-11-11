@@ -21,6 +21,7 @@ dependencies = [
 
 [project.scripts]
 lmpipe = "cslrtools2.lmpipe.app.cli:main"
+sldataset2 = "cslrtools2.sldataset.app.cli:main"
 
 [project.entry-points."cslrtools2.lmpipe.plugins"]
 "mediapipe.pose" = "cslrtools2.plugins.mediapipe.lmpipe.pose_args:pose_info"

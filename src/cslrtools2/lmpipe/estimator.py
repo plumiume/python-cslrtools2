@@ -7,7 +7,7 @@ from itertools import product
 
 import numpy as np
 
-from .typings import (
+from ..typings import (
     ArrayLikeFloat, NDArrayFloat,
     ArrayLikeStr, NDArrayStr,
     MatLike

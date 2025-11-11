@@ -10,7 +10,7 @@ from typing import Iterable
 
 import cv2
 
-from .typings import MatLike
+from ..typings import MatLike
 
 __all__ = [
     "is_video_file",

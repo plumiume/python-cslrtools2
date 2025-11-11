@@ -4,7 +4,7 @@ from typing import Mapping
 
 import numpy as np
 
-from ...typings import NDArrayFloat
+from ....typings import NDArrayFloat
 from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 

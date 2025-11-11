@@ -29,8 +29,9 @@ from concurrent.futures import Future, Executor, ThreadPoolExecutor
 
 import cv2
 
+from ...typings import PathLike, MatLike
 from ..logger import lmpipe_logger
-from ..typings import PathLike, MatLike, ExecutorMode
+from ..typings import ExecutorMode
 from ..options import LMPipeOptions, LMPipeOptionsPartial, DEFAULT_LMPIPE_OPTIONS
 from ..estimator import Estimator, ProcessResult
 from .executor import DummyExecutor, ProcessPoolExecutor

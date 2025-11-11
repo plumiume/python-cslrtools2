@@ -2,7 +2,8 @@ from abc import abstractmethod
 from typing import Any, Iterable, Mapping, Protocol, final
 from pathlib import Path
 
-from ...typings import NDArrayFloat, ExistRule
+from ....typings import NDArrayFloat
+from ...typings import ExistRule
 from ...options import LMPipeOptions
 from ...estimator import ProcessResult
 from ...runspec import RunSpec

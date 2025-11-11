@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Mapping
-from ...typings import MatLike, NDArrayFloat
+from ....typings import MatLike, NDArrayFloat
 
 class BaseROI(ABC):
 

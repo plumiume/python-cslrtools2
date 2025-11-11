@@ -3,7 +3,7 @@ from typing import Mapping
 
 import torch
 
-from ...typings import NDArrayFloat
+from ....typings import NDArrayFloat
 from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 

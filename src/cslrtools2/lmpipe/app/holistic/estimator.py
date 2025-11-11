@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from functools import cache
 from typing import Any, Mapping
-from ...typings import MatLike, NDArrayFloat, NDArrayStr
+from ....typings import MatLike, NDArrayFloat, NDArrayStr
 from ...estimator import (
     Estimator, shape, headers, estimate, annotate
 )

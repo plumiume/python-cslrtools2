@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from .logger import lmpipe_logger
-from .typings import PathLike
+from ..typings import PathLike
 
 __all__ = [
     "RunSpec",
