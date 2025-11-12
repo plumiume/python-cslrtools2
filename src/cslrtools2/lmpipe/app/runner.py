@@ -99,18 +99,6 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
             Live.start
         )
 
-
-    def __del__(self):
-
-        self.rich_client.call_method( # Live.stop
-            self.rich_live_ref,
-            Live.stop
-        )
-
-        manager = _local.manager_map.pop(id(self), None)
-        if manager is not None:
-            manager.stop()
-
     @property
     def search_progress_finish_task(self):
         return Progress.stop_task
@@ -214,8 +202,6 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
 
     def on_failure_batch_task(self, runspec: RunSpec[Path], task_id: int, error: Exception):
 
-        raise error
-
         batch_progress_task_id = _local.batch_progress_task_ids.get(id(self))
         if batch_progress_task_id is not None:
 
@@ -224,6 +210,9 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
                 Progress.advance,
                 batch_progress_task_id
             )
+        
+        # skip error
+        # raise error
 
     def on_end_batch_job(self, runspec: RunSpec[Path]):
 
@@ -297,8 +286,6 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
 
     def on_failure_frames_task(self, task_id: int, error: Exception):
 
-        raise error
-
         frames_progress_task_id = _local.frames_progress_task_ids.get(id(self))
         if frames_progress_task_id is not None:
 
@@ -307,6 +294,9 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
                 Progress.advance,
                 frames_progress_task_id
             )
+
+        # skip error
+        # raise error
 
     def on_end_frames_job(self):
 
@@ -387,3 +377,14 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
             deco="bold green",
             desc="Processing complete."
         )
+
+    def on_finally(self):
+
+        self.rich_client.call_method( # Live.stop
+            self.rich_live_ref,
+            Live.stop
+        )
+
+        manager = _local.manager_map.pop(id(self), None)
+        if manager is not None:
+            manager.stop()

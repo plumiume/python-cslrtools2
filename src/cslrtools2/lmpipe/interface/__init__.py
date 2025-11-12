@@ -430,6 +430,11 @@ def _runner_public_api[S: LMPipeRunner[Any], **P, R](
 
     @wraps(func)
     def wrapper(self: S, *args: P.args, **kwargs: P.kwargs) -> R | None:
+
+        if not self.toplevel_call:
+            return func(self, *args, **kwargs)
+        self.toplevel_call = False
+
         try:
             ret = func(self, *args, **kwargs)
             self.on_complete()
@@ -442,9 +447,12 @@ def _runner_public_api[S: LMPipeRunner[Any], **P, R](
             lmpipe_logger.error(f"Task failed with exception: {func.__name__}", exc_info=True)
             self.on_general_exception(e)
         finally:
-            if self.executor:
-                self.executor.shutdown(wait=False, cancel_futures=True)
+            lmpipe_logger.debug(f"Shutting down executors for task: {func.__name__}")
+            self.toplevel_call = True
+            for executor in self.executors.values():
+                executor.shutdown(wait=False, cancel_futures=True)
             self.on_finally()
+            lmpipe_logger.info(f"Task finalized: {func.__name__}")
     return wrapper
 
 
@@ -464,13 +472,16 @@ class LMPipeRunner[K: str]:
         like configure_executor() and event handlers to customize behavior.
     """
     
-    executor: Executor | None = None
-    "Executor instance used for parallel processing."
+    toplevel_call: bool = True
+    "Indicates if this is the top-level call in nested executions."
+
+    executors: dict[ExecutorMode, Executor] = {}
+    "Executor instances used for parallel processing, keyed by execution mode."
 
     def __getstate__(self) -> dict[str, Any]:
         return {
             **self.__dict__,
-            "executor": None  # Exclude executor from serialization
+            "executors": {}  # Exclude executors from serialization
         }
     
     def __setstate__(self, state: dict[str, Any]):
@@ -632,7 +643,9 @@ class LMPipeRunner[K: str]:
             for ftr in futures:
                 try:
                     ftr.result()  # Propagate exceptions
-                except Exception:
+                    lmpipe_logger.debug(f"Batch task completed successfully: {ftr}")
+                except Exception as e:
+                    lmpipe_logger.error(f"Batch task failed: {ftr} with exception: {e}")
                     pass # Handled in on_failure_batch_task
 
 
@@ -1387,11 +1400,14 @@ class LMPipeRunner[K: str]:
 
     def _init_executor(self, mode: ExecutorMode):
 
-        self.executor = self.configure_executor(
+        if mode in self.executors:
+            return self.executors[mode]
+
+        self.executors[mode] = self.configure_executor(
             mode, self._default_executor_initializer
         )
 
-        return self.executor
+        return self.executors[mode]
 
     def configure_executor(self, mode: ExecutorMode, initializer: Callable[[], Any]) -> Executor:
         """Configure and return an appropriate executor for the given mode.

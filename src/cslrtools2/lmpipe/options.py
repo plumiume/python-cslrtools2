@@ -1,9 +1,10 @@
 """Configuration options for the LMPipe pipeline.
 
 This module defines TypedDict classes and default configurations for
-runtimeresources, executor, collector, lmpipe options used throughout the pipeline processing.
+logging, runtimeresources, executor, collector, lmpipe options used throughout the pipeline processing.
 
 Attributes:
+    DEFAULT_LOGGING_OPTIONS (LoggingOptions): Default options for logging configuration.
     DEFAULT_RUNTIME_RESOURCES (RuntimeResources): Default specification of runtime resource allocation.
     DEFAULT_EXECUTOR_OPTIONS (ExecutorOptions): Default options for executor configuration.
     DEFAULT_COLLECTOR_OPTIONS (CollectorOptions): Default options for collector configuration.
@@ -13,6 +14,36 @@ Attributes:
 from clipar import group, mixin
 from typing import TypedDict
 from .typings import ExecutorMode, ExecutorType, ExistRule
+
+class LoggingOptions(TypedDict):
+    """options for logging configuration"""
+    log_level: str
+    "logging level (e.g., 'debug', 'info', 'warning', 'error')"
+    log_file: str | None
+    "file path to save logs; if None, logs are printed to console"
+
+class LoggingOptionsPartial(TypedDict, total=False):
+    """Partial options for logging configuration
+    
+    Same as LoggingOptions but with all fields optional.
+    """
+    log_level: str
+    "logging level (e.g., 'debug', 'info', 'warning', 'error')"
+    log_file: str | None
+    "file path to save logs; if None, logs are printed to console"
+
+@group
+class LoggingOptionsGroup(mixin.ReprMixin):
+    """options for logging configuration"""
+    log_level: str = 'info'
+    "logging level (e.g., 'debug', 'info', 'warning', 'error')"
+    log_file: str | None = None
+    "file path to save logs; if None, logs are printed to console"
+
+DEFAULT_LOGGING_OPTIONS: LoggingOptions = {
+    "log_level": 'info',
+    "log_file": None
+}
 
 class RuntimeResources(TypedDict):
     """specification of runtime resource allocation"""
@@ -154,6 +185,7 @@ DEFAULT_COLLECTOR_OPTIONS: CollectorOptions = {
 }
 
 class LMPipeOptions(
+    LoggingOptions,
     RuntimeResources,
     ExecutorOptions,
     CollectorOptions,
@@ -162,6 +194,7 @@ class LMPipeOptions(
     pass
 
 class LMPipeOptionsPartial(
+    LoggingOptionsPartial,
     RuntimeResourcesPartial,
     ExecutorOptionsPartial,
     CollectorOptionsPartial,
@@ -176,18 +209,27 @@ class LMPipeOptionsPartial(
 
 @group
 class LMPipeOptionsGroup(
+    LoggingOptionsGroup.T,
     RuntimeResourcesGroup.T,
     ExecutorOptionsGroup.T,
     CollectorOptionsGroup.T,
     ):
-    """CLI argument group combining runtimeresources and executor and collector options."""
+    """CLI argument group combining logging and runtimeresources and executor and collector options."""
     pass
 
 DEFAULT_LMPIPE_OPTIONS: LMPipeOptions = {
+    **DEFAULT_LOGGING_OPTIONS,
     **DEFAULT_RUNTIME_RESOURCES,
     **DEFAULT_EXECUTOR_OPTIONS,
     **DEFAULT_COLLECTOR_OPTIONS,
 }
+
+def logging_options_group_to_dict(group: LoggingOptionsGroup.T) -> LoggingOptions:
+    """Convert LoggingOptionsGroup instance to LoggingOptions TypedDict."""
+    return {
+        "log_level": group.log_level,
+        "log_file": group.log_file
+    }
 
 def runtime_resources_group_to_dict(group: RuntimeResourcesGroup.T) -> RuntimeResources:
     """Convert RuntimeResourcesGroup instance to RuntimeResources TypedDict."""
@@ -220,6 +262,7 @@ def collector_options_group_to_dict(group: CollectorOptionsGroup.T) -> Collector
 def lm_pipe_options_group_to_dict(group: LMPipeOptionsGroup.T) -> LMPipeOptions:
     """Convert LMPipeOptionsGroup instance to LMPipeOptions TypedDict."""
     return {
+        **logging_options_group_to_dict(group),
         **runtime_resources_group_to_dict(group),
         **executor_options_group_to_dict(group),
         **collector_options_group_to_dict(group)

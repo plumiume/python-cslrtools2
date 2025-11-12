@@ -1,4 +1,4 @@
-from typing import Literal, Mapping
+from typing import Literal, Mapping, cast
 from abc import abstractmethod
 from enum import IntEnum
 from functools import cache
@@ -13,7 +13,7 @@ from mediapipe.tasks.python.components.containers.landmark import NormalizedLand
 from mediapipe import Image, ImageFormat
 
 
-from ....lmpipe.typings import MatLike, NDArrayFloat, NDArrayStr
+from ....typings import MatLike, NDArrayFloat, NDArrayStr
 from ....lmpipe.estimator import shape, headers, estimate, annotate
 from ....lmpipe.app.holistic.estimator import HolisticPoseEstimator
 from ....lmpipe.app.holistic.roi import BaseROI
@@ -71,14 +71,7 @@ class MediaPipePosePartROI(BaseROI):
     return_none: bool = False
     center_weight: float  # Must be defined in subclass
     size_weight: float    # Must be defined in subclass
-    
-    # ROI parameters (set by _calculate_roi_parameters)
-    height: int
-    width: int
-    roi_center_px: NDArrayFloat
-    roi_size_px: float
-    roi_angle: float
-    
+
     def _safe_init(self, landmarks: list[NDArrayFloat], height: int, width: int) -> bool:
         """Safe initialization with NaN checking and exception handling.
         
@@ -90,161 +83,105 @@ class MediaPipePosePartROI(BaseROI):
         Returns:
             True if initialization succeeded, False otherwise
         """
-        self.height = height
-        self.width = width
-        
-        # Check for NaN values in landmarks
-        if any(np.isnan(lm).any() for lm in landmarks):
-            self.return_none = True
-            return False
-        
-        # Calculate ROI parameters (implemented by subclass)
+
+        # 1. Check for NaN in landmarks
+        for lm in landmarks:
+            if np.isnan(lm).any():
+                self.return_none = True
+                return False
+
+        # 3. Calculate ROI parameters
         try:
-            self._calculate_roi_parameters()
+            roi_center_px, roi_angle, roi_size = self._calculate_roi_parameters(height, width)
         except (ValueError, ZeroDivisionError):
             self.return_none = True
             return False
         
-        # Initialize affine matrices
-        self._init_affine_matrices()
+        self.roi_dsize = (roi_size, roi_size)
+        self.inv_dsize = (width, height)
+
+        # 4. Calculate affine matrix
+        self.affine_transform = cv2.getRotationMatrix2D(
+            center=roi_center_px,
+            angle=np.degrees(roi_angle),
+            scale=1
+        ) + cast(
+            NDArrayFloat,
+            np.array([
+                [0.0, 0.0, roi_size / 2 - roi_center_px[0]],
+                [0.0, 0.0, roi_size / 2 - roi_center_px[1]]
+            ], dtype=np.float32)
+        )
+
+        self.inv_affine_transform = cv2.invertAffineTransform(
+            self.affine_transform
+        )
+
         return True
-    
-    def _init_affine_matrices(self):
-        """Initialize and cache affine transformation matrices."""
-        # Create normalized affine transformation matrix (3x3)
-        self.affine_matrix = self._create_affine_matrix()
-        # Inverse matrix for converting ROI coords back to world coords
-        self.affine_matrix_inv = np.linalg.inv(self.affine_matrix)
-        
-        # Cache transformation matrices for apply_roi and apply_world_coords
-        self.affine_matrix_2x3 = self.affine_matrix[:2, :]  # For cv2.warpAffine
-        self.roi_output_size = max(1, int(self.roi_size_px * 2))  # Output size for ROI
-        
-        # Extended affine matrix cache for arbitrary dimensions
-        # Will be expanded on-demand in apply_world_coords
-        self._max_dims = 3  # Start with [x, y, 1] (homogeneous)
-        self._extended_affine_inv = self.affine_matrix_inv.copy()  # 3x3 initially
+
+
     
     @abstractmethod
-    def _calculate_roi_parameters(self):
+    def _calculate_roi_parameters(
+        self, height: int, width: int
+    ) -> tuple[tuple[float, float], float, int]:
         """Calculate ROI center, size, and angle from landmarks.
         
-        Must set:
-            - self.roi_center_px: NDArrayFloat
-            - self.roi_size_px: float
-            - self.roi_angle: float
+        Args:
+            height: Frame height in pixels
+            width: Frame width in pixels
+        
+        Returns:
+            Tuple of (center_px, angle_rad, size_px)
+            - center_px: ROI center in pixel coordinates [x, y]
+            - angle_rad: ROI rotation angle in radians
+            - size_px: ROI size in pixels
         """
         ...
-    
-    def _create_affine_matrix(self) -> NDArrayFloat:
-        """Create 3x3 affine transformation matrix for ROI normalization.
-        
-        Returns:
-            :class:`NDArrayFloat`: 3x3 homogeneous transformation matrix
-        """
-        # Translation to ROI center
-        T = np.array([
-            [1, 0, -self.roi_center_px[0]],
-            [0, 1, -self.roi_center_px[1]],
-            [0, 0, 1]
-        ], dtype=np.float32)
-        
-        # Rotation by -roi_angle (to align with horizontal)
-        cos_a = np.cos(-self.roi_angle)
-        sin_a = np.sin(-self.roi_angle)
-        R = np.array([
-            [cos_a, -sin_a, 0],
-            [sin_a, cos_a, 0],
-            [0, 0, 1]
-        ], dtype=np.float32)
-        
-        # Scale to normalize ROI size
-        scale = 1.0 / self.roi_size_px if self.roi_size_px > 0 else 1.0
-        S = np.array([
-            [scale, 0, 0],
-            [0, scale, 0],
-            [0, 0, 1]
-        ], dtype=np.float32)
-        
-        # Combined transformation: M = S @ R @ T
-        return S @ R @ T
-    
+
     def apply_roi(self, frame_src: MatLike) -> MatLike | None:
-        """Apply ROI transformation to extract and normalize region.
         
-        Args:
-            frame_src (`MatLike`): Input frame image
-            
-        Returns:
-            :code:`MatLike | None`: Normalized ROI image, or None if ROI is invalid
-        """
         if self.return_none:
             return None
-        
-        return cv2.warpAffine(
-            frame_src,
-            self.affine_matrix_2x3,
-            (self.roi_output_size, self.roi_output_size)
-        )
-    
-    def apply_world_coords[K: str](
-        self, local_coords: Mapping[K, NDArrayFloat]
-        ) -> Mapping[K, NDArrayFloat | None]:
-        """Transform ROI coordinates back to world coordinates.
-        
-        Args:
-            local_coords (``Mapping[K, NDArrayFloat]``): Landmark coordinates in ROI space
 
-        Returns:
-            :code:`Mapping[K, NDArrayFloat | None]`: Landmark coordinates in world (frame) space
-        """
+        roi_frame = cv2.warpAffine(
+            frame_src,
+            self.affine_transform,
+            dsize=self.roi_dsize,
+        )
+
+        return roi_frame
+
+    def apply_world_coords[K: str](
+        self, local_coords: Mapping[K, NDArrayFloat] # key: Array(N, >=2)
+        ) -> Mapping[K, NDArrayFloat | None]:
+        
         if self.return_none:
-            return {k: None for k in local_coords.keys()}
-        
-        result: dict[K, NDArrayFloat | None] = {}
-        for k, coords in local_coords.items():
-            # Determine required dimensions
-            num_points = coords.shape[0]
-            num_dims = coords.shape[1]
-            required_dims = num_dims + 1  # +1 for homogeneous coordinate
-            
-            # Expand cached affine matrix if necessary
-            if required_dims > self._max_dims:
-                self._expand_affine_matrix(required_dims)
-            
-            # Create homogeneous coordinates [x, y, z, ..., 1]
-            ones = np.ones((num_points, 1), dtype=coords.dtype)
-            homogeneous = np.hstack([coords, ones])
-            
-            # Apply inverse transformation using sliced extended matrix
-            # Use [:num_dims, :required_dims] to get the appropriate submatrix
-            transform_matrix = self._extended_affine_inv[:num_dims, :required_dims]
-            transformed = homogeneous @ transform_matrix.T
-            
-            result[k] = transformed
-        
+            return {
+                klm: None
+                for klm in local_coords.keys()
+            }
+
+        result: dict[K, NDArrayFloat] = {}
+
+        norm2pix = np.array(self.roi_dsize)
+        pix2norm = 1 / np.array(self.inv_dsize)
+
+        weight = self.inv_affine_transform[:, :2]
+        bias = self.inv_affine_transform[:, 2]
+
+        for klm, lm in local_coords.items():
+
+            xy = lm[:, :2]
+            ex = lm[:, 2:]
+
+            roi_px = norm2pix * xy
+            world_px = roi_px @ weight.T + bias
+            world_norm = pix2norm * world_px
+
+            result[klm] = np.concatenate([world_norm, ex], axis=1)
+
         return result
-    
-    def _expand_affine_matrix(self, new_dims: int):
-        """Expand the cached affine matrix to support more dimensions.
-        
-        Args:
-            new_dims (`int`): New total dimensions (including homogeneous coordinate)
-        """
-        new_size = new_dims
-        
-        # Create new extended matrix with identity for extra dimensions
-        new_matrix = np.eye(new_size, dtype=np.float32)
-        
-        # Copy existing 2x2 affine transformation (top-left)
-        new_matrix[:2, :2] = self.affine_matrix_inv[:2, :2]
-        # Copy translation (top-right, excluding homogeneous coord)
-        new_matrix[:2, new_size-1] = self.affine_matrix_inv[:2, 2]
-        # Keep identity for additional dimensions (z, visibility, etc.)
-        # Already set by np.eye
-        
-        self._extended_affine_inv = new_matrix
-        self._max_dims = new_size
 
 
 class MediaPipePoseHandROI(MediaPipePosePartROI):
@@ -255,6 +192,7 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
 
     center_weight: float = 0.25
     size_weight: float = 2.2
+    pad_weight: float = 0.1
 
     def __init__(
         self,
@@ -277,22 +215,30 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
         # Use common initialization framework
         self._safe_init([wrist, elbow], height, width)
     
-    def _calculate_roi_parameters(self):
+    def _calculate_roi_parameters(
+        self, height: int, width: int
+    ) -> tuple[tuple[float, float], float, int]:
         """Calculate ROI center, size, and angle from landmarks."""
+
+        # Determine long side for square ROI
+        long_side = max(height, width)
+
         # Convert normalized coordinates to pixel coordinates
-        wrist_px = np.array([self.wrist[0] * self.width, self.wrist[1] * self.height])
-        elbow_px = np.array([self.elbow[0] * self.width, self.elbow[1] * self.height])
+        wrist_px = np.array([self.wrist[0] * width, self.wrist[1] * height])
+        elbow_px = np.array([self.elbow[0] * width, self.elbow[1] * height])
         
         # Calculate center (weighted towards wrist)
-        self.roi_center_px = wrist_px + self.center_weight * (wrist_px - elbow_px)
-        
+        center_px = wrist_px + self.center_weight * (wrist_px - elbow_px)
+
         # Calculate size based on wrist-elbow distance
         distance = np.linalg.norm(wrist_px - elbow_px)
-        self.roi_size_px = float(self.size_weight * distance)
+        size_px = int(self.size_weight * distance + self.pad_weight * long_side)
         
         # Calculate rotation angle
         diff = wrist_px - elbow_px
-        self.roi_angle = float(np.arctan2(diff[1], diff[0]))
+        angle_rad = np.arctan2(diff[1], diff[0])
+
+        return ((center_px[0], center_px[1]), angle_rad, size_px)
 
 
 class MediaPipePoseFaceROI(MediaPipePosePartROI):
@@ -303,6 +249,7 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
 
     center_weight: float = 0.1
     size_weight: float = 2.0
+    pad_weight: float = 0.1
 
     def __init__(
         self,
@@ -328,26 +275,34 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
         # Use common initialization framework
         self._safe_init([left_ear, right_ear, nose], height, width)
     
-    def _calculate_roi_parameters(self):
+    def _calculate_roi_parameters(
+        self, height: int, width: int
+    ) -> tuple[tuple[float, float], float, int]:
         """Calculate ROI center, size, and angle from landmarks."""
+
+        # Determine long side for square ROI
+        long_side = max(height, width)
+
         # Convert normalized coordinates to pixel coordinates
-        left_ear_px = np.array([self.left_ear[0] * self.width, self.left_ear[1] * self.height])
-        right_ear_px = np.array([self.right_ear[0] * self.width, self.right_ear[1] * self.height])
-        nose_px = np.array([self.nose[0] * self.width, self.nose[1] * self.height])
+        left_ear_px = np.array([self.left_ear[0] * width, self.left_ear[1] * height])
+        right_ear_px = np.array([self.right_ear[0] * width, self.right_ear[1] * height])
+        nose_px = np.array([self.nose[0] * width, self.nose[1] * height])
         
         # Calculate ear center
         ear_center = (left_ear_px + right_ear_px) / 2
         
         # Calculate ROI center (weighted towards nose)
-        self.roi_center_px = ear_center + self.center_weight * (nose_px - ear_center)
+        center_px = ear_center + self.center_weight * (nose_px - ear_center)
         
         # Calculate size based on ear distance
         ear_distance = np.linalg.norm(right_ear_px - left_ear_px)
-        self.roi_size_px = float(self.size_weight * ear_distance)
-        
+        size_px = int(self.size_weight * ear_distance + self.pad_weight * long_side)
+
         # Calculate rotation angle (based on ear alignment)
         diff = right_ear_px - left_ear_px
-        self.roi_angle = float(np.arctan2(diff[1], diff[0]))
+        angle_rad = np.arctan2(diff[1], diff[0])
+
+        return ((center_px[0], center_px[1]), angle_rad, size_px)
 
 class MediaPipePoseEstimator(
     MediaPipeEstimator[MediaPipePoseKey],
@@ -495,7 +450,3 @@ class MediaPipePoseEstimator(
             height=height,
             width=width
         )
-
-
-# abstruct method implementations test
-estim = MediaPipePoseEstimator()

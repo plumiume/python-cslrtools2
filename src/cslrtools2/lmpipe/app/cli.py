@@ -1,6 +1,10 @@
 from typing import Any
+import logging
 from multiprocessing import freeze_support
 from clipar import NotSelected, NotSelectedType
+
+import cv2
+
 from ..options import lm_pipe_options_group_to_dict, LMPipeOptions
 from ..estimator import Estimator
 from ..collector import Collector
@@ -190,8 +194,18 @@ def main():
         return 1
     collectors = _get_collectors_from_args(lmpipe_options)
 
+    from ..logger import lmpipe_logger, lmpipe_formatter
     from ..interface import LMPipeInterface
     from .runner import CliAppRunner
+
+    lmpipe_logger.setLevel(lmpipe_options["log_level"].upper())
+    if lmpipe_options["log_file"]:
+        handler = logging.FileHandler(
+            lmpipe_options["log_file"],
+            encoding="utf-8"
+        )
+        handler.setFormatter(lmpipe_formatter)
+        lmpipe_logger.addHandler(handler)
 
     try:
         interface = LMPipeInterface(
@@ -219,4 +233,11 @@ def main():
     return 0
 
 if __name__ == "__main__":
-    exit(main())
+    try:
+        code = main()
+    except Exception as e:
+        print(f"Fatal error: {e}")
+        code = 1
+    finally:
+        cv2.destroyAllWindows()
+    exit(code)

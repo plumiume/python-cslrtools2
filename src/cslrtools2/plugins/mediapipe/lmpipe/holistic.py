@@ -13,7 +13,7 @@ from mediapipe.tasks.python.components.containers.landmark import ( # pyright: i
     Landmark, NormalizedLandmark
 ) 
 
-from ....lmpipe.typings import MatLike, NDArrayFloat, NDArrayStr
+from ....typings import MatLike, NDArrayFloat, NDArrayStr
 from ....lmpipe.estimator import shape, headers, estimate, annotate
 from .base import MediaPipeEstimator
 from .face import FACE_LANDMARKS_NUM

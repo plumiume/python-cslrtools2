@@ -1,6 +1,9 @@
 from abc import abstractmethod
 from functools import cache
 from typing import Any, Mapping
+
+# import cv2
+
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
 from ...estimator import (
     Estimator, shape, headers, estimate, annotate
@@ -103,6 +106,8 @@ class HolisticEstimator(Estimator[str]):
                     for klm in self.left_hand_estimator.headers.keys()
                 })
             else:
+                # cv2.imshow("left_hand_frame_src", left_hand_frame_src)
+                # cv2.waitKey(1)
                 result.update(
                     left_hand_roi.apply_world_coords(
                         self.left_hand_estimator.estimate(
@@ -127,6 +132,8 @@ class HolisticEstimator(Estimator[str]):
                     for klm in self.right_hand_estimator.headers.keys()
                 })
             else:
+                # cv2.imshow("right_hand_frame_src", right_hand_frame_src)
+                # cv2.waitKey(1)
                 result.update(
                     right_hand_roi.apply_world_coords(
                         self.right_hand_estimator.estimate(

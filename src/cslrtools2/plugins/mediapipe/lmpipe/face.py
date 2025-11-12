@@ -9,7 +9,7 @@ from mediapipe.tasks.python.vision.face_landmarker import FaceLandmarker, FaceLa
 from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark # pyright: ignore[reportMissingTypeStubs]
 from mediapipe import Image, ImageFormat
 
-from ....lmpipe.typings import MatLike, NDArrayFloat, NDArrayStr
+from ....typings import MatLike, NDArrayFloat, NDArrayStr
 from ....lmpipe.estimator import shape, headers, estimate, annotate
 from ....lmpipe.app.holistic.estimator import HolisticPartEstimator
 from .base import MediaPipeEstimator, get_mediapipe_model

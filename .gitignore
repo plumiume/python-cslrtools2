@@ -11,3 +11,8 @@ wheels/
 
 # Assets
 src/cslrtools2/assets/
+
+# Logs
+logs/
+*.log
+log.txt

@@ -17,9 +17,11 @@ if TYPE_CHECKING:
     )
     from cv2.typing import MatLike as _MatLike
 else:
+    _ArrayLike = object
     _ArrayLikeFloat_co = object
     _ArrayLikeStr_co = object
     _NDArray = object
+    _DTypeLike = object
     _MatLike = object
 
 class SupportsArray[R: _ArrayLike](Protocol):

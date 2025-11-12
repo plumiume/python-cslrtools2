@@ -3,6 +3,15 @@
 from .typings import ExecutorMode, ExecutorType, ExistRule
 
 
+class LoggingOptions:
+    """options for logging configuration"""
+
+    log_level: str = "info"
+    "logging level (e.g., 'debug', 'info', 'warning', 'error')"
+    log_file: str | None = None
+    "file path to save logs; if None, logs are printed to console"
+
+
 class RuntimeResources:
     """specification of runtime resource allocation"""
     cpu: float = 1.0
@@ -14,6 +23,7 @@ class RuntimeResources:
     gpu_tags: list[str] = []
     "tags for GPU resource allocation"
 
+
 class ExecutorOptions:
     """options for executor configuration"""
     max_cpus: int = 1
@@ -22,6 +32,7 @@ class ExecutorOptions:
     "execution mode for the executor"
     executor_type: ExecutorType = None
     "type of executor to use"
+
 
 class CollectorOptions:
     """options for collector configuration"""
@@ -47,5 +58,10 @@ class CollectorOptions:
     "framework to use for displaying annotated frames (e.g., 'cv2')"
 
 
-class LMPipeOptions(RuntimeResources, ExecutorOptions, CollectorOptions):
+class LMPipeOptions(
+    LoggingOptions,
+    RuntimeResources,
+    ExecutorOptions,
+    CollectorOptions
+    ):
     pass

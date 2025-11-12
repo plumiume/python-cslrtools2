@@ -1,4 +1,5 @@
 import os
+import warnings
 import requests
 
 try:
@@ -107,6 +108,14 @@ class MediaPipeEstimator[K: str](Estimator[K]):
         self._is_now_suppressing_stderr = False
 
     def __init__(self, base_args: MediaPipeBaseArgs):
+
+        # Suppress protobuf deprecation warning from mediapipe
+        warnings.filterwarnings(
+            "ignore",
+            message="SymbolDatabase.GetPrototype\\(\\) is deprecated",
+            category=UserWarning,
+            module="google.protobuf.symbol_database"
+        )
 
         self.base_args = base_args
 
