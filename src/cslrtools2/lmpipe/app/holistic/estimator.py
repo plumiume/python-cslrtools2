@@ -29,6 +29,13 @@ class HolisticPoseEstimator[K: str](Estimator[K]):
         ) -> BaseROI: ...
     
     @abstractmethod
+    def configure_both_hands_roi(
+        self,
+        landmarks: Mapping[K, NDArrayFloat],
+        height: int, width: int
+        ) -> BaseROI: ...
+    
+    @abstractmethod
     def configure_face_roi(
         self,
         landmarks: Mapping[K, NDArrayFloat],
@@ -46,11 +53,13 @@ class HolisticEstimator(Estimator[str]):
     def __init__(
         self,
         pose_estimator: HolisticPoseEstimator[Any],
+        both_hands_estimator: HolisticPartEstimator[Any] | None = None,
         right_hand_estimator: HolisticPartEstimator[Any] | None = None,
         left_hand_estimator: HolisticPartEstimator[Any] | None = None,
         face_estimator: HolisticPartEstimator[Any] | None = None,
         ) -> None:
         self.pose_estimator = pose_estimator
+        self.both_hands_estimator = both_hands_estimator
         self.right_hand_estimator = right_hand_estimator
         self.left_hand_estimator = left_hand_estimator
         self.face_estimator = face_estimator
@@ -63,6 +72,9 @@ class HolisticEstimator(Estimator[str]):
         result: dict[str, tuple[int, int]] = {}
 
         result.update(self.pose_estimator.shape)
+
+        if self.both_hands_estimator:
+            result.update(self.both_hands_estimator.shape)
 
         if self.right_hand_estimator:
             result.update(self.right_hand_estimator.shape)
@@ -90,6 +102,32 @@ class HolisticEstimator(Estimator[str]):
             for klm, vlm in pose_landmarks.items()
         })
 
+        if self.both_hands_estimator:
+            both_hands_roi = self.pose_estimator.configure_both_hands_roi(
+                pose_landmarks, frame_src.shape[0], frame_src.shape[1]
+            )
+            both_hands_frame_src = both_hands_roi.apply_roi(frame_src)
+            if (
+                both_hands_frame_src is None
+                or both_hands_frame_src.shape[0] < self.MIN_ROI_IMAGE_SHAPE[0]
+                or both_hands_frame_src.shape[1] < self.MIN_ROI_IMAGE_SHAPE[1]
+                ):
+                # ROIが計算できない、ROIが小さすぎる場合はスキップ
+                result.update({
+                    klm: None
+                    for klm in self.both_hands_estimator.headers.keys()
+                })
+            else:
+                # cv2.imshow("both_hands_frame_src", both_hands_frame_src)
+                # cv2.imwrite(f"both_hands_frame/{frame_idx:04d}.png", both_hands_frame_src)
+                result.update(
+                    both_hands_roi.apply_world_coords(
+                        self.both_hands_estimator.estimate(
+                            both_hands_frame_src, frame_idx
+                        )
+                    )
+                )
+
         if self.left_hand_estimator:
             left_hand_roi = self.pose_estimator.configure_left_hand_roi(
                 pose_landmarks, frame_src.shape[0], frame_src.shape[1]
@@ -107,7 +145,7 @@ class HolisticEstimator(Estimator[str]):
                 })
             else:
                 # cv2.imshow("left_hand_frame_src", left_hand_frame_src)
-                # cv2.waitKey(1)
+                # cv2.imwrite(f"left_hand_frame/{frame_idx:04d}.png", left_hand_frame_src)
                 result.update(
                     left_hand_roi.apply_world_coords(
                         self.left_hand_estimator.estimate(
@@ -133,7 +171,7 @@ class HolisticEstimator(Estimator[str]):
                 })
             else:
                 # cv2.imshow("right_hand_frame_src", right_hand_frame_src)
-                # cv2.waitKey(1)
+                # cv2.imwrite(f"right_hand_frame/{frame_idx:04d}.png", right_hand_frame_src)
                 result.update(
                     right_hand_roi.apply_world_coords(
                         self.right_hand_estimator.estimate(
@@ -166,6 +204,8 @@ class HolisticEstimator(Estimator[str]):
                     )
                 )
 
+        # cv2.waitKey(1)
+
         return result
 
     @property
@@ -176,6 +216,9 @@ class HolisticEstimator(Estimator[str]):
         result: dict[str, NDArrayStr] = {}
 
         result.update(self.pose_estimator.headers)
+
+        if self.both_hands_estimator:
+            result.update(self.both_hands_estimator.headers)
 
         if self.right_hand_estimator:
             result.update(self.right_hand_estimator.headers)
@@ -200,6 +243,11 @@ class HolisticEstimator(Estimator[str]):
             frame_src, frame_idx, landmarks
         )
 
+        if self.both_hands_estimator:
+            frame_src = self.both_hands_estimator.annotate(
+                frame_src, frame_idx, landmarks
+            )
+
         if self.right_hand_estimator:
             frame_src = self.right_hand_estimator.annotate(
                 frame_src, frame_idx, landmarks
@@ -219,6 +267,8 @@ class HolisticEstimator(Estimator[str]):
 
     def setup(self):
         self.pose_estimator.setup()
+        if self.both_hands_estimator:
+            self.both_hands_estimator.setup()
         if self.right_hand_estimator:
             self.right_hand_estimator.setup()
         if self.left_hand_estimator:

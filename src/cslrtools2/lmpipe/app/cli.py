@@ -60,33 +60,33 @@ def _get_estimator_from_args(
         both_hands_group = getattr(both_hands_args, both_hands_info["name"])
         assert both_hands_group
         both_hands_init_pair = (both_hands_creator, both_hands_group)
-        left_hand_init_pair = (both_hands_creator, both_hands_group)
-        right_hand_init_pair = (both_hands_creator, both_hands_group)
         face_args = getattr(both_hands_group, "face", NotSelected)
     else:
         both_hands_init_pair = None
-        left_hand_init_pair = None
-        right_hand_init_pair = None
 
     if left_hand_args:
         assert left_hand_args.command
-        left_hand_plugins = plugins["lefthand"] # KeyError?
+        left_hand_plugins = plugins["left_hand"] # KeyError?
         left_hand_info = left_hand_plugins[left_hand_args.command] # KeyError?
         left_hand_creator = left_hand_info["creator"]
         left_hand_group = getattr(left_hand_args, left_hand_info["name"])
         assert left_hand_group
         left_hand_init_pair = (left_hand_creator, left_hand_group)
         right_hand_args = getattr(left_hand_group, "right_hand", NotSelected)
+    else:
+        left_hand_init_pair = None
 
     if right_hand_args:
         assert right_hand_args.command
-        right_hand_plugins = plugins["righthand"] # KeyError?
+        right_hand_plugins = plugins["right_hand"] # KeyError?
         right_hand_info = right_hand_plugins[right_hand_args.command] # KeyError?
         right_hand_creator = right_hand_info["creator"]
         right_hand_group = getattr(right_hand_args, right_hand_info["name"])
         assert right_hand_group
         right_hand_init_pair = (right_hand_creator, right_hand_group)
         face_args = getattr(right_hand_group, "face", NotSelected)
+    else:
+        right_hand_init_pair = None
 
     if face_args:
         assert face_args.command
@@ -103,6 +103,7 @@ def _get_estimator_from_args(
         pose_init_pair
         and (
             face_init_pair
+            or both_hands_init_pair
             or left_hand_init_pair
             or right_hand_init_pair
         )
@@ -112,6 +113,11 @@ def _get_estimator_from_args(
         if not isinstance(pose_estimator, HolisticPoseEstimator):
             raise TypeError(
                 "Pose estimator for HolisticEstimator must be a HolisticPoseEstimator"
+            )
+        both_hands_estimator = both_hands_init_pair and both_hands_init_pair[0](both_hands_init_pair[1])
+        if not isinstance(both_hands_estimator, HolisticPartEstimator | None):
+            raise TypeError(
+                "Both hands estimator for HolisticEstimator must be a HolisticPartEstimator or None"
             )
         left_hand_estimator = left_hand_init_pair and left_hand_init_pair[0](left_hand_init_pair[1])
         if not isinstance(left_hand_estimator, HolisticPartEstimator | None):
@@ -130,6 +136,7 @@ def _get_estimator_from_args(
             )
         return HolisticEstimator(
             pose_estimator=pose_estimator,
+            both_hands_estimator=both_hands_estimator,
             left_hand_estimator=left_hand_estimator,
             right_hand_estimator=right_hand_estimator,
             face_estimator=face_estimator,

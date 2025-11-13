@@ -92,12 +92,12 @@ class MediaPipePosePartROI(BaseROI):
 
         # 3. Calculate ROI parameters
         try:
-            roi_center_px, roi_angle, roi_size = self._calculate_roi_parameters(height, width)
+            roi_center_px, roi_angle, roi_size_px = self._calculate_roi_parameters(height, width)
         except (ValueError, ZeroDivisionError):
             self.return_none = True
             return False
         
-        self.roi_dsize = (roi_size, roi_size)
+        self.roi_dsize = roi_size_px
         self.inv_dsize = (width, height)
 
         # 4. Calculate affine matrix
@@ -108,8 +108,8 @@ class MediaPipePosePartROI(BaseROI):
         ) + cast(
             NDArrayFloat,
             np.array([
-                [0.0, 0.0, roi_size / 2 - roi_center_px[0]],
-                [0.0, 0.0, roi_size / 2 - roi_center_px[1]]
+                [0.0, 0.0, roi_size_px[0] / 2 - roi_center_px[0]],
+                [0.0, 0.0, roi_size_px[1] / 2 - roi_center_px[1]]
             ], dtype=np.float32)
         )
 
@@ -120,11 +120,10 @@ class MediaPipePosePartROI(BaseROI):
         return True
 
 
-    
     @abstractmethod
     def _calculate_roi_parameters(
         self, height: int, width: int
-    ) -> tuple[tuple[float, float], float, int]:
+    ) -> tuple[tuple[float, float], float, tuple[int, int]]:
         """Calculate ROI center, size, and angle from landmarks.
         
         Args:
@@ -135,7 +134,7 @@ class MediaPipePosePartROI(BaseROI):
             Tuple of (center_px, angle_rad, size_px)
             - center_px: ROI center in pixel coordinates [x, y]
             - angle_rad: ROI rotation angle in radians
-            - size_px: ROI size in pixels
+            - size_px: ROI size as (width, height) pair in pixels
         """
         ...
 
@@ -182,6 +181,86 @@ class MediaPipePosePartROI(BaseROI):
             result[klm] = np.concatenate([world_norm, ex], axis=1)
 
         return result
+    
+
+class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
+    """Both hands ROI using left and right wrist landmarks from pose estimation.
+    
+    Generates normalized affine transformation matrix for both hands region extraction.
+    ROI vector: right wrist -> left wrist (reversed)
+    ROI size: max of left hand and right hand ROI sizes
+    ROI center: adjusted to contain both hands within ROI bounds
+    """
+
+    center_weight: float = 0.25
+    size_weight: float = 2.2
+    pad_weight: float = 0.1
+
+    def __init__(
+        self,
+        left_wrist: NDArrayFloat,
+        left_elbow: NDArrayFloat,
+        right_wrist: NDArrayFloat,
+        right_elbow: NDArrayFloat,
+        height: int,
+        width: int
+        ):
+        """Initialize Both Hands ROI with pose landmarks.
+        
+        Args:
+            left_wrist: Left wrist landmark coordinates [x, y, z, c]
+            left_elbow: Left elbow landmark coordinates [x, y, z, c]
+            right_wrist: Right wrist landmark coordinates [x, y, z, c]
+            right_elbow: Right elbow landmark coordinates [x, y, z, c]
+            height: Frame height in pixels
+            width: Frame width in pixels
+        """
+        self.left_wrist = left_wrist
+        self.left_elbow = left_elbow
+        self.right_wrist = right_wrist
+        self.right_elbow = right_elbow
+        
+        # Use common initialization framework
+        self._safe_init([left_wrist, left_elbow, right_wrist, right_elbow], height, width)
+    
+    def _calculate_roi_parameters(
+        self, height: int, width: int
+    ) -> tuple[tuple[float, float], float, tuple[int, int]]:
+        """Calculate ROI center, size, and angle from landmarks.
+        
+        ROI is oriented from right wrist to left wrist, with the center
+        adjusted so that the line segment fits within size/2 from the center.
+        Returns a rectangular ROI with width based on wrist distance and height
+        based on hand size.
+        """
+
+        # Determine long side for padding calculation
+        long_side = max(height, width)
+
+        # Convert normalized coordinates to pixel coordinates
+        left_wrist_px = np.array([self.left_wrist[0] * width, self.left_wrist[1] * height])
+        left_elbow_px = np.array([self.left_elbow[0] * width, self.left_elbow[1] * height])
+        right_wrist_px = np.array([self.right_wrist[0] * width, self.right_wrist[1] * height])
+        right_elbow_px = np.array([self.right_elbow[0] * width, self.right_elbow[1] * height])
+        
+        # Calculate hand sizes (for height)
+        left_distance = np.linalg.norm(left_wrist_px - left_elbow_px)
+        right_distance = np.linalg.norm(right_wrist_px - right_elbow_px)
+        max_distance = max(left_distance, right_distance)
+        size_px = int(self.size_weight * max_distance + self.pad_weight * long_side)
+        
+        # Calculate wrist-to-wrist distance (for width)
+        wrist_distance = int(np.linalg.norm(left_wrist_px - right_wrist_px))
+        size_px_pair = (size_px + wrist_distance, size_px)
+        
+        # Calculate center (midpoint between left and right wrists)
+        center_px = (left_wrist_px + right_wrist_px) / 2
+        
+        # Calculate rotation angle (right wrist -> left wrist, reversed)
+        diff = left_wrist_px - right_wrist_px
+        angle_rad = np.arctan2(diff[1], diff[0])
+
+        return ((center_px[0], center_px[1]), angle_rad, size_px_pair)
 
 
 class MediaPipePoseHandROI(MediaPipePosePartROI):
@@ -217,7 +296,7 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
     
     def _calculate_roi_parameters(
         self, height: int, width: int
-    ) -> tuple[tuple[float, float], float, int]:
+    ) -> tuple[tuple[float, float], float, tuple[int, int]]:
         """Calculate ROI center, size, and angle from landmarks."""
 
         # Determine long side for square ROI
@@ -238,7 +317,7 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
         diff = wrist_px - elbow_px
         angle_rad = np.arctan2(diff[1], diff[0])
 
-        return ((center_px[0], center_px[1]), angle_rad, size_px)
+        return ((center_px[0], center_px[1]), angle_rad, (size_px, size_px))
 
 
 class MediaPipePoseFaceROI(MediaPipePosePartROI):
@@ -277,7 +356,7 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
     
     def _calculate_roi_parameters(
         self, height: int, width: int
-    ) -> tuple[tuple[float, float], float, int]:
+    ) -> tuple[tuple[float, float], float, tuple[int, int]]:
         """Calculate ROI center, size, and angle from landmarks."""
 
         # Determine long side for square ROI
@@ -302,7 +381,7 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
         diff = right_ear_px - left_ear_px
         angle_rad = np.arctan2(diff[1], diff[0])
 
-        return ((center_px[0], center_px[1]), angle_rad, size_px)
+        return ((center_px[0], center_px[1]), angle_rad, (size_px, size_px))
 
 class MediaPipePoseEstimator(
     MediaPipeEstimator[MediaPipePoseKey],
@@ -429,6 +508,26 @@ class MediaPipePoseEstimator(
         return MediaPipePoseHandROI(
             wrist=right_wrist,
             elbow=right_elbow,
+            height=height,
+            width=width
+        )
+
+    def configure_both_hands_roi(
+        self,
+        landmarks: Mapping[MediaPipePoseKey, NDArrayFloat],
+        height: int, width: int
+        ) -> MediaPipePoseBothHandsROI:
+
+        left_wrist = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.LEFT_WRIST]
+        left_elbow = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.LEFT_ELBOW]
+        right_wrist = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.RIGHT_WRIST]
+        right_elbow = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.RIGHT_ELBOW]
+
+        return MediaPipePoseBothHandsROI(
+            left_wrist=left_wrist,
+            left_elbow=left_elbow,
+            right_wrist=right_wrist,
+            right_elbow=right_elbow,
             height=height,
             width=width
         )
