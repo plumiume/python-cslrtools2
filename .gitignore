@@ -19,7 +19,6 @@ log.txt
 
 # IDE and development tools
 .vscode/
-.devcontainer/
 .dockerignore
 
 # Test files and outputs

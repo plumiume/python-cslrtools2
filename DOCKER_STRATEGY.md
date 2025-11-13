@@ -2,6 +2,23 @@
 
 ## 調査結果サマリー (2025年11月14日)
 
+### ベースイメージのユーザー調査
+
+**nvidia/cuda:12.8.0-cudnn-devel-ubuntu24.04の既存ユーザー:**
+- `ubuntu` ユーザーが存在 (UID=1000, GID=1000)
+- sudoグループに所属（video, adm等の権限も保有）
+- ホームディレクトリ: `/home/ubuntu` (作成済み)
+- **sudo権限: 未設定** (sudoers.d/にファイルなし)
+
+**結論: 新規ユーザー作成を推奨 ❌ → 既存ubuntuユーザー活用を推奨 ✅**
+
+**理由:**
+1. VS Code Dev Containerは任意のユーザー名に対応
+2. 既存ubuntuユーザーはUID 1000（一般的なデフォルト）
+3. ホームディレクトリ作成済みで設定ファイル(.bashrc等)も完備
+4. sudo権限追加のみで使用可能
+5. イメージサイズ削減（ユーザー作成処理不要）
+
 ### PyTorch 2.9.0 (最新版) - CUDAサポート
 - **CUDA 12.6**: `--index-url https://download.pytorch.org/whl/cu126`
 - **CUDA 12.8**: `--index-url https://download.pytorch.org/whl/cu128`
@@ -20,11 +37,11 @@ url = "https://download.pytorch.org/whl/cu128"
 
 ## 推奨Docker戦略
 
-### 戦略1: CUDA 12.8環境 (現設定に合わせる) ✅ 推奨
+### 戦略1: CUDA 12.8環境 - 既存ubuntuユーザー活用版 ✅ 推奨
 
 #### Dockerfile
 ```dockerfile
-FROM nvidia/cuda:12.8.0-cudnn9-devel-ubuntu24.04
+FROM nvidia/cuda:12.8.0-cudnn-devel-ubuntu24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -40,7 +57,43 @@ RUN apt-get update && apt-get install -y \
 # uvインストール
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# 非rootユーザー
+# 既存ubuntuユーザーにsudo権限を付与
+RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu \
+    && chmod 0440 /etc/sudoers.d/ubuntu
+
+USER ubuntu
+WORKDIR /workspace
+```
+
+**利点:**
+- pyproject.tomlのcu128設定と完全一致
+- cuDNN 9含む（最新版）
+- Ubuntu 24.04 LTS対応
+- 既存ubuntuユーザー活用でシンプル
+- UID 1000でホスト環境との親和性が高い
+
+#### 戦略1-B: vscodeユーザー作成版（従来方式）
+
+VS Code Dev Container固有の要件がある場合:
+
+```dockerfile
+FROM nvidia/cuda:12.8.0-cudnn-devel-ubuntu24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 基本パッケージ
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    build-essential \
+    python3-dev \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# uvインストール
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# vscodeユーザーを作成（UID衝突を避ける）
 ARG USERNAME=vscode
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
@@ -55,9 +108,9 @@ WORKDIR /workspace
 ```
 
 **利点:**
-- pyproject.tomlのcu128設定と完全一致
-- cuDNN 9含む（最新版）
-- Ubuntu 24.04 LTS対応
+- VS Code拡張機能の明示的なユーザー名要件に対応
+- UID 1001で既存ubuntuユーザー(1000)と衝突回避
+- 複数のdev containerプロジェクトで統一可能
 
 **検証コマンド:**
 ```python
