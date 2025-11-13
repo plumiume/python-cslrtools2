@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
-_FILE = Path(__file__).resolve()
-PACKAGE_ROOT = _FILE.parent
+"""Logger for sldataset module."""
+
+import logging
+
+sldataset_logger = logging.getLogger("cslrtools2.sldataset")
+
+__all__ = ["sldataset_logger"]
