@@ -1,3 +1,19 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any, Mapping, Callable, Concatenate, TypedDict, overload, is_typeddict, get_origin
 from typing_extensions import TypeIs
@@ -16,14 +32,24 @@ from .options import LMPipeOptions, DEFAULT_LMPIPE_OPTIONS
 
 @dataclass
 class ProcessResult[K: str]:
+    """Result of a single frame processing operation.
+    
+    Contains the frame identifier, landmark headers, detected landmarks,
+    and the annotated frame with visualization overlays.
+    
+    Attributes:
+        frame_id (:obj:`int`): Sequential frame identifier.
+        headers (:class:`~typing.Mapping`\\[:obj:`K`, :class:`numpy.typing.NDArray`\\[:obj:`str`\\]\\]):
+            Mapping from landmark keys to their string headers.
+        landmarks (:class:`~typing.Mapping`\\[:obj:`K`, :class:`numpy.typing.NDArray`\\[:obj:`float`\\]\\]):
+            Mapping from landmark keys to their numeric coordinate arrays.
+        annotated_frame (:class:`MatLike`): Frame with visualization annotations.
+    """
     frame_id: int
     headers: Mapping[K, NDArrayStr]
     landmarks: Mapping[K, NDArrayFloat]
     annotated_frame: MatLike
 
-
-# cp314 ready
-type Estimator[K: str] = 'Estimator[K]' # pyright: ignore[reportRedeclaration]
 
 ############################# Estimator Decorators #############################
 
@@ -560,6 +586,24 @@ def annotate[E: EstimatorWithKey, K: str](
 ########################## Estimator Class Definition ##########################
 
 class Estimator[K: str](ABC):
+    """Abstract base class for landmark estimation models.
+    
+    Defines the interface for all landmark estimators in the LMPipe pipeline.
+    Subclasses must implement the core methods to define estimation behavior,
+    output shape, and optional header information.
+    
+    Type Parameters:
+        K: String type for landmark keys identifying different body parts or outputs.
+    
+    Attributes:
+        missing_value (:obj:`float`): Default value for missing/invalid landmarks.
+            Defaults to :obj:`numpy.nan`.
+    
+    Note:
+        Subclasses must implement :attr:`shape` and :meth:`estimate` methods.
+        The :attr:`headers` and :meth:`annotate` methods have default implementations
+        but can be overridden for custom behavior.
+    """
 
     missing_value: float = np.nan
     'Default missing value used in missing arrays.'
@@ -574,18 +618,21 @@ class Estimator[K: str](ABC):
     def shape(self) -> Mapping[K, tuple[int, int]] | tuple[int, int]:
         """Abstract property that returns shape of the estimation result array.
 
-        The shape is defined as a mapping from key K to a tuple of (V, C).
+        The shape is defined as a mapping from key :obj:`K` to a tuple of ``(V, C)``.
 
-        Where V is the number of landmark points,
-        and C is the coordinate dimension (e.g., 2 for (x, y) coordinates).
+        Where ``V`` is the number of landmark points,
+        and ``C`` is the coordinate dimension (e.g., ``2`` for ``(x, y)`` coordinates).
 
         Returns:
-            :class:`Mapping[K, tuple[int, int]]`:
-                Shape of the estimation result array mapped by key K
+            :class:`~typing.Mapping`\\[:obj:`K`, :obj:`tuple`\\[:obj:`int`, :obj:`int`\\]\\]:
+                Shape of the estimation result array mapped by key :obj:`K`.
 
-        Override Guidelines:
-            - If the estimator has a single output, return a tuple of (V, C).
-            - If the estimator has multiple outputs, return a mapping from each key K to its corresponding (V, C) tuple.
+        Note:
+            Override Guidelines:
+            
+            - If the estimator has a single output, return a tuple of ``(V, C)``.
+            - If the estimator has multiple outputs, return a mapping from each
+              key :obj:`K` to its corresponding ``(V, C)`` tuple.
         """
 
     @abstractmethod
@@ -596,19 +643,20 @@ class Estimator[K: str](ABC):
         """Abstract method that estimates landmarks from frames.
 
         Args:
-            frame_src (`MatLike | None`):
-                Source frame for estimation
-            frame_idx (`int`):
-                Index of the current frame
+            frame_src (:class:`MatLike`): Source frame for estimation.
+            frame_idx (:obj:`int`): Index of the current frame.
 
         Returns:
-            :class:`Mapping[K, ArrayLikeFloat]`:
-                Estimated landmarks mapped by key K
+            :class:`~typing.Mapping`\\[:obj:`K`, :class:`ArrayLikeFloat` | :obj:`None`\\]:
+                Estimated landmarks mapped by key :obj:`K`.
 
-        Override Guidelines:
-            - If the estimator has no single output or want to use dummy array, return `None`.
+        Note:
+            Override Guidelines:
+            
+            - If the estimator has no output or wants to use a dummy array, return :obj:`None`.
             - If the estimator has a single output, return an :class:`ArrayLikeFloat`.
-            - If the estimator has multiple outputs, return a mapping from each key K to its corresponding :class:`ArrayLikeFloat`.
+            - If the estimator has multiple outputs, return a mapping from each
+              key :obj:`K` to its corresponding :class:`ArrayLikeFloat`.
         """
 
     ### Core (Non-Abstract) Methods ###

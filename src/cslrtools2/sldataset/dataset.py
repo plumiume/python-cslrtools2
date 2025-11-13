@@ -1,8 +1,24 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # (root) / metadata / {km: Any}
 # (root) / connections / {klm}.{klm}
 # (root) / items / {idx} / videos / {kvid}
 # (root) / items / {idx} / landmarks /{klm}
 # (root) / items / {idx} / targets / {ktgt}
+
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import * # pyright: ignore[reportWildcardImportFromLibrary]
@@ -16,55 +32,28 @@ from torch.utils.data import (
     IterableDataset as _IterableDataset
 )
 import zarr
-from zarr.api.synchronous import StoreLike
+if TYPE_CHECKING:
+    from zarr.api.synchronous import StoreLike
+else:
+    StoreLike = object
 
 from ..typings import ArrayLike, PathLike
+from .logger import sldataset_logger
 from .utils import as_tensor, get_group, get_array
 from .array_loader import (
     prekey_loaders, PrekeyLoadFunc,
     container_loaders, ContainerLoadFunc
 )
 
-######## cp314 Ready ########
-type SLDatasetItem[ # pyright: ignore[reportRedeclaration]
-    Kvid: str, Vvid: ArrayLike,
-    Klm: str, Vlm: ArrayLike,
-    Ktgt: str, Vtgt: ArrayLike
-] = """SLDatasetItem[
-    Kvid, Vvid,
-    Klm, Vlm,
-    Ktgt, Vtgt
-]"""
-
-type SLDataset[ # pyright: ignore[reportRedeclaration]
-    Kmeta: str, Kvid: str, Klm: str, Ktgt: str, Vconn: ArrayLike
-] = """SLDataset[
-    Kmeta, Kvid, Klm, Ktgt, Vconn
-]"""
-
-type IterableSLDataset[ # pyright: ignore[reportRedeclaration]
-    Kmeta: str, Kvid: str, Klm: str, Ktgt: str, Vconn: ArrayLike
-] = """IterableSLDataset[
-    Kmeta, Kvid, Klm, Ktgt, Vconn
-]"""
-
 ######## Type Aliases ########
 
 type DefaultSLDatasetItem[
     Kvid: str, Klm: str, Ktgt: str
-] = SLDatasetItem[
-    Kvid, Any,
-    Klm, Any,
-    Ktgt, Any
-]
+] = SLDatasetItem[Kvid, Any, Klm, Any, Ktgt, Any]
 
 type TensorSLDatasetItem[
     Kvid: str, Klm: str, Ktgt: str
-] = SLDatasetItem[
-    Kvid, Tensor,
-    Klm, Tensor,
-    Ktgt, Tensor
-]
+] = SLDatasetItem[Kvid, Tensor, Klm, Tensor, Ktgt, Tensor]
 
 type ZarrSLDatasetItem[
     Kvid: str, Klm: str, Ktgt: str
@@ -90,21 +79,64 @@ type DefaultIterableSLDataset[
 ######## Key Holder Class ########
 
 class SLKeyHolder[Kmeta: str, Kvid: str, Klm: str, Ktgt: str]:
+    """Type guards for sign language dataset keys.
+    
+    Provides runtime type checking for the different key types used in
+    sign language datasets (metadata, video, landmark, target).
+    
+    Type Parameters:
+        Kmeta: String type for metadata keys.
+        Kvid: String type for video data keys.
+        Klm: String type for landmark data keys.
+        Ktgt: String type for target/label keys.
+    """
 
     @classmethod
     def is_metadata_key(cls, obj: object) -> TypeGuard[Kmeta]:
+        """Check if object is a valid metadata key.
+        
+        Args:
+            obj (:obj:`object`): Object to check.
+            
+        Returns:
+            :obj:`bool`: :obj:`True` if obj is a valid metadata key.
+        """
         return isinstance(obj, str)
 
     @classmethod
     def is_video_key(cls, obj: object) -> TypeGuard[Kvid]:
+        """Check if object is a valid video key.
+        
+        Args:
+            obj (:obj:`object`): Object to check.
+            
+        Returns:
+            :obj:`bool`: :obj:`True` if obj is a valid video key.
+        """
         return isinstance(obj, str)
     
     @classmethod
     def is_landmark_key(cls, obj: object) -> TypeGuard[Klm]:
+        """Check if object is a valid landmark key.
+        
+        Args:
+            obj (:obj:`object`): Object to check.
+            
+        Returns:
+            :obj:`bool`: :obj:`True` if obj is a valid landmark key.
+        """
         return isinstance(obj, str)
     
     @classmethod
     def is_target_key(cls, obj: object) -> TypeGuard[Ktgt]:
+        """Check if object is a valid target key.
+        
+        Args:
+            obj (:obj:`object`): Object to check.
+            
+        Returns:
+            :obj:`bool`: :obj:`True` if obj is a valid target key.
+        """
         return isinstance(obj, str)
 
 ######## Item Class ########
@@ -114,6 +146,31 @@ class SLDatasetItem[
     Klm: str, Vlm: ArrayLike,
     Ktgt: str, Vtgt: ArrayLike
     ](SLKeyHolder[Never, Kvid, Klm, Ktgt]):
+    """Single item from a sign language dataset.
+    
+    Contains video data, landmark coordinates, and target labels for
+    one sample in the dataset. Supports conversion to different devices
+    for PyTorch training.
+    
+    Type Parameters:
+        Kvid: String type for video data keys.
+        Vvid: Array-like type for video data values.
+        Klm: String type for landmark data keys.
+        Vlm: Array-like type for landmark data values.
+        Ktgt: String type for target/label keys.
+        Vtgt: Array-like type for target/label values.
+    
+    Attributes:
+        videos (:class:`~typing.Mapping`\\[:obj:`Kvid`, :obj:`Vvid`\\]):
+            Video data mapping. Each value has shape ``[N, T, H, W, C]``
+            where N is batch size, T is time, H is height, W is width, C is channels.
+        landmarks (:class:`~typing.Mapping`\\[:obj:`Klm`, :obj:`Vlm`\\]):
+            Landmark data mapping. Each value has shape ``[N, T, V, A]``
+            where N is batch size, T is time, V is vertices, A is attributes.
+        targets (:class:`~typing.Mapping`\\[:obj:`Ktgt`, :obj:`Vtgt`\\]):
+            Target/label data mapping. Each value has shape ``[N, S]``
+            where N is batch size, S is sequence length.
+    """
 
     def __init__(
         self,
@@ -125,8 +182,25 @@ class SLDatasetItem[
         self.videos = videos
         self.landmarks = landmarks
         self.targets = targets
+        
+        sldataset_logger.debug(
+            f"Initialized SLDatasetItem with {len(videos)} videos, "
+            f"{len(landmarks)} landmark types, {len(targets)} targets"
+        )
 
     def to(self, device: torch.device) -> TensorSLDatasetItem[Kvid, Klm, Ktgt]:
+        """Move all data to the specified device.
+        
+        Converts all video, landmark, and target data to :class:`torch.Tensor`
+        and moves them to the specified :class:`torch.device`.
+        
+        Args:
+            device (:class:`torch.device`): Target device (e.g., ``'cuda'``, ``'cpu'``).
+            
+        Returns:
+            :class:`TensorSLDatasetItem`\\[:obj:`Kvid`, :obj:`Klm`, :obj:`Ktgt`\\]:
+                New dataset item with all data on the specified device.
+        """
 
         return SLDatasetItem(
             videos={
@@ -318,6 +392,11 @@ class SLDatasetBatch[Kmeta: str, Kvid: str, Klm: str, Ktgt: str](
         ):
         self.dataset = dataset
         self.item = item
+        
+        sldataset_logger.debug(
+            f"Created SLDatasetBatch with {len(item.videos)} videos, "
+            f"{len(item.landmarks)} landmarks, {len(item.targets)} targets"
+        )
 
     def to(self, device: torch.device) -> Self:
 
@@ -383,11 +462,17 @@ class SLDataset[Kmeta: str, Kvid: str, Klm: str, Ktgt: str, Vconn: ArrayLike](
         self.metadata = metadata
         self.connections = connections
         self.items = items
+        
+        sldataset_logger.info(
+            f"Initialized SLDataset with {len(items)} items, "
+            f"{len(metadata)} metadata entries, {len(connections)} landmark connections"
+        )
 
     def __len__(self) -> int:
         return len(self.items)
 
     def __getitem__(self, index: int) -> DefaultSLDatasetItem[Kvid, Klm, Ktgt]:
+        sldataset_logger.debug(f"Fetching dataset item at index {index}")
         return self.items[index]
 
     def to_partially(self, device: torch.device) -> SLDataset[Kmeta, Kvid, Klm, Ktgt, Tensor]:
@@ -454,8 +539,14 @@ class IterableSLDataset[Kmeta: str, Kvid: str, Klm: str, Ktgt: str, Vconn: Array
         self.metadata = metadata
         self.connections = connections
         self.items = items
+        
+        sldataset_logger.info(
+            f"Initialized IterableSLDataset with {len(metadata)} metadata entries, "
+            f"{len(connections)} landmark connections"
+        )
 
     def __iter__(self) -> Iterator[DefaultSLDatasetItem[Kvid, Klm, Ktgt]]:
+        sldataset_logger.debug("Starting iteration over IterableSLDataset")
         return iter(self.items)
 
     def to_partially(self, device: torch.device) -> IterableSLDataset[Kmeta, Kvid, Klm, Ktgt, Tensor]:
