@@ -1,0 +1,26 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 基本パッケージインストール
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    build-essential \
+    python3-dev \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# uvインストール
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# ubuntuユーザー作成とsudo権限付与
+RUN useradd -m -u 1000 -s /bin/bash ubuntu \
+    && echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu \
+    && chmod 0440 /etc/sudoers.d/ubuntu
+
+USER ubuntu
+WORKDIR /workspace
+
+# PyTorch CPU版のインデックスを設定
+ENV UV_INDEX_URL=https://download.pytorch.org/whl/cpu

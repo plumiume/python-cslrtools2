@@ -21,6 +21,10 @@ log.txt
 .vscode/
 .dockerignore
 
+# Docker
+docker-compose.override.yaml
+.docker/
+
 # Test files and outputs
 test_*.py
 analyze_*.py

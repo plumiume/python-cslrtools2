@@ -1,0 +1,27 @@
+FROM nvidia/cuda:12.8.0-cudnn-devel-ubuntu24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 基本パッケージインストール
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    build-essential \
+    python3-dev \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# uvインストール
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# 既存ubuntuユーザーにsudo権限を付与
+RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu \
+    && chmod 0440 /etc/sudoers.d/ubuntu
+
+USER ubuntu
+WORKDIR /workspace
+
+# PyTorch 2.3.0用のインデックスを設定 (CUDA 12.8対応)
+ENV UV_INDEX_URL=https://download.pytorch.org/whl/cu128
+
+# Note: pyproject.tomlのtorch>=2.9.0を一時的に2.3.0に変更してテストする必要がある
