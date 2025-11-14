@@ -20,20 +20,22 @@ sign language datasets with efficient storage and PyTorch integration.
 
 from __future__ import annotations
 
-# Core dataset classes and utilities
-from .core import (
-    # Type aliases
+# Key holder for type guards
+from .holder import SLKeyHolder
+
+# Dataset item classes and type aliases
+from .item import (
+    SLDatasetItem,
     DefaultSLDatasetItem,
     TensorSLDatasetItem,
     ZarrSLDatasetItem,
+)
+
+# Core dataset classes and utilities
+from .core import (
+    # Type aliases
     DefaultSLDataset,
     DefaultIterableSLDataset,
-    
-    # Key holder
-    SLKeyHolder,
-    
-    # Dataset item
-    SLDatasetItem,
     
     # Base classes
     Dataset,
@@ -51,15 +53,15 @@ from .core import (
 )
 
 __all__ = [
+    # Key holder
+    "SLKeyHolder",
+    
     # Type aliases
     "DefaultSLDatasetItem",
     "TensorSLDatasetItem",
     "ZarrSLDatasetItem",
     "DefaultSLDataset",
     "DefaultIterableSLDataset",
-    
-    # Key holder
-    "SLKeyHolder",
     
     # Dataset item
     "SLDatasetItem",

@@ -44,24 +44,15 @@ from ..array_loader import (
     prekey_loaders, PrekeyLoadFunc,
     container_loaders, ContainerLoadFunc
 )
+from .holder import SLKeyHolder
+from .item import (
+    SLDatasetItem,
+    DefaultSLDatasetItem,
+    TensorSLDatasetItem,
+    ZarrSLDatasetItem,
+)
 
 ######## Type Aliases ########
-
-type DefaultSLDatasetItem[
-    Kvid: str, Klm: str, Ktgt: str
-] = SLDatasetItem[Kvid, Any, Klm, Any, Ktgt, Any]
-
-type TensorSLDatasetItem[
-    Kvid: str, Klm: str, Ktgt: str
-] = SLDatasetItem[Kvid, Tensor, Klm, Tensor, Ktgt, Tensor]
-
-type ZarrSLDatasetItem[
-    Kvid: str, Klm: str, Ktgt: str
-] = SLDatasetItem[
-    Kvid, zarr.Array,
-    Klm, zarr.Array,
-    Ktgt, zarr.Array
-]
 
 type DefaultSLDataset[
     Kvid: str, Klm: str, Ktgt: str
