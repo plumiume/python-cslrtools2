@@ -136,10 +136,12 @@ git worktree add ..\cslrtools2-<name> -b dev-ai/<task-name>
 # 既存ブランチでworktree作成
 git worktree add ..\cslrtools2-<name> origin/dev-ai/<branch-name>
 
-# 環境セットアップ
+# 環境セットアップ（uv syncを使用）
 cd ..\cslrtools2-<name>
-uv venv
-uv pip install -e . --index-strategy unsafe-best-match
+uv sync
+
+# MediaPipeが必要な場合
+# uv sync --group mediapipe
 ```
 
 ### worktreeの削除
@@ -250,8 +252,10 @@ Pop-Location
 # 新worktree作成
 git worktree add ..\cslrtools2-newfeature -b dev-ai/new-feature
 cd ..\cslrtools2-newfeature
-uv venv
-uv pip install -e . --index-strategy unsafe-best-match
+uv sync
+
+# MediaPipeが必要な場合
+# uv sync --group mediapipe
 
 # 状態確認
 git status
