@@ -37,10 +37,10 @@ if TYPE_CHECKING:
 else:
     StoreLike = object
 
-from ..typings import ArrayLike, PathLike
-from .logger import sldataset_logger
-from .utils import as_tensor, get_group, get_array
-from .array_loader import (
+from ...typings import ArrayLike, PathLike
+from ..logger import sldataset_logger
+from ..utils import as_tensor, get_group, get_array
+from ..array_loader import (
     prekey_loaders, PrekeyLoadFunc,
     container_loaders, ContainerLoadFunc
 )
