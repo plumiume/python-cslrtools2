@@ -78,3 +78,12 @@ mediapipe = [
     "mediapipe>=0.10.14",
 ]
 
+[tool.pytest.ini_options]
+markers = [
+    "mediapipe: tests that require MediaPipe to be installed",
+]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
