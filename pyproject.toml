@@ -29,6 +29,7 @@ dependencies = [
     "requests>=2.28.0",
     "rich>=13.0.0",
     "safetensors>=0.3.0",
+    "scipy>=1.16.3",
     "torch>=2.0.0",
     "torchvision>=0.15.0",
     "zarr>=3.0.0",
