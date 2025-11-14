@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # CUDA 12.8 (メイン開発環境)
   pytorch-cu128:

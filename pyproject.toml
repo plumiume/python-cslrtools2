@@ -32,14 +32,29 @@ sldataset2 = "cslrtools2.sldataset.app.cli:main"
 "mediapipe.holistic" = "cslrtools2.plugins.mediapipe.lmpipe.holistic_args:holistic_info"
 
 [build-system]
-requires = ["uv_build>=0.9.7,<0.10.0"]
-build-backend = "uv_build"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/cslrtools2/_version.py"
 
 [[tool.uv.index]]
+name = "pytorch"
 url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
 
 [tool.uv.sources]
 clipar = { git = "https://github.com/plumiume/python-clipar.git" }
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
 
 [dependency-groups]
 mediapipe = [

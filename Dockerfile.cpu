@@ -14,9 +14,8 @@ RUN apt-get update && apt-get install -y \
 # uvインストール
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# ubuntuユーザー作成とsudo権限付与
-RUN useradd -m -u 1000 -s /bin/bash ubuntu \
-    && echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu \
+# 既存ubuntuユーザーにsudo権限を付与
+RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu \
     && chmod 0440 /etc/sudoers.d/ubuntu
 
 USER ubuntu
