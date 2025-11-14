@@ -13,6 +13,18 @@ C:\Users\ikeda\Workspace\1github\
 │   ├── .venv/                   # 独立仮想環境
 │   └── 役割: logger修正・メイン開発
 │
+├── cslrtools2-dataset/          # データセット機能強化
+│   ├── ブランチ: dev-ai/dataset-enhancement
+│   ├── .venv/                   # 独立仮想環境
+│   ├── 役割: SLDataset機能追加・テスト環境構築
+│   └── 🎯 取り込むブランチ: dev-ai/merge-integration
+│
+├── cslrtools2-merge/            # ブランチ統合専用
+│   ├── ブランチ: dev-ai/merge-integration
+│   ├── .venv/                   # 独立仮想環境
+│   ├── 役割: 複数ブランチのマージ・統合テスト
+│   └── ✅ 統合済み: utilities-expansion, dependencies-update, gitignore-cleanup
+│
 ├── cslrtools2-dependencies/     # 依存関係管理
 │   ├── ブランチ: dev-ai/dependencies-update (detached)
 │   ├── .venv/                   # 独立仮想環境
@@ -33,6 +45,8 @@ C:\Users\ikeda\Workspace\1github\
 
 ### 1. Git Worktree構成
 - [x] メインワークスペース: `python-cslrtools2`
+- [x] データセットワークスペース: `cslrtools2-dataset` ⭐ **推奨作業場所**
+- [x] マージワークスペース: `cslrtools2-merge`
 - [x] 依存関係ワークスペース: `cslrtools2-dependencies`
 - [x] Git設定ワークスペース: `cslrtools2-gitignore`
 - [x] ユーティリティワークスペース: `cslrtools2-utilities`
@@ -136,12 +150,12 @@ git worktree add ..\cslrtools2-<name> -b dev-ai/<task-name>
 # 既存ブランチでworktree作成
 git worktree add ..\cslrtools2-<name> origin/dev-ai/<branch-name>
 
-# 環境セットアップ（uv syncを使用）
+# 環境セットアップ（uv sync --all-groups推奨）
 cd ..\cslrtools2-<name>
-uv sync
+uv sync --all-groups
 
-# MediaPipeが必要な場合
-# uv sync --group mediapipe
+# 最小構成の場合（MediaPipeなし）
+# uv sync
 ```
 
 ### worktreeの削除
@@ -252,10 +266,10 @@ Pop-Location
 # 新worktree作成
 git worktree add ..\cslrtools2-newfeature -b dev-ai/new-feature
 cd ..\cslrtools2-newfeature
-uv sync
+uv sync --all-groups
 
-# MediaPipeが必要な場合
-# uv sync --group mediapipe
+# 最小構成の場合（MediaPipeなし）
+# uv sync
 
 # 状態確認
 git status
@@ -266,6 +280,105 @@ git add .
 git commit -m "feat: New feature"
 git push origin dev-ai/new-feature
 ```
+
+## 🎯 ワークスペース別の推奨作業
+
+### cslrtools2-dataset（dataset機能強化）
+
+**目的**: SLDataset機能の拡充、テスト環境構築、ドキュメント整備
+
+**取り込むべきブランチ**:
+```powershell
+# dev-ai/merge-integrationから最新の統合成果を取り込む
+cd C:\Users\ikeda\Workspace\1github\cslrtools2-dataset
+git fetch origin
+git merge origin/dev-ai/merge-integration
+```
+
+**優先タスク**:
+1. ✅ **テスト環境の構築**
+   - `pyproject.toml`に`[dependency-groups.test]`追加（pytest, pytest-cov）
+   - `tests/test_sldataset.py`作成（基本的なCRUD操作テスト）
+   - `tests/test_array_loader.py`作成（複数フォーマット対応テスト）
+
+2. 📝 **sldataset2 CLIの実装**
+   - `sldataset2 info <dataset.zarr>`: データセット統計表示
+   - `sldataset2 validate <dataset.zarr>`: 整合性チェック
+   - `sldataset2 convert <input> <output>`: フォーマット変換
+
+3. 📚 **ドキュメント拡充**
+   - `README.md`にFluentSigners50プラグイン使用例追加
+   - `sldataset2`コマンドの実用例追加
+   - データセット作成チュートリアル作成
+
+4. 🔧 **コード改善**
+   - `dataset.py`の型ヒント強化
+   - Zarr型スタブ（`typings/zarr/`）の完成
+   - エラーハンドリング改善
+
+**開発ワークフロー**:
+```powershell
+cd C:\Users\ikeda\Workspace\1github\cslrtools2-dataset
+
+# テスト実行
+uv run pytest tests/ -v
+
+# 型チェック
+uv run pyright src/
+
+# コマンド動作確認
+uv run sldataset2 --help
+```
+
+### cslrtools2-merge（ブランチ統合専用）
+
+**目的**: 複数dev-aiブランチの統合・テスト・main合流準備
+
+**既に統合済み**:
+- ✅ utilities-expansion
+- ✅ dependencies-update  
+- ✅ gitignore-cleanup
+- ✅ tests/ディレクトリ追加
+
+**次のステップ**:
+```powershell
+cd C:\Users\ikeda\Workspace\1github\cslrtools2-merge
+
+# dataset-enhancementが完成したら統合
+git merge dev-ai/dataset-enhancement
+
+# 全テスト実行
+uv run pytest tests/ -v --cov=cslrtools2
+
+# mainへのマージ準備
+git checkout main
+git merge --squash dev-ai/merge-integration
+git commit -m "feat: Integrate dataset enhancements, tests, and utilities"
+```
+
+---
+
+## 🤖 その他できること
+
+### パフォーマンス最適化
+- [ ] Zarr配列読み込みの遅延評価最適化
+- [ ] MediaPipeバッチ処理の並列化改善
+- [ ] キャッシュ機構の導入（lmpipe結果のキャッシュ）
+
+### 新機能追加
+- [ ] データ拡張（augmentation）サポート（SLDatasetに統合）
+- [ ] ストリーミング推論モード（リアルタイムランドマーク抽出）
+- [ ] TensorBoard統合（学習プロセス可視化）
+
+### ドキュメント
+- [ ] アーキテクチャ図の生成（Mermaid/PlantUML）
+- [ ] APIリファレンスの自動生成（Sphinx）
+- [ ] 貢献ガイドライン（CONTRIBUTING.md）
+
+### CI/CD
+- [ ] GitHub Actions: pytestとPyright自動実行
+- [ ] GitHub Actions: PyPI自動公開ワークフロー
+- [ ] pre-commitフックの設定（型チェック、フォーマット）
 
 ---
 
