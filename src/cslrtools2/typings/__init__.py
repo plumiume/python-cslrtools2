@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import TYPE_CHECKING, Protocol
 from os import PathLike as _PathLike
 
@@ -25,6 +39,27 @@ else:
     _MatLike = object
 
 class SupportsArray[R: _ArrayLike](Protocol):
+    """Protocol for objects that support conversion to arrays.
+    
+    This protocol defines objects that implement the :meth:`__array__` method,
+    allowing them to be converted to NumPy arrays or similar array types.
+    
+    Type Parameters:
+        R: The return type of :meth:`__array__`, must be array-like.
+        
+    Example:
+        Custom class implementing the array protocol::
+        
+            >>> import numpy as np
+            >>> class MyArray:
+            ...     def __init__(self, data):
+            ...         self.data = data
+            ...     def __array__(self, dtype=None, copy=None):
+            ...         return np.array(self.data, dtype=dtype)
+            >>> obj = MyArray([1, 2, 3])
+            >>> np.asarray(obj)
+            array([1, 2, 3])
+    """
     def __array__(
         self,
         dtype: _DTypeLike | None = None,

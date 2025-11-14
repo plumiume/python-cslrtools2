@@ -16,3 +16,21 @@ src/cslrtools2/assets/
 logs/
 *.log
 log.txt
+
+# IDE and development tools
+.vscode/
+.devcontainer/
+.dockerignore
+
+# Test files and outputs
+test_*.py
+analyze_*.py
+check_*.py
+create_*.py
+process_*.py
+test_output/
+*_frame/
+*.mp4
+
+# Temporary documentation
+github-issue-*.md

@@ -1,3 +1,36 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Command-line interface for LMPipe landmark extraction.
+
+This module provides the main CLI entry point for running landmark
+extraction pipelines from the command line. It handles argument parsing,
+estimator selection, and pipeline execution.
+
+The CLI supports multiple estimator types (holistic, pose, hands, face)
+and various output formats through the collector system.
+
+Example:
+    Run pose estimation on a video::
+    
+        $ lmpipe pose mediapipe --model-size lite input.mp4 output/
+        
+    Run holistic estimation with multiple collectors::
+    
+        $ lmpipe holistic mediapipe --csv --show input.mp4 output/
+"""
+
 from typing import Any
 import logging
 from multiprocessing import freeze_support

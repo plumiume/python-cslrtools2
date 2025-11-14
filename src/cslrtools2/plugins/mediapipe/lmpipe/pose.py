@@ -1,6 +1,19 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import Literal, Mapping, cast
 from abc import abstractmethod
-from enum import IntEnum
 from functools import cache
 from itertools import product
 
@@ -19,46 +32,25 @@ from ....lmpipe.app.holistic.estimator import HolisticPoseEstimator
 from ....lmpipe.app.holistic.roi import BaseROI
 from .base import MediaPipeEstimator, get_mediapipe_model
 from .pose_args import MediaPipePoseKey, MediaPipePoseArgs
+from .mp_constants import PoseLandmark
 
 
 MEDIA_PIPE_POSE_KEY: MediaPipePoseKey = "mediapipe.pose"
 
 
-class MediaPipePoseNames(IntEnum):
-    """Enum for pose landmark names based on MediaPipe Pose model."""
-    NOSE = 0
-    LEFT_EYE_INNER = 1
-    LEFT_EYE = 2
-    LEFT_EYE_OUTER = 3
-    RIGHT_EYE_INNER = 4
-    RIGHT_EYE = 5
-    RIGHT_EYE_OUTER = 6
-    LEFT_EAR = 7
-    RIGHT_EAR = 8
-    MOUTH_LEFT = 9
-    MOUTH_RIGHT = 10
-    LEFT_SHOULDER = 11
-    RIGHT_SHOULDER = 12
-    LEFT_ELBOW = 13
-    RIGHT_ELBOW = 14
-    LEFT_WRIST = 15
-    RIGHT_WRIST = 16
-    LEFT_PINKY = 17
-    RIGHT_PINKY = 18
-    LEFT_INDEX = 19
-    RIGHT_INDEX = 20
-    LEFT_THUMB = 21
-    RIGHT_THUMB = 22
-    LEFT_HIP = 23
-    RIGHT_HIP = 24
-    LEFT_KNEE = 25
-    RIGHT_KNEE = 26
-    LEFT_ANKLE = 27
-    RIGHT_ANKLE = 28
-    LEFT_HEEL = 29
-    RIGHT_HEEL = 30
-    LEFT_FOOT_INDEX = 31
-    RIGHT_FOOT_INDEX = 32
+# Deprecated: Use PoseLandmark from constants module instead
+# This alias is kept for backward compatibility
+MediaPipePoseNames = PoseLandmark
+"""Deprecated: Use ``PoseLandmark`` from ``constants`` module instead.
+
+This is an alias to MediaPipe's official ``PoseLandmark`` enum for backward
+compatibility. New code should import directly from the constants module::
+
+    from cslrtools2.plugins.mediapipe.lmpipe.constants import PoseLandmark
+
+.. deprecated:: 0.1.0
+    Use :class:`~cslrtools2.plugins.mediapipe.lmpipe.constants.PoseLandmark` instead.
+"""
 
 
 class MediaPipePosePartROI(BaseROI):

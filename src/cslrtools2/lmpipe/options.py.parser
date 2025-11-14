@@ -1,4 +1,18 @@
 #!/usr/bin/env python
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Template parser for generating options.py from options.py.template.
 
 This script uses AST to parse the template file and generates the complete
@@ -196,6 +210,23 @@ def extract_imports_from_ast(tree: ast.Module) -> list[str]:
 def generate_options_content(tree: ast.Module, classes: list[dict[str, Any]], quote_style: str = '"') -> str:
     """Generate the complete options.py content."""
     
+    # License header (Apache 2.0)
+    license_header = '''# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+'''
+    
     # Generate dynamic module docstring
     # Extract class names and their descriptions from actual classes
     individual_classes = [cls for cls in classes if not cls['base_classes']]
@@ -249,7 +280,7 @@ Attributes:'''
     # Group to dict converter functions
     converter_functions = generate_group_to_dict_functions(classes, quote_style)
     
-    return header + imports_section + '\n\n'.join(class_sections) + '\n\n' + combined_section + '\n\n' + converter_functions
+    return license_header + header + imports_section + '\n\n'.join(class_sections) + '\n\n' + combined_section + '\n\n' + converter_functions
 
 
 def generate_class_section(class_info: dict[str, Any], quote_style: str = '"') -> str:
