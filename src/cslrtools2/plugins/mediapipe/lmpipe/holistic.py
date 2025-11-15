@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import cast, Any, Mapping, NamedTuple
 from functools import cache
 from itertools import product
@@ -14,6 +28,7 @@ from mediapipe.tasks.python.components.containers.landmark import ( # pyright: i
 ) 
 
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
+from ....exceptions import ValidationError
 from ....lmpipe.estimator import shape, headers, estimate, annotate
 from .base import MediaPipeEstimator
 from .face import FACE_LANDMARKS_NUM
@@ -63,7 +78,10 @@ class MediaPipeHolisticEstimator(
         )
 
     def configure_estimator_name(self) -> MediaPipeHolisticKey:
-        raise ValueError("Holistic estimator does not have a single key.")
+        raise ValidationError(
+            "Holistic estimator does not have a single key. "
+            "Use estimator.pose_key, estimator.left_hand_key, etc. instead."
+        )
 
     @property
     @shape

@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # pyright: reportUnnecessaryIsInstance=false
 
 from typing import (
@@ -15,17 +29,54 @@ def conv_size(
     padding: Tensor,
     dilation: Tensor
     ) -> Tensor:
-    """Calculate the output size of a convolution.
+    """Calculate the output size of a convolution operation.
+
+    Computes the spatial dimensions of the output feature map for a 
+    convolution layer given the input size and convolution parameters.
 
     Args:
-        size (`Tensor`): Input size tensor.
-        kernel_size (`Tensor`): Kernel size tensor.
-        stride (`Tensor`): Stride tensor.
-        padding (`Tensor`): Padding tensor.
-        dilation (`Tensor`): Dilation tensor.
+        size (`Tensor`): Input spatial dimensions tensor. Shape: ``(N,)`` 
+            where N is the number of spatial dimensions (typically 2 for 
+            height and width).
+        kernel_size (`Tensor`): Convolution kernel size tensor. Shape: ``(N,)``.
+        stride (`Tensor`): Stride of the convolution. Shape: ``(N,)``.
+        padding (`Tensor`): Padding applied to the input. Shape: ``(N,)``.
+        dilation (`Tensor`): Spacing between kernel elements. Shape: ``(N,)``.
 
     Returns:
-        :class:`Tensor`: Output size tensor.
+        :class:`Tensor`: Output spatial dimensions. Shape: ``(N,)`` matching the 
+            input size tensor shape.
+
+    Note:
+        This function implements the standard convolution output size formula used
+        by :class:`torch.nn.Conv2d` and :class:`torch.nn.Conv3d`:
+        
+        .. math::
+            \\text{output} = \\left\\lfloor \\frac{\\text{input} + 2 \\times \\text{padding} - \\text{dilation} \\times (\\text{kernel} - 1) - 1}{\\text{stride}} \\right\\rfloor + 1
+
+    Example:
+        Calculate output size for a 2D convolution::
+
+            >>> import torch
+            >>> from cslrtools2.convsize import conv_size
+            >>> output = conv_size(
+            ...     size=torch.tensor([224, 224]),
+            ...     kernel_size=torch.tensor([3, 3]),
+            ...     stride=torch.tensor([2, 2]),
+            ...     padding=torch.tensor([1, 1]),
+            ...     dilation=torch.tensor([1, 1])
+            ... )
+            >>> output
+            tensor([112, 112])
+
+        Verify with PyTorch :class:`torch.nn.Conv2d` layer::
+
+            >>> import torch.nn as nn
+            >>> conv = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1)
+            >>> x = torch.randn(1, 3, 224, 224)
+            >>> y = conv(x)
+            >>> y.shape
+            torch.Size([1, 64, 112, 112])
     """
 
     return torch.floor_divide(
@@ -41,18 +92,60 @@ def conv_transpose_size(
     output_padding: Tensor,
     dilation: Tensor
     ) -> Tensor:
-    """Calculate the output size of a transposed convolution.
+    """Calculate the output size of a transposed convolution operation.
+
+    Computes the spatial dimensions of the output feature map for a 
+    transposed convolution (deconvolution) layer given the input size 
+    and convolution parameters.
 
     Args:
-        size (`Tensor`): Input size tensor.
-        kernel_size (`Tensor`): Kernel size tensor.
-        stride (`Tensor`): Stride tensor.
-        padding (`Tensor`): Padding tensor.
-        output_padding (`Tensor`): Output padding tensor.
-        dilation (`Tensor`): Dilation tensor.
+        size (`Tensor`): Input spatial dimensions tensor. Shape: ``(N,)`` 
+            where N is the number of spatial dimensions.
+        kernel_size (`Tensor`): Convolution kernel size tensor. Shape: ``(N,)``.
+        stride (`Tensor`): Stride of the transposed convolution. Shape: ``(N,)``.
+        padding (`Tensor`): Padding applied to the input. Shape: ``(N,)``.
+        output_padding (`Tensor`): Additional size added to one side of 
+            the output shape. Shape: ``(N,)``.
+        dilation (`Tensor`): Spacing between kernel elements. Shape: ``(N,)``.
 
     Returns:
-        :class:`Tensor`: Output size tensor.
+        :class:`Tensor`: Output spatial dimensions. Shape: ``(N,)`` matching 
+            the input size tensor shape.
+
+    Note:
+        This function implements the transposed convolution output size formula
+        used by :class:`torch.nn.ConvTranspose2d` and :class:`torch.nn.ConvTranspose3d`:
+        
+        .. math::
+            \\text{output} = (\\text{input} - 1) \\times \\text{stride} - 2 \\times \\text{padding} + \\text{dilation} \\times (\\text{kernel} - 1) + \\text{output\\_padding} + 1
+
+    Example:
+        Calculate output size for a 2D transposed convolution::
+
+            >>> import torch
+            >>> from cslrtools2.convsize import conv_transpose_size
+            >>> output = conv_transpose_size(
+            ...     size=torch.tensor([112, 112]),
+            ...     kernel_size=torch.tensor([3, 3]),
+            ...     stride=torch.tensor([2, 2]),
+            ...     padding=torch.tensor([1, 1]),
+            ...     output_padding=torch.tensor([1, 1]),
+            ...     dilation=torch.tensor([1, 1])
+            ... )
+            >>> output
+            tensor([224, 224])
+
+        Verify with PyTorch :class:`torch.nn.ConvTranspose2d` layer::
+
+            >>> import torch.nn as nn
+            >>> deconv = nn.ConvTranspose2d(
+            ...     64, 3, kernel_size=3, stride=2, 
+            ...     padding=1, output_padding=1
+            ... )
+            >>> x = torch.randn(1, 64, 112, 112)
+            >>> y = deconv(x)
+            >>> y.shape
+            torch.Size([1, 3, 224, 224])
     """
 
     return (
@@ -66,17 +159,34 @@ _ConvNd = TypeVar('_ConvNd', bound=nn.Conv1d | nn.Conv2d | nn.Conv3d)
 _ConvTransposeNd = TypeVar('_ConvTransposeNd', bound=nn.ConvTranspose1d | nn.ConvTranspose2d | nn.ConvTranspose3d)
 
 class ConvSize(nn.Module, Generic[_ConvNd]):
+    """Calculate the output size of a convolutional layer.
 
-    """
-    Calculate the output size of a convolutional layer.
+    A :class:`torch.nn.Module` that computes the spatial output dimensions
+    for convolutional layers (:class:`torch.nn.Conv1d`, :class:`torch.nn.Conv2d`,
+    :class:`torch.nn.Conv3d`) given their parameters.
 
-    Parameters:
-        conv (`_ConvNd`): A convolutional layer instance
-        (e.g., :class:`nn.Conv1d`, :class:`nn.Conv2d`, :class:`nn.Conv3d`).
+    Args:
+        conv (_ConvNd): A convolutional layer instance (e.g., :class:`torch.nn.Conv1d`,
+            :class:`torch.nn.Conv2d`, :class:`torch.nn.Conv3d`).
 
     Shape:
-        - Input: :class:`Tensor` of shape `(batch_size, channels, ...)` or :class:`Size`.
-        - Output: :class:`Tensor` of shape `(batch_size, out_channels, ...)` or :class:`Size`.
+        - Input: :class:`torch.Tensor` of shape ``(batch_size, channels, ...)``
+          or :class:`torch.Size`.
+        - Output: :class:`torch.Tensor` of shape ``(batch_size, out_channels, ...)``
+          or :class:`torch.Size`.
+
+    Example:
+        Calculate output size for a 2D convolutional layer::
+
+            >>> import torch
+            >>> import torch.nn as nn
+            >>> from cslrtools2.convsize import ConvSize
+            >>> conv = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1)
+            >>> conv_size_calc = ConvSize(conv)
+            >>> input_size = torch.tensor([224, 224])
+            >>> output_size = conv_size_calc(input_size)
+            >>> output_size
+            tensor([112, 112])
     """
 
     def __init__(self, conv: _ConvNd):
@@ -147,17 +257,39 @@ class ConvSize(nn.Module, Generic[_ConvNd]):
         return Size(unchange_shape + changed_shape)
 
 class ConvTransposeSize(nn.Module, Generic[_ConvTransposeNd]):
+    """Calculate the output size of a transposed convolutional layer.
 
-    """
-    Calculate the output size of a transposed convolutional layer.
+    A :class:`torch.nn.Module` that computes the spatial output dimensions
+    for transposed convolutional layers (:class:`torch.nn.ConvTranspose1d`,
+    :class:`torch.nn.ConvTranspose2d`, :class:`torch.nn.ConvTranspose3d`)
+    given their parameters.
 
-    Parameters:
-        conv (`_ConvTransposeNd`): A transposed convolutional layer instance
-        (e.g., :class:`nn.ConvTranspose1d`, :class:`nn.ConvTranspose2d`, :class:`nn.ConvTranspose3d`).
+    Args:
+        conv (_ConvTransposeNd): A transposed convolutional layer instance
+            (e.g., :class:`torch.nn.ConvTranspose1d`, :class:`torch.nn.ConvTranspose2d`,
+            :class:`torch.nn.ConvTranspose3d`).
 
     Shape:
-        - Input: :class:`Tensor` of shape `(batch_size, channels, ...)` or :class:`Size`.
-        - Output: :class:`Tensor` of shape `(batch_size, out_channels, ...)` or :class:`Size`.
+        - Input: :class:`torch.Tensor` of shape ``(batch_size, channels, ...)``
+          or :class:`torch.Size`.
+        - Output: :class:`torch.Tensor` of shape ``(batch_size, out_channels, ...)``
+          or :class:`torch.Size`.
+
+    Example:
+        Calculate output size for a 2D transposed convolutional layer::
+
+            >>> import torch
+            >>> import torch.nn as nn
+            >>> from cslrtools2.convsize import ConvTransposeSize
+            >>> deconv = nn.ConvTranspose2d(
+            ...     64, 3, kernel_size=3, stride=2,
+            ...     padding=1, output_padding=1
+            ... )
+            >>> deconv_size_calc = ConvTransposeSize(deconv)
+            >>> input_size = torch.tensor([112, 112])
+            >>> output_size = deconv_size_calc(input_size)
+            >>> output_size
+            tensor([224, 224])
     """
 
     def __init__(self, conv: _ConvTransposeNd):

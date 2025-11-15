@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import warnings
 import requests
@@ -14,6 +28,7 @@ except ImportError as exc:
 
 from ...._root import PACKAGE_ROOT
 from ....lmpipe.estimator import Estimator
+from ....exceptions import ValidationError, ModelDownloadError
 from .base_args import MediaPipeBaseArgs
 
 MODELS: dict[str, dict[str, str]] = {
@@ -34,17 +49,46 @@ ASSETS_PATH = PACKAGE_ROOT / "assets"
 ASSETS_PATH.mkdir(parents=True, exist_ok=True)
 
 def get_mediapipe_model(part: str, size: str) -> str:
+    """Download or retrieve cached MediaPipe model file.
+    
+    Downloads the specified MediaPipe model from Google Cloud Storage
+    if not already cached locally. Models are stored in the package
+    assets directory.
+    
+    Args:
+        part (:obj:`str`): Body part type. One of ``'pose'``, ``'hand'``, ``'face'``.
+        size (:obj:`str`): Model size variant. Options vary by part:
+            
+            - pose: ``'lite'``, ``'full'``, ``'heavy'``
+            - hand: ``'full'``
+            - face: ``'full'``
+    
+    Returns:
+        :obj:`str`: Path to the downloaded/cached model file.
+        
+    Raises:
+        :exc:`ValidationError`: If invalid part or size is specified.
+        :exc:`ModelDownloadError`: If model download fails.
+        
+    Example:
+        Download pose landmarker model::
+        
+            >>> model_path = get_mediapipe_model('pose', 'lite')
+            >>> print(model_path)
+            '.../cslrtools2/assets/pose/lite.task'
+    """
 
     part_map = MODELS.get(part)
     if part_map is None:
-        raise ValueError(
+        raise ValidationError(
             f"Invalid model part: {part}. Available parts: {list(MODELS.keys())}"
         )
 
     model_url = part_map.get(size)
     if model_url is None:
-        raise ValueError(
-            f"Invalid model size: {size} for part {part}. Available sizes: {list(part_map.keys())}"
+        raise ValidationError(
+            f"Invalid model size: {size} for part {part}. "
+            f"Available sizes: {list(part_map.keys())}"
         )
 
     model_dir = ASSETS_PATH / part
@@ -57,8 +101,11 @@ def get_mediapipe_model(part: str, size: str) -> str:
     response = requests.get(model_url)
 
     if response.status_code != 200:
-        raise RuntimeError(
-            f"Failed to download model from {model_url}. Status code: {response.status_code}"
+        raise ModelDownloadError(
+            f"Failed to download model from {model_url}. "
+            f"Status code: {response.status_code}. "
+            f"Reason: {response.reason}. "
+            f"Ensure you have internet connectivity."
         )
 
     with model_file.open("wb") as f:
@@ -68,6 +115,20 @@ def get_mediapipe_model(part: str, size: str) -> str:
     return str(model_file)
 
 class MediaPipeEstimator[K: str](Estimator[K]):
+    """Base class for MediaPipe-based landmark estimators.
+    
+    Provides common functionality for MediaPipe vision tasks including
+    model loading, landmark extraction, and coordinate normalization.
+    
+    Type Parameters:
+        K: String type for landmark keys identifying different body parts.
+    
+    Attributes:
+        channels (:obj:`int`): Number of channels per landmark. Defaults to ``4``
+            (x, y, z, confidence).
+        axis_names (:obj:`list`\\[:obj:`str`\\]): Names of the coordinate axes.
+            Defaults to ``['x', 'y', 'z', 'c']``.
+    """
 
     channels: int = 4
 
@@ -78,6 +139,15 @@ class MediaPipeEstimator[K: str](Estimator[K]):
     def _get_array_from_landmarks(
         self, lm: NormalizedLandmark
         ) -> list[float]:
+        """Convert MediaPipe landmark to coordinate array.
+        
+        Args:
+            lm (:class:`mediapipe.tasks.python.components.containers.landmark.NormalizedLandmark`):
+                MediaPipe normalized landmark.
+                
+        Returns:
+            :obj:`list`\\[:obj:`float`\\]: Coordinate array ``[x, y, z, confidence]``.
+        """
         return [
             lm.x or self.missing_value,
             lm.y or self.missing_value,

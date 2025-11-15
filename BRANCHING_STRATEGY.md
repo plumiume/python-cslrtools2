@@ -19,7 +19,8 @@
 
 ### その他のブランチ
 - `main` - 本番用の安定版ブランチ
-- `feature/<feature-name>` - 新機能開発（人間の開発者用）
+- `main-ai` - すべてのdev-aiブランチを統合したAI開発統合ブランチ
+- `feature/<feature-name>` - 新機能開発(人間の開発者用)
 - `bugfix/<bug-name>` - バグ修正
 - `hotfix/<issue-name>` - 緊急修正
 
@@ -117,12 +118,43 @@ graph LR
     C -->|OK| D[PR作成]
     D -->|Squash Merge| A
     C -->|NG| B
+    A -->|複数のdev-ai統合| E[main-ai]
+    E -->|さらなる開発| F[dev-ai/new-task]
+    E -->|テスト・検証後| A
 ```
+
+### main-ai ブランチの運用
+
+**目的**: 複数のdev-aiブランチの変更を統合し、一括テスト・検証を行う
+
+**作成方法**:
+```bash
+# mainから作成
+git checkout main
+git pull origin main
+git checkout -b main-ai
+
+# 各dev-aiブランチをマージ
+git merge origin/dev-ai/branch1 --no-ff -m "chore: Merge dev-ai/branch1 into main-ai"
+git merge origin/dev-ai/branch2 --no-ff -m "refactor: Merge dev-ai/branch2 into main-ai"
+
+# リモートにプッシュ
+git push -u origin main-ai
+```
+
+**用途**:
+- 複数のdev-aiブランチの統合テスト
+- AI開発成果の一括検証
+- mainへのマージ前の最終確認
+- 継続的な統合開発のベースブランチ
+
+**注意**:
+- main-aiは定期的にmainと同期すること
+- mainへのマージはmain-aiからのSquash Mergeを推奨
 
 ## ベストプラクティス
 
 ### AIエージェント開発時
-- **作業開始前**: 他のdev-aiブランチの状況を確認する（後述の「他のdev-aiブランチの確認」参照）
 - 小さな単位で頻繁にコミット・プッシュする
 - コミットメッセージは明確に記述する
 - 大きな変更は複数のdev-aiブランチに分割する
@@ -132,76 +164,6 @@ graph LR
 - 作業完了後は速やかにマージしてブランチを削除
 - 長期間マージされないブランチは定期的に見直す
 - mainブランチは常にデプロイ可能な状態を保つ
-
-## 他のdev-aiブランチの確認
-
-新しい作業を開始する前に、他のAIエージェントが作業中のブランチを確認し、重複や競合を避けます。
-
-### 1. リモートブランチの最新情報を取得
-```bash
-# リモートの最新状態を取得（ブランチ削除も反映）
-git fetch origin --prune
-```
-
-### 2. dev-aiブランチ一覧の確認
-```bash
-# リモートのdev-aiブランチを一覧表示
-git branch -r | grep 'origin/dev-ai/'
-
-# または詳細情報付きで表示
-git for-each-ref --sort=-committerdate refs/remotes/origin/dev-ai/ --format='%(committerdate:short) %(refname:short) %(subject)'
-```
-
-### 3. 特定ブランチの変更内容を確認
-```bash
-# ブランチの変更ファイル一覧
-git diff main...origin/dev-ai/<branch-name> --name-status
-
-# ブランチの詳細な差分
-git diff main...origin/dev-ai/<branch-name>
-
-# ブランチのコミットログ
-git log main..origin/dev-ai/<branch-name> --oneline
-```
-
-### 4. 他ブランチの変更を取り込む必要がある場合
-```bash
-# 新しい作業ブランチを作成
-git checkout -b dev-ai/<new-task>
-
-# 他のdev-aiブランチの変更を取り込む
-git merge origin/dev-ai/<other-branch>
-
-# または、特定のコミットのみを取り込む
-git cherry-pick <commit-hash>
-```
-
-### 5. 確認すべきポイント
-- [ ] 同じファイルを編集している他のブランチはないか
-- [ ] 自分の作業と関連する機能開発が進行中でないか
-- [ ] 取り込むべき有用な変更があるか
-- [ ] コンフリクトが発生する可能性はないか
-
-### 例: 作業開始時のフロー
-```bash
-# 1. mainブランチを最新化
-git checkout main
-git pull origin main
-
-# 2. リモートブランチを確認
-git fetch origin --prune
-git branch -r | grep 'origin/dev-ai/'
-
-# 3. 関連ブランチの内容を確認
-git log main..origin/dev-ai/gitignore-cleanup --oneline
-git diff main...origin/dev-ai/gitignore-cleanup --name-status
-
-# 4. 新しい作業ブランチを作成
-git checkout -b dev-ai/new-feature
-
-# 5. 必要に応じて他ブランチの変更を取り込む
-git merge origin/dev-ai/gitignore-cleanup
-```
 
 ## トラブルシューティング
 
