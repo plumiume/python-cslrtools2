@@ -40,4 +40,5 @@ docker-compose.override.yaml
 *.mp4
 
 # Temporary documentation
+.github/worktree-copilot-instructions.md
 github-issue-*.md
