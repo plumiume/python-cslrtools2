@@ -101,8 +101,8 @@ class TestPluginImports:
     def test_import_mediapipe_plugin(self) -> None:
         """Test that the MediaPipe plugin can be imported (optional)."""
         try:
-            from cslrtools2.plugins.mediapipe import lmpipe
+            import cslrtools2.plugins.mediapipe as mediapipe  # type: ignore  # noqa: F401
 
-            assert lmpipe is not None
+            assert mediapipe is not None
         except ImportError:
             pytest.skip("MediaPipe plugin not installed")
