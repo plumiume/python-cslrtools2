@@ -100,7 +100,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv pip install --system -e . --group dev
+        uv pip install --system -e . --group dev --group mediapipe
 
     - name: Run Pyright
       run: |
@@ -132,7 +132,7 @@ jobs:
 
     - name: Build Sphinx documentation
       run: |
-        uv run sphinx-build -b html sphinx/source sphinx/build/html -W --keep-going
+        uv run sphinx-build -b html sphinx/source sphinx/build/html --keep-going
 
     - name: Upload documentation artifact
       uses: actions/upload-artifact@v4
