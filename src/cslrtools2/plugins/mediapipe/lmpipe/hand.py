@@ -155,12 +155,12 @@ class MediaPipeHandEstimator(
 
         if not landmarks:
             return None
-        
+
         left_hand_landmarks: NDArrayFloat | None = None
         right_hand_landmarks: NDArrayFloat | None = None
-        
+
         for ctgrs, lms in zip(handedness, landmarks):
-            
+
             if not ctgrs:
                 continue
 
@@ -178,15 +178,15 @@ class MediaPipeHandEstimator(
                 ])
 
         if self.category == "both":
-            
+
             return {
                 "mediapipe.left_hand": left_hand_landmarks,
                 "mediapipe.right_hand": right_hand_landmarks
             }
-        
+
         if self.category == "left":
             return left_hand_landmarks
-        
+
         if self.category == "right":
             return right_hand_landmarks
 

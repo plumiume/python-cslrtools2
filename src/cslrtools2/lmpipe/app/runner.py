@@ -138,7 +138,7 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
             Progress.add_task,
             DESC_TEMPLATE.format(
                 deco="bold blue",
-                desc=f"Searching batch tasks ..."
+                desc="Searching batch tasks ..."
             ),
             total=None
         )
@@ -156,7 +156,7 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
             Progress.add_task,
             DESC_TEMPLATE.format(
                 deco="bold blue",
-                desc=f"Running batch job ..."
+                desc="Running batch job ..."
             ),
             total=None
         )
@@ -224,7 +224,7 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
                 Progress.advance,
                 batch_progress_task_id
             )
-        
+
         # skip error
         # raise error
 

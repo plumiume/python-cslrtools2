@@ -1,0 +1,488 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cslrtools2.sldataset.array_loader &mdash; cslrtools2 0.1.dev54+gb18e68278.d20251115 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=9bb56542"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            cslrtools2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cslrtools2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cslrtools2.html">cslrtools2 package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/ikegami-yukino/python-cslrtools2">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/cslrtools2/">PyPI Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cslrtools2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cslrtools2.sldataset.array_loader</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cslrtools2.sldataset.array_loader</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2025 cslrtools2 contributors</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="c1"># CsvLoader(PreKeyLoader)</span>
+<span class="c1"># JsonLoader(PreKeyLoader)</span>
+<span class="c1"># NpyLoader(PreKeyLoader)</span>
+<span class="c1"># NpzLoader(ContainerLoader)</span>
+<span class="c1"># TorchLoader(PreKeyLoader, ContainerLoader)</span>
+<span class="c1"># SafetensorsLoader(ContainerLoader)</span>
+<span class="c1"># ZarrLoader(ContainerLoader)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeGuard</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">safetensors.torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..typings</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathLike</span><span class="p">,</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFormatError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_mapping</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]](</span><span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if object is an instance of a mapping type.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (:obj:`object`): Object to check.</span>
+<span class="sd">        type_ (:obj:`type`\\[:obj:`T`\\]): Target mapping type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`bool`: :obj:`True` if obj is an instance of the mapping type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">type_</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">new_origin</span> <span class="o">:=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">origin</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">new_origin</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">origin</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PreKeyLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.PreKeyLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PreKeyLoader</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for loaders that load single arrays from files.</span>
+
+<span class="sd">    Pre-key loaders handle file formats where each file contains a single array</span>
+<span class="sd">    associated with a key (derived from the filename).</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        Formats: CSV, JSON (single array), NPY</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PreKeyLoader.load_array">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.PreKeyLoader.load_array">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a single array from the specified file path.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the file to load.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`ArrayLike`: The loaded array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+</div>
+
+
+<div class="viewcode-block" id="ContainerLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.ContainerLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ContainerLoader</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for loaders that load multiple keyed arrays from files.</span>
+
+<span class="sd">    Container loaders handle file formats where a single file contains multiple</span>
+<span class="sd">    arrays, each associated with a string key.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        Formats: NPZ, PyTorch (pt/pth), SafeTensors, Zarr</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ContainerLoader.load_mapping">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.ContainerLoader.load_mapping">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a mapping of keyed arrays from the specified file path.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the container file to load.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:</span>
+<span class="sd">                Mapping from keys to arrays.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CsvLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.CsvLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CsvLoader</span><span class="p">(</span><span class="n">PreKeyLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;CSV file loader for array data.</span>
+
+<span class="sd">    Loads numeric data from CSV files, converting each row to a list of floats.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        delimiter (:obj:`str`): Column delimiter character. Defaults to ``&#39;,&#39;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CsvLoader.__init__">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.CsvLoader.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span> <span class="o">=</span> <span class="n">delimiter</span></div>
+
+
+<div class="viewcode-block" id="CsvLoader.load_array">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.CsvLoader.load_array">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load CSV file as a 2D array.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the CSV file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`ArrayLike`: 2D list of float values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span>
+                <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="n">delimiter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span>
+            <span class="p">)</span>
+        <span class="p">]</span></div>
+</div>
+
+
+<div class="viewcode-block" id="JsonLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.JsonLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">JsonLoader</span><span class="p">(</span><span class="n">PreKeyLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;JSON file loader for array data.</span>
+
+<span class="sd">    Loads array data from JSON files. The JSON file should contain a single</span>
+<span class="sd">    array or nested array structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="JsonLoader.load_array">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.JsonLoader.load_array">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load JSON file as an array.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the JSON file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`ArrayLike`: The parsed JSON array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+            <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="NpyLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.NpyLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NpyLoader</span><span class="p">(</span><span class="n">PreKeyLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NumPy NPY file loader for array data.</span>
+
+<span class="sd">    Loads NumPy arrays from NPY files. Only supports single arrays,</span>
+<span class="sd">    not NPZ archives.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="NpyLoader.load_array">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.NpyLoader.load_array">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load NPY file as a NumPy array.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the NPY file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`ArrayLike`: The loaded NumPy array.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            :exc:`DataFormatError`: If the file contains a mapping instead of a single array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DataFormatError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected a single array in NPY file at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">, got a mapping. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Use load_npy_multi() for multi-array files.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+</div>
+
+
+<div class="viewcode-block" id="NpzLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.NpzLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NpzLoader</span><span class="p">(</span><span class="n">ContainerLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NumPy NPZ archive loader for multiple keyed arrays.</span>
+
+<span class="sd">    Loads multiple NumPy arrays from NPZ archive files, where each array</span>
+<span class="sd">    is associated with a string key.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="NpzLoader.load_mapping">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.NpzLoader.load_mapping">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load NPZ archive as a mapping of arrays.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the NPZ file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:</span>
+<span class="sd">                Mapping from array names to NumPy arrays.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            :exc:`DataFormatError`: If the file is not a valid NPZ archive.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">npz</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">npyio</span><span class="o">.</span><span class="n">NpzFile</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_mapping</span><span class="p">(</span><span class="n">npz</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">npyio</span><span class="o">.</span><span class="n">NpzFile</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="n">DataFormatError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected a NPZ file at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">npz</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Ensure the file is a valid NumPy .npz archive.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">npz</span></div>
+</div>
+
+
+<div class="viewcode-block" id="TorchLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.TorchLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TorchLoader</span><span class="p">(</span><span class="n">PreKeyLoader</span><span class="p">,</span> <span class="n">ContainerLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PyTorch file loader for tensors and tensor dictionaries.</span>
+
+<span class="sd">    Supports loading both single tensors (PreKeyLoader) and dictionaries</span>
+<span class="sd">    of tensors (ContainerLoader) from PyTorch .pt/.pth files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TorchLoader.load_array">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.TorchLoader.load_array">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load PyTorch file as a single tensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the PyTorch file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`ArrayLike`: The loaded :class:`torch.Tensor`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            :exc:`DataFormatError`: If the file does not contain a single tensor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DataFormatError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected a Tensor in Torch file at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Use load_array_dict() for dictionary-based Torch files.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="TorchLoader.load_mapping">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.TorchLoader.load_mapping">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load PyTorch file as a mapping of tensors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the PyTorch file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:</span>
+<span class="sd">                Mapping from keys to tensors.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            :exc:`DataFormatError`: If the file does not contain a valid mapping.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="n">DataFormatError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected a dict of str to ArrayLike in Torch file at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Use load_array() for single tensor files.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+</div>
+
+
+<div class="viewcode-block" id="SafetensorsLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.SafetensorsLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SafetensorsLoader</span><span class="p">(</span><span class="n">ContainerLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;SafeTensors file loader for secure tensor storage.</span>
+
+<span class="sd">    Loads tensors from SafeTensors format files, which provide safe</span>
+<span class="sd">    and efficient tensor serialization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SafetensorsLoader.load_mapping">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.SafetensorsLoader.load_mapping">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load SafeTensors file as a mapping of tensors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the SafeTensors file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:</span>
+<span class="sd">                Mapping from keys to tensors.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            :exc:`DataFormatError`: If the file does not contain a valid mapping.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">safetensors</span><span class="o">.</span><span class="n">torch</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="n">DataFormatError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected a dict of str to ArrayLike in Safetensors file at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Ensure the file contains a valid safetensors mapping.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+</div>
+
+
+<div class="viewcode-block" id="ZarrLoader">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.ZarrLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ZarrLoader</span><span class="p">(</span><span class="n">ContainerLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Zarr group loader for chunked array storage.</span>
+
+<span class="sd">    Loads arrays from Zarr groups, which support efficient chunked</span>
+<span class="sd">    storage and compression for large datasets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ZarrLoader.load_mapping">
+<a class="viewcode-back" href="../../../cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.ZarrLoader.load_mapping">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load Zarr group as a mapping of arrays.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (:class:`PathLike`): Path to the Zarr group directory.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:</span>
+<span class="sd">                Mapping from array names to :class:`zarr.Array` objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">zarr</span><span class="o">.</span><span class="n">open_group</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">array</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">arrays</span><span class="p">()</span>
+        <span class="p">}</span></div>
+</div>
+
+
+<span class="nb">type</span> <span class="n">PrekeyLoadFunc</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">]</span>
+<span class="nb">type</span> <span class="n">ContainerLoadFunc</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]]</span>
+
+<span class="n">prekey_loaders</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PrekeyLoadFunc</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;.csv&quot;</span><span class="p">:</span> <span class="n">CsvLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_array</span><span class="p">,</span>
+    <span class="s2">&quot;.tsv&quot;</span><span class="p">:</span> <span class="n">CsvLoader</span><span class="p">(</span><span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load_array</span><span class="p">,</span>
+    <span class="s2">&quot;.ssv&quot;</span><span class="p">:</span> <span class="n">CsvLoader</span><span class="p">(</span><span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load_array</span><span class="p">,</span>
+    <span class="s2">&quot;.json&quot;</span><span class="p">:</span> <span class="n">JsonLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_array</span><span class="p">,</span>
+    <span class="s2">&quot;.npy&quot;</span><span class="p">:</span> <span class="n">NpyLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_array</span><span class="p">,</span>
+    <span class="s2">&quot;.pt&quot;</span><span class="p">:</span> <span class="n">TorchLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_array</span><span class="p">,</span>
+    <span class="s2">&quot;.pth&quot;</span><span class="p">:</span> <span class="n">TorchLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_array</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">container_loaders</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ContainerLoadFunc</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;.npz&quot;</span><span class="p">:</span> <span class="n">NpzLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_mapping</span><span class="p">,</span>
+    <span class="s2">&quot;.pt&quot;</span><span class="p">:</span> <span class="n">TorchLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_mapping</span><span class="p">,</span>
+    <span class="s2">&quot;.pth&quot;</span><span class="p">:</span> <span class="n">TorchLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_mapping</span><span class="p">,</span>
+    <span class="s2">&quot;.safetensors&quot;</span><span class="p">:</span> <span class="n">SafetensorsLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_mapping</span><span class="p">,</span>
+    <span class="s2">&quot;.zarr&quot;</span><span class="p">:</span> <span class="n">ZarrLoader</span><span class="p">()</span><span class="o">.</span><span class="n">load_mapping</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, plumiume.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

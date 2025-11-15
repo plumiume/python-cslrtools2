@@ -23,11 +23,11 @@ and various output formats through the collector system.
 
 Example:
     Run pose estimation on a video::
-    
+
         $ lmpipe pose mediapipe --model-size lite input.mp4 output/
-        
+
     Run holistic estimation with multiple collectors::
-    
+
         $ lmpipe holistic mediapipe --csv --show input.mp4 output/
 """
 

@@ -25,4 +25,3 @@ class BaseROI(ABC):
     def apply_world_coords[K: str](
         self, local_coords: Mapping[K, NDArrayFloat]
         ) -> Mapping[K, NDArrayFloat | None]: ...
-

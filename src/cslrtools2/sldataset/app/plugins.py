@@ -63,7 +63,7 @@ def loader() -> dict[str, PluginInfo[Any]]:
                 f"Plugin entry point {ep.name} does not return a tuple of length 2. "
                 f"Expected (NamespaceWrapper, processor_callable), got {len(info)} elements."
             )
-    
+
         nswrapper, processor = info
 
         if not _is_nswrapper(nswrapper):
@@ -71,13 +71,13 @@ def loader() -> dict[str, PluginInfo[Any]]:
                 f"First element of plugin entry point {ep.name} is not a NamespaceWrapper. "
                 f"Got {type(nswrapper)}."
             )
-        
+
         if not _is_processor(processor):
             raise PluginError(
                 f"Second element of plugin entry point {ep.name} is not a processor callable. "
                 f"Expected a Callable[[T], None], got {type(processor)}."
             )
-        
+
         plugins[ep.name] = PluginInfo(
             name=ep.name,
             nswrapper=nswrapper,

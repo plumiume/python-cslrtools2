@@ -108,9 +108,9 @@ class TestEstimatorABC:
         """Test that process returns a valid ProcessResult."""
         estimator = DummyEstimator()
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
-        
+
         result = estimator.process(frame)
-        
+
         assert isinstance(result, ProcessResult)
         assert result.frame_id == 0
         assert "test" in result.headers
@@ -126,14 +126,14 @@ class TestProcessResult:
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
         headers = {"test": np.array(["x", "y"], dtype=str)}
         landmarks = {"test": np.array([[1.0, 2.0]], dtype=np.float32)}
-        
+
         result = ProcessResult(
             frame_id=42,
             headers=headers,
             landmarks=landmarks,
             annotated_frame=frame,
         )
-        
+
         assert result.frame_id == 42
         assert "test" in result.headers
         assert "test" in result.landmarks
@@ -151,14 +151,14 @@ class TestProcessResult:
             "pose": np.array([[1.0, 2.0, 3.0]], dtype=np.float32),
             "hand": np.array([[4.0, 5.0]], dtype=np.float32),
         }
-        
+
         result = ProcessResult(
             frame_id=0,
             headers=headers,
             landmarks=landmarks,
             annotated_frame=frame,
         )
-        
+
         assert len(result.headers) == 2
         assert len(result.landmarks) == 2
         assert "pose" in result.headers

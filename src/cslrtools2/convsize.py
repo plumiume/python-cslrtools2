@@ -31,12 +31,12 @@ def conv_size(
     ) -> Tensor:
     """Calculate the output size of a convolution operation.
 
-    Computes the spatial dimensions of the output feature map for a 
+    Computes the spatial dimensions of the output feature map for a
     convolution layer given the input size and convolution parameters.
 
     Args:
-        size (`Tensor`): Input spatial dimensions tensor. Shape: ``(N,)`` 
-            where N is the number of spatial dimensions (typically 2 for 
+        size (`Tensor`): Input spatial dimensions tensor. Shape: ``(N,)``
+            where N is the number of spatial dimensions (typically 2 for
             height and width).
         kernel_size (`Tensor`): Convolution kernel size tensor. Shape: ``(N,)``.
         stride (`Tensor`): Stride of the convolution. Shape: ``(N,)``.
@@ -44,13 +44,13 @@ def conv_size(
         dilation (`Tensor`): Spacing between kernel elements. Shape: ``(N,)``.
 
     Returns:
-        :class:`Tensor`: Output spatial dimensions. Shape: ``(N,)`` matching the 
+        :class:`Tensor`: Output spatial dimensions. Shape: ``(N,)`` matching the
             input size tensor shape.
 
     Note:
         This function implements the standard convolution output size formula used
         by :class:`torch.nn.Conv2d` and :class:`torch.nn.Conv3d`:
-        
+
         .. math::
             \\text{output} = \\left\\lfloor \\frac{\\text{input} + 2 \\times \\text{padding} - \\text{dilation} \\times (\\text{kernel} - 1) - 1}{\\text{stride}} \\right\\rfloor + 1
 
@@ -94,28 +94,28 @@ def conv_transpose_size(
     ) -> Tensor:
     """Calculate the output size of a transposed convolution operation.
 
-    Computes the spatial dimensions of the output feature map for a 
-    transposed convolution (deconvolution) layer given the input size 
+    Computes the spatial dimensions of the output feature map for a
+    transposed convolution (deconvolution) layer given the input size
     and convolution parameters.
 
     Args:
-        size (`Tensor`): Input spatial dimensions tensor. Shape: ``(N,)`` 
+        size (`Tensor`): Input spatial dimensions tensor. Shape: ``(N,)``
             where N is the number of spatial dimensions.
         kernel_size (`Tensor`): Convolution kernel size tensor. Shape: ``(N,)``.
         stride (`Tensor`): Stride of the transposed convolution. Shape: ``(N,)``.
         padding (`Tensor`): Padding applied to the input. Shape: ``(N,)``.
-        output_padding (`Tensor`): Additional size added to one side of 
+        output_padding (`Tensor`): Additional size added to one side of
             the output shape. Shape: ``(N,)``.
         dilation (`Tensor`): Spacing between kernel elements. Shape: ``(N,)``.
 
     Returns:
-        :class:`Tensor`: Output spatial dimensions. Shape: ``(N,)`` matching 
+        :class:`Tensor`: Output spatial dimensions. Shape: ``(N,)`` matching
             the input size tensor shape.
 
     Note:
         This function implements the transposed convolution output size formula
         used by :class:`torch.nn.ConvTranspose2d` and :class:`torch.nn.ConvTranspose3d`:
-        
+
         .. math::
             \\text{output} = (\\text{input} - 1) \\times \\text{stride} - 2 \\times \\text{padding} + \\text{dilation} \\times (\\text{kernel} - 1) + \\text{output\\_padding} + 1
 
@@ -139,7 +139,7 @@ def conv_transpose_size(
 
             >>> import torch.nn as nn
             >>> deconv = nn.ConvTranspose2d(
-            ...     64, 3, kernel_size=3, stride=2, 
+            ...     64, 3, kernel_size=3, stride=2,
             ...     padding=1, output_padding=1
             ... )
             >>> x = torch.randn(1, 64, 112, 112)

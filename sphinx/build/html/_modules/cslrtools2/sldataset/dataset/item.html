@@ -1,0 +1,452 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cslrtools2.sldataset.dataset.item &mdash; cslrtools2 0.1.dev54+gb18e68278.d20251115 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=9bb56542"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            cslrtools2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">cslrtools2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cslrtools2.html">cslrtools2 package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/ikegami-yukino/python-cslrtools2">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/cslrtools2/">PyPI Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">cslrtools2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cslrtools2.sldataset.dataset.item</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cslrtools2.sldataset.dataset.item</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2025 cslrtools2 contributors</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Dataset item classes for sign language datasets.</span>
+
+<span class="sd">This module provides the SLDatasetItem class and related utilities for</span>
+<span class="sd">representing individual samples in a sign language dataset.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span> <span class="c1"># pyright: ignore[reportWildcardImportFromLibrary]</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">zarr.api.synchronous</span><span class="w"> </span><span class="kn">import</span> <span class="n">StoreLike</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">StoreLike</span> <span class="o">=</span> <span class="nb">object</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...typings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">PathLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">sldataset_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_tensor</span><span class="p">,</span> <span class="n">get_group</span><span class="p">,</span> <span class="n">get_array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..array_loader</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">prekey_loaders</span><span class="p">,</span> <span class="n">PrekeyLoadFunc</span><span class="p">,</span>
+    <span class="n">container_loaders</span><span class="p">,</span> <span class="n">ContainerLoadFunc</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.holder</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLKeyHolder</span>
+
+
+<span class="c1">######## Type Aliases ########</span>
+
+<span class="nb">type</span> <span class="n">DefaultSLDatasetItem</span><span class="p">[</span>
+    <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">]</span> <span class="o">=</span> <span class="n">SLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+
+<span class="nb">type</span> <span class="n">TensorSLDatasetItem</span><span class="p">[</span>
+    <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">]</span> <span class="o">=</span> <span class="n">SLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]</span>
+
+<span class="nb">type</span> <span class="n">ZarrSLDatasetItem</span><span class="p">[</span>
+    <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">]</span> <span class="o">=</span> <span class="n">SLDatasetItem</span><span class="p">[</span>
+    <span class="n">Kvid</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span><span class="p">,</span>
+    <span class="n">Klm</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span><span class="p">,</span>
+    <span class="n">Ktgt</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span>
+<span class="p">]</span>
+
+
+<span class="c1">######## Key Holder Class ########</span>
+
+<span class="c1"># Note: SLKeyHolder is now defined in holder.py and imported above</span>
+<span class="c1"># This section is kept for backward compatibility documentation</span>
+
+
+<span class="c1">######## Item Class ########</span>
+
+<div class="viewcode-block" id="SLDatasetItem">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SLDatasetItem</span><span class="p">[</span>
+    <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Vvid</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Vlm</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Vtgt</span><span class="p">:</span> <span class="n">ArrayLike</span>
+    <span class="p">](</span><span class="n">SLKeyHolder</span><span class="p">[</span><span class="n">Never</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Single item from a sign language dataset.</span>
+
+<span class="sd">    Contains video data, landmark coordinates, and target labels for</span>
+<span class="sd">    one sample in the dataset. Supports conversion to different devices</span>
+<span class="sd">    for PyTorch training.</span>
+
+<span class="sd">    Type Parameters:</span>
+<span class="sd">        Kvid: String type for video data keys.</span>
+<span class="sd">        Vvid: Array-like type for video data values.</span>
+<span class="sd">        Klm: String type for landmark data keys.</span>
+<span class="sd">        Vlm: Array-like type for landmark data values.</span>
+<span class="sd">        Ktgt: String type for target/label keys.</span>
+<span class="sd">        Vtgt: Array-like type for target/label values.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        videos (:class:`~typing.Mapping`\\[:obj:`Kvid`, :obj:`Vvid`\\]):</span>
+<span class="sd">            Video data mapping. Each value has shape ``[N, T, H, W, C]``</span>
+<span class="sd">            where N is batch size, T is time, H is height, W is width, C is channels.</span>
+<span class="sd">        landmarks (:class:`~typing.Mapping`\\[:obj:`Klm`, :obj:`Vlm`\\]):</span>
+<span class="sd">            Landmark data mapping. Each value has shape ``[N, T, V, A]``</span>
+<span class="sd">            where N is batch size, T is time, V is vertices, A is attributes.</span>
+<span class="sd">        targets (:class:`~typing.Mapping`\\[:obj:`Ktgt`, :obj:`Vtgt`\\]):</span>
+<span class="sd">            Target/label data mapping. Each value has shape ``[N, S]``</span>
+<span class="sd">            where N is batch size, S is sequence length.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SLDatasetItem.__init__">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">videos</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Vvid</span><span class="p">],</span> <span class="c1"># (Kvid, [N, T, H, W, C])</span>
+        <span class="n">landmarks</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Klm</span><span class="p">,</span> <span class="n">Vlm</span><span class="p">],</span> <span class="c1"># (Klm, [N, T, V, A])</span>
+        <span class="n">targets</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Ktgt</span><span class="p">,</span> <span class="n">Vtgt</span><span class="p">],</span> <span class="c1"># (Ktgt, [N, S])</span>
+        <span class="p">):</span> <span class="c1"># N = 1 or Batch size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">videos</span> <span class="o">=</span> <span class="n">videos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">landmarks</span> <span class="o">=</span> <span class="n">landmarks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span>
+
+        <span class="n">sldataset_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Initialized SLDatasetItem with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">videos</span><span class="p">)</span><span class="si">}</span><span class="s2"> videos, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">landmarks</span><span class="p">)</span><span class="si">}</span><span class="s2"> landmark types, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span><span class="si">}</span><span class="s2"> targets&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SLDatasetItem.to">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.to">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move all data to the specified device.</span>
+
+<span class="sd">        Converts all video, landmark, and target data to :class:`torch.Tensor`</span>
+<span class="sd">        and moves them to the specified :class:`torch.device`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            device (:class:`torch.device`): Target device (e.g., ``&#39;cuda&#39;``, ``&#39;cpu&#39;``).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`TensorSLDatasetItem`\\[:obj:`Kvid`, :obj:`Klm`, :obj:`Ktgt`\\]:</span>
+<span class="sd">                New dataset item with all data on the specified device.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">SLDatasetItem</span><span class="p">(</span>
+            <span class="n">videos</span><span class="o">=</span><span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">as_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">videos</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">},</span>
+            <span class="n">landmarks</span><span class="o">=</span><span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">as_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">landmarks</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">},</span>
+            <span class="n">targets</span><span class="o">=</span><span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">as_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SLDatasetItem.to_zarr">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.to_zarr">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_zarr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_or_group</span><span class="p">:</span> <span class="n">StoreLike</span> <span class="o">|</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save item to Zarr storage.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            store_or_group: Zarr store path or group object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Zarr group containing the saved item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">store_or_group</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+            <span class="n">item_group</span> <span class="o">=</span> <span class="n">store_or_group</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">item_group</span> <span class="o">=</span> <span class="n">zarr</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">store_or_group</span><span class="p">)</span>
+
+        <span class="n">video_group</span> <span class="o">=</span> <span class="n">item_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;videos&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">kvid</span><span class="p">,</span> <span class="n">vvid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">videos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">video_group</span><span class="o">.</span><span class="n">create_array</span><span class="p">(</span>
+                <span class="n">kvid</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vvid</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">landmark_group</span> <span class="o">=</span> <span class="n">item_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;landmarks&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">klm</span><span class="p">,</span> <span class="n">vlm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">landmarks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">landmark_group</span><span class="o">.</span><span class="n">create_array</span><span class="p">(</span>
+                <span class="n">klm</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vlm</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">target_group</span> <span class="o">=</span> <span class="n">item_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;targets&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ktgt</span><span class="p">,</span> <span class="n">vtgt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">target_group</span><span class="o">.</span><span class="n">create_array</span><span class="p">(</span>
+                <span class="n">ktgt</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vtgt</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">item_group</span></div>
+
+
+<div class="viewcode-block" id="SLDatasetItem.from_file_system">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.from_file_system">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_file_system</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">,</span>
+        <span class="n">extra_prekey_load_funcs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PrekeyLoadFunc</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">extra_container_load_funcs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ContainerLoadFunc</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load item from file system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path: Path to the item directory.</span>
+<span class="sd">            extra_prekey_load_funcs: Additional per-key file loaders.</span>
+<span class="sd">            extra_container_load_funcs: Additional container file loaders.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Loaded dataset item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">prekey_load_funcs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">**</span><span class="n">prekey_loaders</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">extra_prekey_load_funcs</span>
+        <span class="p">}</span>
+        <span class="n">container_load_funcs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">**</span><span class="n">container_loaders</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">extra_container_load_funcs</span>
+        <span class="p">}</span>
+
+        <span class="n">videos</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_load_category_from_fs</span><span class="p">(</span>
+            <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;videos&quot;</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">is_video_key</span><span class="p">,</span>
+            <span class="n">prekey_load_funcs</span><span class="p">,</span>
+            <span class="n">container_load_funcs</span>
+        <span class="p">)</span>
+        <span class="n">landmarks</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_load_category_from_fs</span><span class="p">(</span>
+            <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;landmarks&quot;</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">is_landmark_key</span><span class="p">,</span>
+            <span class="n">prekey_load_funcs</span><span class="p">,</span>
+            <span class="n">container_load_funcs</span>
+        <span class="p">)</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_load_category_from_fs</span><span class="p">(</span>
+            <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;targets&quot;</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">is_target_key</span><span class="p">,</span>
+            <span class="n">prekey_load_funcs</span><span class="p">,</span>
+            <span class="n">container_load_funcs</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">SLDatasetItem</span><span class="p">(</span>
+            <span class="n">videos</span><span class="o">=</span><span class="n">videos</span><span class="p">,</span>
+            <span class="n">landmarks</span><span class="o">=</span><span class="n">landmarks</span><span class="p">,</span>
+            <span class="n">targets</span><span class="o">=</span><span class="n">targets</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_category_from_fs</span><span class="p">[</span><span class="n">K</span><span class="p">:</span> <span class="nb">str</span><span class="p">](</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">path_without_suffix</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">is_key_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">object</span><span class="p">],</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">K</span><span class="p">]],</span>
+        <span class="n">prekey_load_funcs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PrekeyLoadFunc</span><span class="p">],</span>
+        <span class="n">container_load_funcs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ContainerLoadFunc</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">K</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load category data from file system.</span>
+
+<span class="sd">        Supports both per-key files (one file per key) and container files</span>
+<span class="sd">        (all keys in one file).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">K</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">path_without_suffix</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path_without_suffix</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="c1"># Load pre-key files</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">path_without_suffix</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                    <span class="k">continue</span>
+                <span class="n">suffix</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">suffix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">prekey_load_funcs</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">stem</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_key_func</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">prekey_load_funcs</span><span class="p">[</span><span class="n">suffix</span><span class="p">](</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Load container files</span>
+            <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">container_load_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">path_with_suffix</span> <span class="o">=</span> <span class="n">path_without_suffix</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">path_with_suffix</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">path_with_suffix</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                    <span class="k">continue</span>
+                <span class="n">mapping</span> <span class="o">=</span> <span class="n">container_load_funcs</span><span class="p">[</span><span class="n">ext</span><span class="p">](</span><span class="n">path_with_suffix</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">karr</span><span class="p">,</span> <span class="n">varr</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">karr</span><span class="p">,</span> <span class="n">varr</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">is_key_func</span><span class="p">(</span><span class="n">karr</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="SLDatasetItem.from_zarr">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.from_zarr">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_zarr</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ZarrSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load item from Zarr group.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            group: Zarr group containing the item data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Loaded dataset item with Zarr arrays.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">videos</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_load_category_from_zarr</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">is_video_key</span><span class="p">,</span>
+            <span class="n">get_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s2">&quot;videos&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">landmarks</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_load_category_from_zarr</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">is_landmark_key</span><span class="p">,</span>
+            <span class="n">get_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s2">&quot;landmarks&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_load_category_from_zarr</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">is_target_key</span><span class="p">,</span>
+            <span class="n">get_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s2">&quot;targets&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">SLDatasetItem</span><span class="p">(</span>
+            <span class="n">videos</span><span class="o">=</span><span class="n">videos</span><span class="p">,</span>
+            <span class="n">landmarks</span><span class="o">=</span><span class="n">landmarks</span><span class="p">,</span>
+            <span class="n">targets</span><span class="o">=</span><span class="n">targets</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_category_from_zarr</span><span class="p">[</span><span class="n">K</span><span class="p">:</span> <span class="nb">str</span><span class="p">](</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">is_key_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">object</span><span class="p">],</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">K</span><span class="p">]],</span>
+        <span class="n">group</span><span class="p">:</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">K</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load category data from Zarr group.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">karr</span><span class="p">:</span> <span class="n">get_array</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">karr</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">karr</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">array_keys</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">is_key_func</span><span class="p">(</span><span class="n">karr</span><span class="p">)</span>
+        <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, plumiume.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

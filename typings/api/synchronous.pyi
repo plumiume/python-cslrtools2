@@ -1,24 +1,28 @@
 from typing import TypeAlias, Any, Literal, Iterable
 from typing_extensions import deprecated
 from pathlib import Path
-from fsspec.mapping import FSMap as _FSMap
+from fsspec.mapping import FSMap as _FSMap # pyright: ignore[reportMissingTypeStubs]
 
 import numpy as np
 import numpy.typing as npt
 
 from zarr import Group
 from zarr.api.asynchronous import ArrayLike
-from zarr.storage._common import Store, StorePath, Buffer
+from zarr.abc.store import Store
+from zarr.storage._common import StorePath
+from zarr.core.buffer.core import Buffer
 from zarr.abc.numcodec import Numcodec
 from zarr.abc.codec import Codec
 from zarr.core.common import (
-    AccessModeLiteral, ZarrFormat, JSON, Any, MemoryOrder, DimensionNames,
+    AccessModeLiteral, ZarrFormat, JSON, MemoryOrder, DimensionNames,
     ShapeLike
 )
 from zarr.core.array import (
-    Array, NDArrayLike, CompressorLike, DEFAULT_FILL_VALUE, ShardsLike,
-    FiltersLike, CompressorsLike, SerializerLike, ChunkKeyEncodingLike
+    Array, CompressorLike, DEFAULT_FILL_VALUE, ShardsLike,
+    FiltersLike, CompressorsLike, SerializerLike
 )
+from zarr.core.buffer.core import NDArrayLike
+from zarr.core.chunk_key_encodings import ChunkKeyEncodingLike
 from zarr.core.array_spec import ArrayConfigLike
 from zarr.core.buffer.core import NDArrayLikeOrScalar
 from zarr.core.chunk_key_encodings import ChunkKeyEncoding

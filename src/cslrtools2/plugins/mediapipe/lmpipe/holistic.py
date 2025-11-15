@@ -25,7 +25,7 @@ from mediapipe.python.solutions.holistic import ( # pyright: ignore[reportMissin
 from mediapipe.tasks.python.vision.core.vision_task_running_mode import VisionTaskRunningMode # pyright: ignore[reportMissingTypeStubs]
 from mediapipe.tasks.python.components.containers.landmark import ( # pyright: ignore[reportMissingTypeStubs]
     Landmark, NormalizedLandmark
-) 
+)
 
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
 from ....exceptions import ValidationError
@@ -186,4 +186,3 @@ class MediaPipeHolisticEstimator(
 
         # TODO: Implement holistic annotation
         return frame_src
-

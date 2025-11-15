@@ -5,6 +5,7 @@ __pycache__/
 dist/
 wheels/
 *.egg-info
+src/cslrtools2/_version.py
 
 # Virtual environments
 .venv

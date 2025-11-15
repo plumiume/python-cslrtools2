@@ -1,0 +1,494 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cslrtools2.convsize &mdash; cslrtools2 0.1.dev54+gb18e68278.d20251115 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=9bb56542"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            cslrtools2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">cslrtools2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cslrtools2.html">cslrtools2 package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/ikegami-yukino/python-cslrtools2">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/cslrtools2/">PyPI Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">cslrtools2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cslrtools2.convsize</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cslrtools2.convsize</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2025 cslrtools2 contributors</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="c1"># pyright: reportUnnecessaryIsInstance=false</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">overload</span><span class="p">,</span>
+    <span class="n">Sequence</span>
+<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">Size</span>
+
+<div class="viewcode-block" id="conv_size">
+<a class="viewcode-back" href="../../cslrtools2.html#cslrtools2.convsize.conv_size">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">conv_size</span><span class="p">(</span>
+    <span class="n">size</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">kernel_size</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">stride</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">dilation</span><span class="p">:</span> <span class="n">Tensor</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the output size of a convolution operation.</span>
+
+<span class="sd">    Computes the spatial dimensions of the output feature map for a</span>
+<span class="sd">    convolution layer given the input size and convolution parameters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size (`Tensor`): Input spatial dimensions tensor. Shape: ``(N,)``</span>
+<span class="sd">            where N is the number of spatial dimensions (typically 2 for</span>
+<span class="sd">            height and width).</span>
+<span class="sd">        kernel_size (`Tensor`): Convolution kernel size tensor. Shape: ``(N,)``.</span>
+<span class="sd">        stride (`Tensor`): Stride of the convolution. Shape: ``(N,)``.</span>
+<span class="sd">        padding (`Tensor`): Padding applied to the input. Shape: ``(N,)``.</span>
+<span class="sd">        dilation (`Tensor`): Spacing between kernel elements. Shape: ``(N,)``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`Tensor`: Output spatial dimensions. Shape: ``(N,)`` matching the</span>
+<span class="sd">            input size tensor shape.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This function implements the standard convolution output size formula used</span>
+<span class="sd">        by :class:`torch.nn.Conv2d` and :class:`torch.nn.Conv3d`:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\text{output} = \\left\\lfloor \\frac{\\text{input} + 2 \\times \\text{padding} - \\text{dilation} \\times (\\text{kernel} - 1) - 1}{\\text{stride}} \\right\\rfloor + 1</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        Calculate output size for a 2D convolution::</span>
+
+<span class="sd">            &gt;&gt;&gt; import torch</span>
+<span class="sd">            &gt;&gt;&gt; from cslrtools2.convsize import conv_size</span>
+<span class="sd">            &gt;&gt;&gt; output = conv_size(</span>
+<span class="sd">            ...     size=torch.tensor([224, 224]),</span>
+<span class="sd">            ...     kernel_size=torch.tensor([3, 3]),</span>
+<span class="sd">            ...     stride=torch.tensor([2, 2]),</span>
+<span class="sd">            ...     padding=torch.tensor([1, 1]),</span>
+<span class="sd">            ...     dilation=torch.tensor([1, 1])</span>
+<span class="sd">            ... )</span>
+<span class="sd">            &gt;&gt;&gt; output</span>
+<span class="sd">            tensor([112, 112])</span>
+
+<span class="sd">        Verify with PyTorch :class:`torch.nn.Conv2d` layer::</span>
+
+<span class="sd">            &gt;&gt;&gt; import torch.nn as nn</span>
+<span class="sd">            &gt;&gt;&gt; conv = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1)</span>
+<span class="sd">            &gt;&gt;&gt; x = torch.randn(1, 3, 224, 224)</span>
+<span class="sd">            &gt;&gt;&gt; y = conv(x)</span>
+<span class="sd">            &gt;&gt;&gt; y.shape</span>
+<span class="sd">            torch.Size([1, 64, 112, 112])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">floor_divide</span><span class="p">(</span>
+        <span class="n">size</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span> <span class="o">-</span> <span class="n">dilation</span> <span class="o">*</span> <span class="p">(</span><span class="n">kernel_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">stride</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="conv_transpose_size">
+<a class="viewcode-back" href="../../cslrtools2.html#cslrtools2.convsize.conv_transpose_size">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">conv_transpose_size</span><span class="p">(</span>
+    <span class="n">size</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">kernel_size</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">stride</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">output_padding</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">dilation</span><span class="p">:</span> <span class="n">Tensor</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the output size of a transposed convolution operation.</span>
+
+<span class="sd">    Computes the spatial dimensions of the output feature map for a</span>
+<span class="sd">    transposed convolution (deconvolution) layer given the input size</span>
+<span class="sd">    and convolution parameters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size (`Tensor`): Input spatial dimensions tensor. Shape: ``(N,)``</span>
+<span class="sd">            where N is the number of spatial dimensions.</span>
+<span class="sd">        kernel_size (`Tensor`): Convolution kernel size tensor. Shape: ``(N,)``.</span>
+<span class="sd">        stride (`Tensor`): Stride of the transposed convolution. Shape: ``(N,)``.</span>
+<span class="sd">        padding (`Tensor`): Padding applied to the input. Shape: ``(N,)``.</span>
+<span class="sd">        output_padding (`Tensor`): Additional size added to one side of</span>
+<span class="sd">            the output shape. Shape: ``(N,)``.</span>
+<span class="sd">        dilation (`Tensor`): Spacing between kernel elements. Shape: ``(N,)``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`Tensor`: Output spatial dimensions. Shape: ``(N,)`` matching</span>
+<span class="sd">            the input size tensor shape.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This function implements the transposed convolution output size formula</span>
+<span class="sd">        used by :class:`torch.nn.ConvTranspose2d` and :class:`torch.nn.ConvTranspose3d`:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\text{output} = (\\text{input} - 1) \\times \\text{stride} - 2 \\times \\text{padding} + \\text{dilation} \\times (\\text{kernel} - 1) + \\text{output\\_padding} + 1</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        Calculate output size for a 2D transposed convolution::</span>
+
+<span class="sd">            &gt;&gt;&gt; import torch</span>
+<span class="sd">            &gt;&gt;&gt; from cslrtools2.convsize import conv_transpose_size</span>
+<span class="sd">            &gt;&gt;&gt; output = conv_transpose_size(</span>
+<span class="sd">            ...     size=torch.tensor([112, 112]),</span>
+<span class="sd">            ...     kernel_size=torch.tensor([3, 3]),</span>
+<span class="sd">            ...     stride=torch.tensor([2, 2]),</span>
+<span class="sd">            ...     padding=torch.tensor([1, 1]),</span>
+<span class="sd">            ...     output_padding=torch.tensor([1, 1]),</span>
+<span class="sd">            ...     dilation=torch.tensor([1, 1])</span>
+<span class="sd">            ... )</span>
+<span class="sd">            &gt;&gt;&gt; output</span>
+<span class="sd">            tensor([224, 224])</span>
+
+<span class="sd">        Verify with PyTorch :class:`torch.nn.ConvTranspose2d` layer::</span>
+
+<span class="sd">            &gt;&gt;&gt; import torch.nn as nn</span>
+<span class="sd">            &gt;&gt;&gt; deconv = nn.ConvTranspose2d(</span>
+<span class="sd">            ...     64, 3, kernel_size=3, stride=2,</span>
+<span class="sd">            ...     padding=1, output_padding=1</span>
+<span class="sd">            ... )</span>
+<span class="sd">            &gt;&gt;&gt; x = torch.randn(1, 64, 112, 112)</span>
+<span class="sd">            &gt;&gt;&gt; y = deconv(x)</span>
+<span class="sd">            &gt;&gt;&gt; y.shape</span>
+<span class="sd">            torch.Size([1, 3, 224, 224])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">stride</span>
+        <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span>
+        <span class="o">+</span> <span class="n">dilation</span> <span class="o">*</span> <span class="p">(</span><span class="n">kernel_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">output_padding</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">)</span></div>
+
+
+<span class="n">_ConvNd</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_ConvNd&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv1d</span> <span class="o">|</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span> <span class="o">|</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv3d</span><span class="p">)</span>
+<span class="n">_ConvTransposeNd</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_ConvTransposeNd&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose1d</span> <span class="o">|</span> <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span> <span class="o">|</span> <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose3d</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConvSize">
+<a class="viewcode-back" href="../../cslrtools2.html#cslrtools2.convsize.ConvSize">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConvSize</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_ConvNd</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the output size of a convolutional layer.</span>
+
+<span class="sd">    A :class:`torch.nn.Module` that computes the spatial output dimensions</span>
+<span class="sd">    for convolutional layers (:class:`torch.nn.Conv1d`, :class:`torch.nn.Conv2d`,</span>
+<span class="sd">    :class:`torch.nn.Conv3d`) given their parameters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conv (_ConvNd): A convolutional layer instance (e.g., :class:`torch.nn.Conv1d`,</span>
+<span class="sd">            :class:`torch.nn.Conv2d`, :class:`torch.nn.Conv3d`).</span>
+
+<span class="sd">    Shape:</span>
+<span class="sd">        - Input: :class:`torch.Tensor` of shape ``(batch_size, channels, ...)``</span>
+<span class="sd">          or :class:`torch.Size`.</span>
+<span class="sd">        - Output: :class:`torch.Tensor` of shape ``(batch_size, out_channels, ...)``</span>
+<span class="sd">          or :class:`torch.Size`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        Calculate output size for a 2D convolutional layer::</span>
+
+<span class="sd">            &gt;&gt;&gt; import torch</span>
+<span class="sd">            &gt;&gt;&gt; import torch.nn as nn</span>
+<span class="sd">            &gt;&gt;&gt; from cslrtools2.convsize import ConvSize</span>
+<span class="sd">            &gt;&gt;&gt; conv = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1)</span>
+<span class="sd">            &gt;&gt;&gt; conv_size_calc = ConvSize(conv)</span>
+<span class="sd">            &gt;&gt;&gt; input_size = torch.tensor([224, 224])</span>
+<span class="sd">            &gt;&gt;&gt; output_size = conv_size_calc(input_size)</span>
+<span class="sd">            &gt;&gt;&gt; output_size</span>
+<span class="sd">            tensor([112, 112])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ConvSize.__init__">
+<a class="viewcode-back" href="../../cslrtools2.html#cslrtools2.convsize.ConvSize.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conv</span><span class="p">:</span> <span class="n">_ConvNd</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span> <span class="c1"># pyright: ignore[reportUnknownMemberType]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">stride</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">padding</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">dilation</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Size</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Size</span><span class="p">:</span> <span class="o">...</span>
+
+<div class="viewcode-block" id="ConvSize.forward">
+<a class="viewcode-back" href="../../cslrtools2.html#cslrtools2.convsize.ConvSize.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span> <span class="c1"># type: ignore[reportInconsistentOverload]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">arg</span><span class="p">:</span> <span class="n">Tensor</span> <span class="o">|</span> <span class="n">Size</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span> <span class="o">|</span> <span class="n">Size</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_tensor</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Size</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_size</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected Tensor or Size, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_forward_tensor</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">conv_size</span><span class="p">(</span>
+            <span class="n">size</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_forward_size</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Size</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Size</span><span class="p">:</span>
+
+        <span class="n">change_ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">)</span>
+        <span class="n">change_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="n">change_ndim</span><span class="p">:]</span>
+        <span class="n">unchange_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="n">change_ndim</span><span class="p">]</span>
+        <span class="n">changed_shape</span> <span class="o">=</span> <span class="n">Size</span><span class="p">(</span>
+            <span class="n">conv_size</span><span class="p">(</span>
+                <span class="c1"># pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">change_shape</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Size</span><span class="p">(</span><span class="n">unchange_shape</span> <span class="o">+</span> <span class="n">changed_shape</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConvTransposeSize">
+<a class="viewcode-back" href="../../cslrtools2.html#cslrtools2.convsize.ConvTransposeSize">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConvTransposeSize</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_ConvTransposeNd</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the output size of a transposed convolutional layer.</span>
+
+<span class="sd">    A :class:`torch.nn.Module` that computes the spatial output dimensions</span>
+<span class="sd">    for transposed convolutional layers (:class:`torch.nn.ConvTranspose1d`,</span>
+<span class="sd">    :class:`torch.nn.ConvTranspose2d`, :class:`torch.nn.ConvTranspose3d`)</span>
+<span class="sd">    given their parameters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conv (_ConvTransposeNd): A transposed convolutional layer instance</span>
+<span class="sd">            (e.g., :class:`torch.nn.ConvTranspose1d`, :class:`torch.nn.ConvTranspose2d`,</span>
+<span class="sd">            :class:`torch.nn.ConvTranspose3d`).</span>
+
+<span class="sd">    Shape:</span>
+<span class="sd">        - Input: :class:`torch.Tensor` of shape ``(batch_size, channels, ...)``</span>
+<span class="sd">          or :class:`torch.Size`.</span>
+<span class="sd">        - Output: :class:`torch.Tensor` of shape ``(batch_size, out_channels, ...)``</span>
+<span class="sd">          or :class:`torch.Size`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        Calculate output size for a 2D transposed convolutional layer::</span>
+
+<span class="sd">            &gt;&gt;&gt; import torch</span>
+<span class="sd">            &gt;&gt;&gt; import torch.nn as nn</span>
+<span class="sd">            &gt;&gt;&gt; from cslrtools2.convsize import ConvTransposeSize</span>
+<span class="sd">            &gt;&gt;&gt; deconv = nn.ConvTranspose2d(</span>
+<span class="sd">            ...     64, 3, kernel_size=3, stride=2,</span>
+<span class="sd">            ...     padding=1, output_padding=1</span>
+<span class="sd">            ... )</span>
+<span class="sd">            &gt;&gt;&gt; deconv_size_calc = ConvTransposeSize(deconv)</span>
+<span class="sd">            &gt;&gt;&gt; input_size = torch.tensor([112, 112])</span>
+<span class="sd">            &gt;&gt;&gt; output_size = deconv_size_calc(input_size)</span>
+<span class="sd">            &gt;&gt;&gt; output_size</span>
+<span class="sd">            tensor([224, 224])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ConvTransposeSize.__init__">
+<a class="viewcode-back" href="../../cslrtools2.html#cslrtools2.convsize.ConvTransposeSize.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conv</span><span class="p">:</span> <span class="n">_ConvTransposeNd</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span> <span class="c1"># pyright: ignore[reportUnknownMemberType]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">stride</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">padding</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_padding</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">output_padding</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">dilation</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Size</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Size</span><span class="p">:</span> <span class="o">...</span>
+
+<div class="viewcode-block" id="ConvTransposeSize.forward">
+<a class="viewcode-back" href="../../cslrtools2.html#cslrtools2.convsize.ConvTransposeSize.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span> <span class="c1"># type: ignore[reportInconsistentOverload]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">arg</span><span class="p">:</span> <span class="n">Tensor</span> <span class="o">|</span> <span class="n">Size</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span> <span class="o">|</span> <span class="n">Size</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_tensor</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Size</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_size</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected Tensor or Size, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_forward_tensor</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">conv_transpose_size</span><span class="p">(</span>
+            <span class="n">size</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_padding</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_forward_size</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Size</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Size</span><span class="p">:</span>
+
+        <span class="n">change_ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">)</span>
+        <span class="n">change_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="n">change_ndim</span><span class="p">:]</span>
+        <span class="n">unchange_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="n">change_ndim</span><span class="p">]</span>
+        <span class="n">changed_shape</span> <span class="o">=</span> <span class="n">Size</span><span class="p">(</span>
+            <span class="n">conv_transpose_size</span><span class="p">(</span>
+                <span class="c1"># pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">change_shape</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_padding</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Size</span><span class="p">(</span><span class="n">unchange_shape</span> <span class="o">+</span> <span class="n">changed_shape</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, plumiume.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

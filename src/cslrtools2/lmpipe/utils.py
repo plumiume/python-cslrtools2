@@ -40,13 +40,13 @@ __all__ = [
 
 def is_video_file(path: Path) -> bool:
     """Check if the given path is a video file.
-    
+
     Uses simple extension-based detection. For MIME type based detection,
     see :func:`is_video_ext_from_mimetype`.
-    
+
     Args:
         path (:class:`pathlib.Path`): Path to check.
-        
+
     Returns:
         :obj:`bool`: :obj:`True` if the path is a video file, :obj:`False` otherwise.
     """
@@ -61,17 +61,17 @@ def is_video_file(path: Path) -> bool:
 
 def is_images_dir(path: Path) -> bool:
     """Check if the given path is a directory containing image sequences.
-    
+
     Only checks the immediate children of the directory (non-recursive).
     Hidden files (starting with ``'.'``) are ignored.
-    
+
     Args:
         path (:class:`pathlib.Path`): Path to check.
-        
+
     Returns:
         :obj:`bool`: :obj:`True` if the path is a directory with image sequences,
             :obj:`False` otherwise.
-        
+
     Note:
         Future versions may support nested directory traversal and configurable
         extension sets.
@@ -87,13 +87,13 @@ def is_images_dir(path: Path) -> bool:
 
 def is_image_file(path: Path) -> bool:
     """Check if the given path is an image file.
-    
+
     Uses simple extension-based detection for common image formats.
     For MIME type based detection, see :func:`is_image_ext_from_mimetype`.
-    
+
     Args:
         path (:class:`pathlib.Path`): Path to check.
-        
+
     Returns:
         :obj:`bool`: :obj:`True` if the path is an image file, :obj:`False` otherwise.
     """
@@ -110,15 +110,15 @@ def is_image_file(path: Path) -> bool:
 
 def capture_to_frames(capture: cv2.VideoCapture) -> Iterable[MatLike]:
     """Convert OpenCV VideoCapture to frame iterator.
-    
+
     Yields frames sequentially until the video stream ends.
-    
+
     Args:
         capture (:class:`cv2.VideoCapture`): OpenCV :class:`cv2.VideoCapture` object.
 
     Yields:
         :class:`MatLike`: Individual frames as matrices.
-        
+
     Note:
         Future versions may add backpressure control and asynchronous frame generation.
     """
@@ -131,15 +131,15 @@ def capture_to_frames(capture: cv2.VideoCapture) -> Iterable[MatLike]:
 
 def seq_imgs_to_frames(src: Path) -> Iterable[MatLike]:
     """Convert image sequence directory to frame iterator.
-    
+
     Sorts files alphabetically and yields frames from valid image files.
-    
+
     Args:
         src (:class:`pathlib.Path`): Path to directory containing image sequence.
 
     Yields:
         :class:`MatLike`: Individual frames as matrices.
-        
+
     Note:
         Future versions may add natural sorting (e.g., ``img1``, ``img2``, ``img10``)
         and streaming pagination for large datasets.
@@ -151,15 +151,15 @@ def seq_imgs_to_frames(src: Path) -> Iterable[MatLike]:
 
 def image_file_to_frame(src: Path) -> MatLike:
     """Load single image file as frame matrix.
-    
+
     Reads the image using :func:`cv2.imread` with default settings (BGR color space).
-    
+
     Args:
         src (:class:`pathlib.Path`): Path to image file.
-        
+
     Returns:
         :class:`MatLike`: Image as matrix.
-        
+
     Note:
         Future versions may validate color space requirements and expose
         configurable read flags (e.g., grayscale, unchanged).
@@ -170,10 +170,10 @@ def image_file_to_frame(src: Path) -> MatLike:
 
 def is_video_ext_from_mimetype(extension: str) -> bool:
     """Check if the given file extension is a video format using mimetypes.
-    
+
     This function uses Python's :mod:`mimetypes` module to determine if an extension
     corresponds to a video MIME type (e.g., ``'video/mp4'``, ``'video/x-msvideo'``).
-    
+
     Args:
         extension (:obj:`str`): File extension including the dot (e.g., ``'.mp4'``, ``'.avi'``).
 
@@ -187,27 +187,27 @@ def is_video_ext_from_mimetype(extension: str) -> bool:
         False
     """
     import mimetypes
-    
+
     # Ensure extension starts with a dot
     if not extension.startswith('.'):
         extension = f'.{extension}'
-    
+
     # Guess the MIME type from the extension
     mime_type, _ = mimetypes.guess_type(f'dummy{extension}')
-    
+
     # Check if the MIME type starts with 'video/'
     if mime_type is None:
         return False
-    
+
     return mime_type.startswith('video/')
 
 
 def is_image_ext_from_mimetype(extension: str) -> bool:
     """Check if the given file extension is an image format using mimetypes.
-    
+
     This function uses Python's :mod:`mimetypes` module to determine if an extension
     corresponds to an image MIME type (e.g., ``'image/png'``, ``'image/jpeg'``).
-    
+
     Args:
         extension (:obj:`str`): File extension including the dot (e.g., ``'.png'``, ``'.jpg'``).
 
@@ -221,16 +221,16 @@ def is_image_ext_from_mimetype(extension: str) -> bool:
         False
     """
     import mimetypes
-    
+
     # Ensure extension starts with a dot
     if not extension.startswith('.'):
         extension = f'.{extension}'
-    
+
     # Guess the MIME type from the extension
     mime_type, _ = mimetypes.guess_type(f'dummy{extension}')
-    
+
     # Check if the MIME type starts with 'image/'
     if mime_type is None:
         return False
-    
+
     return mime_type.startswith('image/')

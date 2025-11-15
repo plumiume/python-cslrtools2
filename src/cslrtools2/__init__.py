@@ -14,14 +14,14 @@
 
 """cslrtools2: Comprehensive toolkit for Continuous Sign Language Recognition.
 
-**Software Type**: Research Library / Toolkit Package  
-**Domain**: Computer Vision, Sign Language Recognition, Deep Learning  
+**Software Type**: Research Library / Toolkit Package
+**Domain**: Computer Vision, Sign Language Recognition, Deep Learning
 **License**: Apache 2.0
 
 What This Package Does
 ----------------------
-cslrtools2 is a **research-oriented library** that provides end-to-end tools for 
-analyzing sign language videos using computer vision and deep learning techniques. 
+cslrtools2 is a **research-oriented library** that provides end-to-end tools for
+analyzing sign language videos using computer vision and deep learning techniques.
 It bridges the gap between raw video data and machine learning models by offering:
 
 1. **Data Preprocessing**: Extract skeletal landmarks from sign language videos
@@ -37,70 +37,70 @@ Main Components
 ---------------
 
 1. **lmpipe** - Landmark Extraction Pipeline (Framework/Processing Pipeline)
-   
+
    What it does:
-       Converts sign language videos into structured landmark data that machine 
-       learning models can process. Think of it as a preprocessing pipeline that 
+       Converts sign language videos into structured landmark data that machine
+       learning models can process. Think of it as a preprocessing pipeline that
        transforms raw videos into numerical representations.
-   
+
    Key features:
        - Parallel video processing with progress tracking
        - MediaPipe integration for pose, hand, and face detection
        - Multiple output formats: NPY, NPZ, Zarr, SafeTensors, PyTorch, JSON, CSV
        - Batch processing for large video datasets
        - Annotated frame visualization
-   
+
    Command-line tool: ``lmpipe``
-   
+
    Example::
-   
+
        # Extract landmarks from a video
        lmpipe mediapipe.holistic input_video.mp4 -o landmarks.npz
-       
+
        # Process entire directory with 4 workers
        lmpipe mediapipe.pose videos/ -o output.zarr --workers 4
 
 2. **sldataset** - Sign Language Dataset Management (Data Layer/Utility Module)
-   
+
    What it does:
-       Provides a unified interface for managing sign language datasets with 
-       efficient storage and PyTorch integration. It's a data abstraction layer 
+       Provides a unified interface for managing sign language datasets with
+       efficient storage and PyTorch integration. It's a data abstraction layer
        that handles the complexity of storing videos, landmarks, and labels together.
-   
+
    Key features:
        - Zarr-based storage for large arrays (efficient, compressed, chunked)
        - PyTorch ``Dataset`` and ``IterableDataset`` compatibility
        - Flexible schema supporting videos, landmarks, and arbitrary targets
        - Plugin architecture for specific datasets (e.g., FluentSigners50)
        - Array loader system for various file formats
-   
+
    Command-line tool: ``sldataset2``
-   
+
    Example::
-   
+
        # Load a dataset in Python
        from cslrtools2.sldataset import SLDataset
        dataset = SLDataset.from_zarr(zarr_group)
-       
+
        # Use with PyTorch DataLoader
        from torch.utils.data import DataLoader
        loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 3. **convsize** - PyTorch Convolution Utilities (Helper/Utility Module)
-   
+
    What it does:
-       Calculates output tensor dimensions for PyTorch convolutional layers. 
-       Useful when designing neural network architectures to avoid shape mismatch 
+       Calculates output tensor dimensions for PyTorch convolutional layers.
+       Useful when designing neural network architectures to avoid shape mismatch
        errors and understand how tensor sizes change through the network.
-   
+
    Key features:
        - Output size calculation for Conv1d, Conv2d, Conv3d
        - Pooling layer size calculation
        - Transpose convolution (deconvolution) support
        - Layer-by-layer shape tracking
-   
+
    Example::
-   
+
        from cslrtools2.convsize import conv_size
        output_h, output_w = conv_size(
            input_h=224, input_w=224,
@@ -112,9 +112,9 @@ Software Architecture
 
 **Package Type**: Namespace Package (Single Top-Level)
 
-    Python packaging best practices require a single top-level package. This 
+    Python packaging best practices require a single top-level package. This
     project follows a modular architecture with clear separation of concerns:
-    
+
     - ``cslrtools2/`` (root package - minimal imports)
       - ``lmpipe/`` (processing framework)
       - ``sldataset/`` (data management)
@@ -123,8 +123,8 @@ Software Architecture
 
 **Design Philosophy**: Lazy Loading
 
-    This ``__init__.py`` intentionally keeps imports minimal to avoid loading 
-    heavy dependencies (torch, mediapipe, opencv, zarr) at package import time. 
+    This ``__init__.py`` intentionally keeps imports minimal to avoid loading
+    heavy dependencies (torch, mediapipe, opencv, zarr) at package import time.
     Each submodule is designed to be imported explicitly when needed.
 
 Usage Patterns
@@ -135,12 +135,12 @@ Recommended import style to avoid unnecessary dependency loading::
     # ✅ Lightweight - only loads version metadata (~37ms)
     import cslrtools2
     print(cslrtools2.__version__)
-    
+
     # ✅ Explicit submodule import - loads only what's needed
     from cslrtools2.convsize import conv_size
     from cslrtools2.sldataset import SLDataset
     from cslrtools2.lmpipe.interface import LMPipeInterface
-    
+
     # ❌ Avoid wildcard imports - loads everything
     from cslrtools2 import *  # Don't do this
 
@@ -152,7 +152,7 @@ Two CLI applications are provided as console scripts (defined in ``pyproject.tom
 1. ``lmpipe`` → :func:`cslrtools2.lmpipe.app.cli.main`
 2. ``sldataset2`` → :func:`cslrtools2.sldataset.app.cli.main`
 
-These are separate entry points that load their respective heavy dependencies 
+These are separate entry points that load their respective heavy dependencies
 only when the command is executed.
 
 Target Audience

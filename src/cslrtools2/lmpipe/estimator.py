@@ -33,10 +33,10 @@ from .options import LMPipeOptions, DEFAULT_LMPIPE_OPTIONS
 @dataclass
 class ProcessResult[K: str]:
     """Result of a single frame processing operation.
-    
+
     Contains the frame identifier, landmark headers, detected landmarks,
     and the annotated frame with visualization overlays.
-    
+
     Attributes:
         frame_id (:obj:`int`): Sequential frame identifier.
         headers (:class:`~typing.Mapping`\\[:obj:`K`, :class:`numpy.typing.NDArray`\\[:obj:`str`\\]\\]):
@@ -587,18 +587,18 @@ def annotate[E: EstimatorWithKey, K: str](
 
 class Estimator[K: str](ABC):
     """Abstract base class for landmark estimation models.
-    
+
     Defines the interface for all landmark estimators in the LMPipe pipeline.
     Subclasses must implement the core methods to define estimation behavior,
     output shape, and optional header information.
-    
+
     Type Parameters:
         K: String type for landmark keys identifying different body parts or outputs.
-    
+
     Attributes:
         missing_value (:obj:`float`): Default value for missing/invalid landmarks.
             Defaults to :obj:`numpy.nan`.
-    
+
     Note:
         Subclasses must implement :attr:`shape` and :meth:`estimate` methods.
         The :attr:`headers` and :meth:`annotate` methods have default implementations
@@ -629,7 +629,7 @@ class Estimator[K: str](ABC):
 
         Note:
             Override Guidelines:
-            
+
             - If the estimator has a single output, return a tuple of ``(V, C)``.
             - If the estimator has multiple outputs, return a mapping from each
               key :obj:`K` to its corresponding ``(V, C)`` tuple.
@@ -652,7 +652,7 @@ class Estimator[K: str](ABC):
 
         Note:
             Override Guidelines:
-            
+
             - If the estimator has no output or wants to use a dummy array, return :obj:`None`.
             - If the estimator has a single output, return an :class:`ArrayLikeFloat`.
             - If the estimator has multiple outputs, return a mapping from each
@@ -705,7 +705,7 @@ class Estimator[K: str](ABC):
             - If nothing to do, return `None` to use the original frame.
             - Otherwise, return an annotated :class:`MatLike`.
         """
-        
+
         return None
 
     ### Configuration Methods ###
@@ -722,7 +722,7 @@ class Estimator[K: str](ABC):
 
     @abstractmethod
     def configure_estimator_name(self) -> K:
-        # This method must be abstract 
+        # This method must be abstract
         # because the key K is not determined at Estimator definition time.
         """Configures and returns the estimator name used as key K.
 
