@@ -376,6 +376,32 @@ class TestDecoratorWithKeyOptions:
         assert "part" in shapes
         assert shapes["part"] == (8, 4)
     
+    def test_shape_decorator_returns_mapping(self) -> None:
+        """Test shape decorator when method returns Mapping (line 196)."""
+        class MappingShapeEstimator(Estimator[Literal["a", "b"]]):
+            @property
+            @shape
+            def shape(self) -> Mapping[Literal["a", "b"], tuple[int, int]]:
+                # Directly return a Mapping to hit line 196
+                return {"a": (3, 2), "b": (5, 4)}
+            
+            @estimate
+            def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["a", "b"], NDArrayFloat]:
+                return {
+                    "a": np.zeros((3, 2), dtype=np.float32),
+                    "b": np.zeros((5, 4), dtype=np.float32)
+                }
+            
+            def configure_estimator_name(self) -> Literal["a"]:
+                return "a"
+        
+        estimator = MappingShapeEstimator()
+        shapes = estimator.shape
+        
+        assert len(shapes) == 2
+        assert shapes["a"] == (3, 2)
+        assert shapes["b"] == (5, 4)
+    
     def test_shape_decorator_with_invalid_argument(self) -> None:
         """Test shape decorator with invalid non-callable argument (line 188)."""
         with pytest.raises(TypeError, match="First argument must be a callable or KeyOptions TypedDict"):
@@ -412,6 +438,42 @@ class TestDecoratorWithKeyOptions:
         assert "feature" in headers_result
         assert len(headers_result["feature"]) == 3
     
+    def test_headers_decorator_returns_mapping(self) -> None:
+        """Test headers decorator when method returns Mapping (line 302)."""
+        class MappingHeadersEstimator(Estimator[Literal["x", "y"]]):
+            @property
+            @shape
+            def shape(self) -> Mapping[Literal["x", "y"], tuple[int, int]]:
+                return {"x": (2, 3), "y": (4, 2)}
+            
+            @property
+            @headers
+            def headers(self) -> Mapping[Literal["x", "y"], list[str]]:
+                # Directly return a Mapping to hit line 302
+                return {
+                    "x": ["a", "b", "c"],
+                    "y": ["p", "q"]
+                }
+            
+            @estimate
+            def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["x", "y"], NDArrayFloat]:
+                return {
+                    "x": np.zeros((2, 3), dtype=np.float32),
+                    "y": np.zeros((4, 2), dtype=np.float32)
+                }
+            
+            def configure_estimator_name(self) -> Literal["x"]:
+                return "x"
+        
+        estimator = MappingHeadersEstimator()
+        headers_result = estimator.headers
+        
+        assert isinstance(headers_result, Mapping)
+        assert len(headers_result) == 2
+        # Headers are converted to numpy arrays
+        assert np.array_equal(headers_result["x"], np.array(["a", "b", "c"]))
+        assert np.array_equal(headers_result["y"], np.array(["p", "q"]))
+    
     def test_headers_decorator_with_invalid_argument(self) -> None:
         """Test headers decorator with invalid non-callable argument (line 294)."""
         with pytest.raises(TypeError, match="First argument must be a callable or KeyOptions TypedDict"):
@@ -443,6 +505,34 @@ class TestDecoratorWithKeyOptions:
         assert isinstance(result, Mapping)
         assert "output" in result
         assert result["output"].shape == (6, 2)
+    
+    def test_estimate_decorator_with_none_frame(self) -> None:
+        """Test estimate decorator with None frame_src (line 428)."""
+        class NoneFrameEstimator(Estimator[Literal["data"]]):
+            @property
+            @shape
+            def shape(self) -> tuple[int, int]:
+                return (7, 5)
+            
+            @estimate
+            def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["data"], NDArrayFloat]:
+                if frame_src is None:
+                    # This should never happen as decorator handles it
+                    raise AssertionError("frame_src should not be None")
+                return {"data": np.zeros((7, 5), dtype=np.float32)}
+            
+            def configure_estimator_name(self) -> Literal["data"]:
+                return "data"
+        
+        estimator = NoneFrameEstimator()
+        # Pass None to trigger line 428 in the decorator
+        result = estimator.estimate(None, 0)
+        
+        assert isinstance(result, Mapping)
+        assert "data" in result
+        # Should return missing array, not call the actual estimate method
+        assert result["data"].shape == (7, 5)
+        assert np.all(np.isnan(result["data"]))
     
     def test_estimate_decorator_with_invalid_argument(self) -> None:
         """Test estimate decorator with invalid non-callable argument (line 419)."""
