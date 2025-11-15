@@ -491,7 +491,7 @@ class TestDecoratorWithKeyOptions:
             def shape(self) -> tuple[int, int]:
                 return (6, 2)
             
-            @estimate({"key": "output"})  # type: ignore[reportArgumentType]
+            @estimate(KeyOptions[Literal["output"]]({"key": "output"}))
             def estimate(self, frame_src: MatLike, frame_idx: int) -> Mapping[Literal["output"], NDArrayFloat]:
                 return {"output": np.zeros((6, 2), dtype=np.float32)}
             
@@ -555,7 +555,7 @@ class TestDecoratorWithKeyOptions:
             def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["anno"], NDArrayFloat]:
                 return {"anno": np.zeros((3, 2), dtype=np.float32)}
             
-            @annotate({"key": "anno"})  # type: ignore[reportArgumentType]
+            @annotate(KeyOptions[Literal["anno"]]({"key": "anno"}))
             def annotate(
                 self,
                 frame_src: MatLike,
