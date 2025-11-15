@@ -1,243 +1,188 @@
-# cslrtools2 AI Coding Agent Instructions
+# Copilot Instructions for cslrtools2
 
-**Project**: Continuous Sign Language Recognition (CSLR) toolkit for landmark extraction and dataset management  
-**Language**: Python 3.12+ with PEP 695 generics and modern type hints  
-**Package Manager**: `uv` (preferred for all operations)
+## Project Overview
 
----
+**cslrtools2** is a Continuous Sign Language Recognition (CSLR) toolkit providing:
+- **LMPipe**: Landmark extraction pipeline using MediaPipe
+- **SLDataset**: PyTorch-compatible dataset management with Zarr storage
+- **ConvSize**: PyTorch convolution size calculation utilities
 
-## 🏗️ Architecture Overview
+Python 3.12+ required with modern type hints (PEP 695 generics).
 
-This project is a **domain-specific application framework** with two major subsystems:
+## Architecture Patterns
 
-### 1. LMPipe (Landmark Pipeline) - ETL Framework
-- **Purpose**: Extract skeletal landmarks from sign language videos using MediaPipe
-- **Pattern**: Pipeline (Extract → Transform → Load) with plugin architecture
-- **Key abstraction**: `Estimator[K]` ABC - implement `process()` and `configure_estimator_name()`
-- **Plugin system**: Entry points in `pyproject.toml` register estimators (e.g., `mediapipe.holistic`, `mediapipe.pose`)
-- **Execution modes**: Sequential, parallel (multiprocessing), or thread-based via `LMPipeOptions`
-- **CLI**: `lmpipe mediapipe.holistic input.mp4 -o output.npz --workers 4`
+### Plugin System via Entry Points
 
-**Core flow**: `RunSpec` (job spec) → `Estimator` (landmark detection) → `Collector` (save to NPY/Zarr/SafeTensors) → Progress tracking via Rich
+The project uses `pyproject.toml` entry points for extensibility. All MediaPipe estimators are registered as plugins:
 
-### 2. SLDataset - Data Access Layer
-- **Purpose**: Unified storage/loading for sign language datasets with PyTorch compatibility
-- **Pattern**: Repository pattern with Zarr-backed storage
-- **Schema**: `dataset.zarr/{metadata/, connections/, items/[N]/{videos/, landmarks/, targets/}}`
-- **Key classes**: `SLDataset` (PyTorch Dataset), `SLDatasetItem` (DTO), `IterableSLDataset` (streaming)
-- **CLI**: `sldataset2 info dataset.zarr`
+```toml
+[project.entry-points."cslrtools2.lmpipe.plugins"]
+"mediapipe.holistic" = "cslrtools2.plugins.mediapipe.lmpipe.holistic_args:holistic_info"
+```
 
----
+Each plugin returns a tuple `(NamespaceWrapper, EstimatorCreator)`. See `src/cslrtools2/lmpipe/app/plugins.py` for the loader pattern.
 
-## 🔧 Development Workflow
+**When adding new estimators:**
+1. Create `{name}_args.py` with a `@namespace` class and `{name}_info` tuple
+2. Implement estimator in `{name}.py` extending `Estimator[K]`
+3. Register in `pyproject.toml` entry points
 
-### Essential Commands
+### Type System: Generic Key Types
 
-**All operations use `uv`** - never use `pip` directly:
+The codebase uses string literal types extensively for type-safe key handling:
+
+```python
+class Estimator[K: str]:  # K is a string literal type like "pose" | "left_hand"
+    def process(self) -> ProcessResult[K]:  # Keys preserved through pipeline
+        ...
+```
+
+**Critical pattern**: The `K` type parameter flows through:
+- `Estimator[K]` → `ProcessResult[K]` → `Collector[K]` → output files
+
+Dataset items use 4 generic keys: `[Kmeta, Kvid, Klm, Ktgt]` for metadata/videos/landmarks/targets.
+
+### Collector Pattern: Output Format Abstraction
+
+Collectors handle result persistence. Two categories:
+
+**LandmarkMatrixSaveCollector** (per-key files):
+- `csv_lmsc.py`, `npy_lmsc.py`, `json_lmsc.py`
+- Each landmark key (e.g., "pose", "left_hand") → separate file
+- Base class in `src/cslrtools2/lmpipe/collector/landmark_matrix/base.py`
+
+**Container collectors** (single file for all keys):
+- `npz_lmsc.py`, `zarr_lmsc.py`, `safetensors_lmsc.py`, `torch_lmsc.py`
+- All landmarks in one container with keys as internal structure
+
+**When adding new formats**: Extend `LandmarkMatrixSaveCollector[K]` and implement:
+- `is_perkey` / `is_container` properties
+- `_open_file()`, `_save_landmark_matrix()`, `_close_file()`
+
+### CLI Architecture: clipar + Nested Commands
+
+Uses `clipar` library for CLI argument parsing with nested command structures:
+
+```python
+# In holistic_args.py
+@namespace
+class MediaPipeHolisticArgs(MediaPipeBaseArgs, mixin.ReprMixin):
+    model_complexity: int = 1
+    smooth_landmarks: bool = True
+```
+
+CLI pattern: `lmpipe mediapipe.holistic input.mp4 -o output.npz --model-complexity 2`
+
+Command resolution in `cli.py` uses dynamic plugin lookup - args determine which estimator plugin loads.
+
+## Development Workflows
+
+### Build & Run
 
 ```powershell
-# Install dependencies (first time)
-uv sync
+# Install with uv (recommended)
+uv pip install -e .
 
-# Run CLI tools (no install needed)
-uv run lmpipe mediapipe.pose video.mp4 -o output.npz
-uv run sldataset2 info dataset.zarr
+# With MediaPipe support
+uv pip install -e . --group mediapipe
 
-# Run Python scripts
-uv run python script_name.py
+# Run Python with uv (CRITICAL - always use this)
+uv run python script.py
 
-# Test in Docker (multiple PyTorch+CUDA environments)
-cd tests/build
-docker compose run --rm pytorch-cu128 uv run python tests/build/test_pytorch_cuda.py
+# Run landmark extraction
+lmpipe mediapipe.holistic video.mp4 -o landmarks.zarr --workers 4
+
+# Use dataset tools
+sldataset2 <command>
 ```
 
-**MediaPipe installation**: Separate dependency group - `uv sync --group mediapipe`
+**IMPORTANT**: Always use `uv run python` instead of `python` directly to ensure proper virtual environment and dependency resolution.
 
-### Build & Test Matrix
+### Type Checking
 
-- **Primary**: PyTorch 2.9.0 + CUDA 12.8 (from `https://download.pytorch.org/whl/cu128`)
-- **Docker envs**: `pytorch-cu128`, `pytorch-cu126`, `pytorch-cu130`, `pytorch-cpu` (see `tests/build/`)
-- **UV cache**: Shared volume (`uv-cache`) across containers for fast installs (~0.5s after first run)
+Project uses Pyright with strict mode. Key conventions:
+- All files use `from __future__ import annotations` for forward references
+- Generic classes use PEP 695 syntax: `class MyClass[T: Bound]:`
+- Type stubs in `typings/` directory for external libraries (MediaPipe, Zarr, etc.)
 
----
+### Testing
 
-## 📐 Code Style & Conventions
+No test files currently exist (alpha stage). When adding tests:
+- Use pytest
+- Mock MediaPipe dependencies (heavy external dependency)
+- Test collector outputs by verifying file formats
 
-### Type System (CRITICAL)
-- **Python 3.12+ only**: Use PEP 695 generic syntax: `class MyClass[T: Bound]: ...`, `def func[T](x: T) -> T: ...`
-- **Always import annotations**: `from __future__ import annotations` in every file
-- **No legacy typing**: Avoid `typing.Generic`, `typing.TypeVar` - use built-in generics
-- **Type stubs**: Custom stubs in `typings/` for mediapipe, zarr, safetensors (incomplete upstream types)
-- **Pyright-compliant**: All code must pass Pyright static analysis (zero type errors)
+### Dependency Management
 
-### Docstrings (Google Style + Sphinx)
-**Required format** (see `DOCSTRING_STYLE.md`):
-- Args: Type names in backticks `Type` for VSCode hover support
-- Body text: Use Sphinx roles - `:class:`ClassName``, `:func:`function_name``, `:obj:`None``/`True`/`False``
-- Returns/Raises: Use roles - `:class:`Tensor``, `:exc:`ValueError``
-- Example:
-  ```python
-  def process(frame: MatLike) -> ProcessResult:
-      """Process a single frame.
-      
-      Args:
-          frame (`MatLike`): Input frame. Must not be :obj:`None`.
-      
-      Returns:
-          :class:`ProcessResult`: Processed landmarks via :meth:`detect_landmarks`.
-      
-      Raises:
-          :exc:`ValueError`: When frame is :obj:`None`.
-      """
-  ```
+- **uv** is the package manager (see `pyproject.toml`)
+- PyTorch installed from custom index: `https://download.pytorch.org/whl/cu128`
+- `clipar` from git: `https://github.com/plumiume/python-clipar.git`
 
-### Exception Handling
-Follow `EXCEPTION_LOGGING_STYLE_GUIDE.md`:
-- **Custom exceptions**: Inherit from `CSLRToolsError` (to be implemented - see guide)
-- **Planned hierarchy**: `LMPipeError`, `EstimatorError`, `SLDatasetError`, `DataLoadError`, etc.
-- **Current state**: Uses standard exceptions (`ValueError`, `TypeError`, `RuntimeError`) - gradually migrate
-- **Logging**: Use named loggers (`logging.getLogger("cslrtools2.lmpipe")`) with structured messages
+MediaPipe is optional (separate dependency group) - estimators gracefully import error if missing.
 
-### Git Workflow
-See `BRANCHING_STRATEGY.md`:
-- **AI development**: `dev-ai/<task-name>` branches (frequent commits encouraged)
-- **Commit format**: Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`)
-- **Merge to main**: Squash merge preferred (cleans up AI commit history)
-- **Integration branch**: `main-ai` for combining multiple `dev-ai/*` branches before merging to `main`
+## Key File References
 
----
+- **Entry point definitions**: `pyproject.toml` (lines 24-29)
+- **Plugin loader**: `src/cslrtools2/lmpipe/app/plugins.py`
+- **Estimator base**: `src/cslrtools2/lmpipe/estimator.py`
+- **Collector base**: `src/cslrtools2/lmpipe/collector/base.py`
+- **Dataset core**: `src/cslrtools2/sldataset/dataset.py`
+- **CLI entry**: `src/cslrtools2/lmpipe/app/cli.py`
+- **Options schema**: `src/cslrtools2/lmpipe/options.py` (uses TypedDict + clipar groups)
 
-## 🧩 Plugin System Architecture
+## Project-Specific Conventions
 
-### Creating a Custom Estimator
+### Branching Strategy
 
-1. **Subclass `Estimator[K]`** where `K` is your landmark key type (e.g., `Literal['my_estimator']`)
-2. **Implement required methods**:
-   ```python
-   from cslrtools2.lmpipe.estimator import Estimator, ProcessResult
-   
-   class MyEstimator(Estimator[Literal['my_key']]):
-       def process(self, frame: MatLike) -> ProcessResult[Literal['my_key']]:
-           # Detect landmarks from frame
-           return ProcessResult(
-               frame_id=0,
-               headers={'my_key': np.array(['x', 'y', 'z'])},
-               landmarks={'my_key': np.array([[1.0, 2.0, 3.0]])},
-               annotated_frame=frame
-           )
-       
-       def configure_estimator_name(self) -> Literal['my_key']:
-           return 'my_key'
-   ```
+- `main` - stable production
+- `dev-ai/*` - AI agent collaborative development branches
+- Use Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, etc.
+- Squash merge from `dev-ai/*` to `main` to consolidate AI agent commits
 
-3. **Register in `pyproject.toml`**:
-   ```toml
-   [project.entry-points."cslrtools2.lmpipe.plugins"]
-   "my_estimator" = "mypackage.estimator_module:estimator_info"
-   ```
+See `BRANCHING_STRATEGY.md` for full rules.
 
-### MediaPipe Constants
-**Use `mp_constants.py`** for all MediaPipe landmark definitions:
-- **Landmark enums**: `PoseLandmark`, `HandLandmark` (re-exported from MediaPipe - DO NOT redefine)
-- **Connection constants**: `POSE_CONNECTIONS`, `HAND_CONNECTIONS`, `FACEMESH_*` (14 types)
-- **Deprecated**: `MediaPipePoseNames`, `MediaPipeHandNames` (aliases kept for compatibility)
-- **Import**: `from cslrtools2.plugins.mediapipe.lmpipe.mp_constants import PoseLandmark, POSE_CONNECTIONS`
+### File Organization
 
----
+- Executable logic: `src/cslrtools2/{module}/app/`
+- Public interfaces: `src/cslrtools2/{module}/interface/`
+- Plugins: `src/cslrtools2/plugins/{provider}/{module}/`
+- Type stubs: `typings/` (for external libraries without stubs)
 
-## 🎯 Common Tasks
+### Naming Patterns
 
-### Adding a New Landmark Estimator
-1. Create estimator class in `src/cslrtools2/plugins/<plugin_name>/lmpipe/`
-2. Define `<name>_args.py` with CLI argument groups (see `mediapipe/lmpipe/pose_args.py`)
-3. Register entry point in `pyproject.toml`
-4. Update `CHANGELOG.md` under `[Unreleased]`
+- Estimators: `{Provider}{Part}Estimator` (e.g., `MediaPipeHolisticEstimator`)
+- Args classes: `{Provider}{Part}Args` with `{part}_info` tuple export
+- Collectors: `{Format}LandmarkMatrixSaveCollector` → alias `{Format}LMSC`
 
-### Adding a New Output Format (Collector)
-1. Subclass `Collector` in `src/cslrtools2/lmpipe/collector/`
-2. Implement `collect()` method for accumulating results
-3. Implement `save()` method for writing to disk
-4. Add CLI option in `lmpipe/app/args.py`
+## Integration Points
 
-### Working with Zarr Datasets
-```python
-import zarr
-from cslrtools2.sldataset import SLDataset
+### MediaPipe Models
 
-# Read
-root = zarr.open("dataset.zarr", mode="r")
-dataset = SLDataset.from_zarr(root)
-item = dataset[0]  # Returns SLDatasetItem
+Models auto-download on first use to `src/cslrtools2/assets/{part}/{size}.task`. See `src/cslrtools2/plugins/mediapipe/lmpipe/base.py` `get_mediapipe_model()`.
 
-# Write
-new_root = zarr.open("output.zarr", mode="w")
-dataset.to_zarr(new_root)
+Available models:
+- Pose: lite/full/heavy
+- Hand: full
+- Face: full
+
+### Zarr Storage Schema
+
+Datasets follow this structure:
+
+```
+dataset.zarr/
+├── metadata/          # Dataset-level info
+├── connections/       # Landmark connectivity graphs
+└── items/{idx}/
+    ├── videos/{kvid}  # Video arrays
+    ├── landmarks/{klm}  # Landmark matrices
+    └── targets/{ktgt}  # Labels/annotations
 ```
 
----
+Access via `SLDataset` class which implements `torch.utils.data.Dataset`.
 
-## ⚠️ Critical Integration Points
+### Parallel Processing
 
-### 1. PyTorch Custom Index URLs
-**Torch/torchvision MUST use custom index** (`https://download.pytorch.org/whl/cu128`):
-- Defined in `pyproject.toml`: `[[tool.uv.index]]` sections
-- Never install from PyPI - builds are incompatible
-- `torchvision==0.24.0` is PINNED (known issue with 0.24.1 - see `github-issue-torchvision==0.24.1-markdown.md`)
+Uses `loky` for multiprocessing (not stdlib `multiprocessing`). Custom `ProcessPoolExecutor` in `src/cslrtools2/lmpipe/interface/executor.py` adds `cancel_futures` support to shutdown.
 
-### 2. MediaPipe Separate Install
-MediaPipe is **optional** (separate dependency group) because:
-- Not needed for dataset loading (`sldataset` works standalone)
-- Users may use custom estimators without MediaPipe
-- Install: `uv sync --group mediapipe`
-
-### 3. Type Stub Files
-Custom stubs in `typings/` because upstream packages lack complete types:
-- `mediapipe.pyi`: Landmark enums, connections
-- `zarr/api/synchronous.pyi`: Zarr v3 API
-- `safetensors/*.pyi`: Save/load functions
-- **DO NOT** modify stubs lightly - they're carefully aligned with runtime behavior
-
-### 4. License Headers
-**Apache 2.0 license required** on all `.py` files (use `add_license_headers.py` script):
-```python
-# Copyright 2025 cslrtools2 contributors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# ...
-```
-
----
-
-## 📚 Key Documentation Files
-
-- `LMPIPE_FRAMEWORK_CLASSIFICATION.md`: Deep dive into LMPipe architecture patterns
-- `DOCSTRING_STYLE.md`: Complete docstring formatting guide
-- `EXCEPTION_LOGGING_STYLE_GUIDE.md`: Exception hierarchy design (implementation pending)
-- `MEDIAPIPE_CONSTANTS_INTEGRATION.md`: MediaPipe constants refactoring history
-- `BRANCHING_STRATEGY.md`: Git workflow for AI agents
-- `tests/build/DOCKER_STRATEGY.md`: Multi-environment testing setup
-
----
-
-## 🚨 Common Pitfalls
-
-1. **Don't use `pip`** - always `uv run` or `uv sync`
-2. **Don't redefine MediaPipe constants** - import from `mp_constants.py`
-3. **Don't use legacy `typing.Generic[T]`** - use PEP 695 `class MyClass[T]:`
-4. **Don't forget `from __future__ import annotations`** at top of files
-5. **Don't mix PyPI and custom PyTorch indexes** - index config is critical
-6. **Don't skip Sphinx roles in docstrings** - `:class:`, `:func:`, `:obj:` are required
-7. **Don't create estimators without entry points** - CLI won't discover them
-
----
-
-## 🎯 Current Focus Areas (as of 2025-11-15)
-
-- Exception hierarchy implementation (`EXCEPTION_LOGGING_TODO.md`)
-- Expanding test coverage (currently minimal - see `tests/` directory)
-- API documentation with Sphinx (structure in `sphinx/`, incomplete)
-- MediaPipe annotation improvements using connection constants
-
----
-
-**Quick Reference**: For immediate context on any module, read the docstring in `src/cslrtools2/<module>/__init__.py` - they contain comprehensive architectural overviews.
+`DummyExecutor` available for single-threaded debugging.

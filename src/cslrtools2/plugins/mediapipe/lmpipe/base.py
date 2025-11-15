@@ -50,29 +50,29 @@ ASSETS_PATH.mkdir(parents=True, exist_ok=True)
 
 def get_mediapipe_model(part: str, size: str) -> str:
     """Download or retrieve cached MediaPipe model file.
-    
+
     Downloads the specified MediaPipe model from Google Cloud Storage
     if not already cached locally. Models are stored in the package
     assets directory.
-    
+
     Args:
         part (:obj:`str`): Body part type. One of ``'pose'``, ``'hand'``, ``'face'``.
         size (:obj:`str`): Model size variant. Options vary by part:
-            
+
             - pose: ``'lite'``, ``'full'``, ``'heavy'``
             - hand: ``'full'``
             - face: ``'full'``
-    
+
     Returns:
         :obj:`str`: Path to the downloaded/cached model file.
-        
+
     Raises:
         :exc:`ValidationError`: If invalid part or size is specified.
         :exc:`ModelDownloadError`: If model download fails.
-        
+
     Example:
         Download pose landmarker model::
-        
+
             >>> model_path = get_mediapipe_model('pose', 'lite')
             >>> print(model_path)
             '.../cslrtools2/assets/pose/lite.task'
@@ -116,13 +116,13 @@ def get_mediapipe_model(part: str, size: str) -> str:
 
 class MediaPipeEstimator[K: str](Estimator[K]):
     """Base class for MediaPipe-based landmark estimators.
-    
+
     Provides common functionality for MediaPipe vision tasks including
     model loading, landmark extraction, and coordinate normalization.
-    
+
     Type Parameters:
         K: String type for landmark keys identifying different body parts.
-    
+
     Attributes:
         channels (:obj:`int`): Number of channels per landmark. Defaults to ``4``
             (x, y, z, confidence).
@@ -140,11 +140,11 @@ class MediaPipeEstimator[K: str](Estimator[K]):
         self, lm: NormalizedLandmark
         ) -> list[float]:
         """Convert MediaPipe landmark to coordinate array.
-        
+
         Args:
             lm (:class:`mediapipe.tasks.python.components.containers.landmark.NormalizedLandmark`):
                 MediaPipe normalized landmark.
-                
+
         Returns:
             :obj:`list`\\[:obj:`float`\\]: Coordinate array ``[x, y, z, confidence]``.
         """
@@ -154,12 +154,12 @@ class MediaPipeEstimator[K: str](Estimator[K]):
             lm.z or self.missing_value,
             max(0.0, (lm.visibility or 0.0) * (lm.presence or 0.0))
         ]
-    
+
     def _enable_suppress_stderr(self):
 
         if self._is_now_suppressing_stderr:
             return
-        
+
         self._is_now_suppressing_stderr = True
 
         self._original_stderr_fd = os.dup(2)
@@ -170,7 +170,7 @@ class MediaPipeEstimator[K: str](Estimator[K]):
 
         if not self._is_now_suppressing_stderr:
             return
-        
+
         os.dup2(self._original_stderr_fd, 2)
         os.close(self._devnull_fd)
         os.close(self._original_stderr_fd)

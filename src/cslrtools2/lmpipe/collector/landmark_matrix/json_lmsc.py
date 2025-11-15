@@ -27,7 +27,7 @@ class JsonLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
     def __init__(self, *, indent: int | None = 2, encoding: str = "utf-8", extension: str = ".json") -> None:
         """Initialize the JSON landmark matrix save collector.
-        
+
         Args:
             indent (:class:`int | None`, optional): JSON indentation level. Defaults to 2.
             encoding (:class:`str`, optional): File encoding. Defaults to "utf-8".
@@ -79,10 +79,10 @@ class JsonLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
 def json_lmsc_creator[K: str](key_type: type[K]) -> JsonLandmarkMatrixSaveCollector[K]:
     """Create a JSON landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`JsonLandmarkMatrixSaveCollector[K]`: JSON landmark matrix saver with .json extension.
     """
@@ -90,10 +90,10 @@ def json_lmsc_creator[K: str](key_type: type[K]) -> JsonLandmarkMatrixSaveCollec
 
 def jsonc_lmsc_creator[K: str](key_type: type[K]) -> JsonLandmarkMatrixSaveCollector[K]:
     """Create a JSONC landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`JsonLandmarkMatrixSaveCollector[K]`: JSON landmark matrix saver with .jsonc extension.
     """

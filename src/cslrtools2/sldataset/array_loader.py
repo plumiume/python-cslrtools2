@@ -36,11 +36,11 @@ from ..exceptions import DataFormatError
 
 def _is_mapping[T: Mapping[Any, Any]](obj: object, type_: type[T]) -> TypeGuard[T]:
     """Check if object is an instance of a mapping type.
-    
+
     Args:
         obj (:obj:`object`): Object to check.
         type_ (:obj:`type`\\[:obj:`T`\\]): Target mapping type.
-        
+
     Returns:
         :obj:`bool`: :obj:`True` if obj is an instance of the mapping type.
     """
@@ -51,10 +51,10 @@ def _is_mapping[T: Mapping[Any, Any]](obj: object, type_: type[T]) -> TypeGuard[
 
 class PreKeyLoader(ABC):
     """Abstract base class for loaders that load single arrays from files.
-    
+
     Pre-key loaders handle file formats where each file contains a single array
     associated with a key (derived from the filename).
-    
+
     Examples:
         Formats: CSV, JSON (single array), NPY
     """
@@ -62,10 +62,10 @@ class PreKeyLoader(ABC):
     @abstractmethod
     def load_array(self, path: PathLike) -> ArrayLike:
         """Load a single array from the specified file path.
-        
+
         Args:
             path (:class:`PathLike`): Path to the file to load.
-            
+
         Returns:
             :class:`ArrayLike`: The loaded array.
         """
@@ -73,10 +73,10 @@ class PreKeyLoader(ABC):
 
 class ContainerLoader(ABC):
     """Abstract base class for loaders that load multiple keyed arrays from files.
-    
+
     Container loaders handle file formats where a single file contains multiple
     arrays, each associated with a string key.
-    
+
     Examples:
         Formats: NPZ, PyTorch (pt/pth), SafeTensors, Zarr
     """
@@ -84,10 +84,10 @@ class ContainerLoader(ABC):
     @abstractmethod
     def load_mapping(self, path: PathLike) -> Mapping[str, ArrayLike]:
         """Load a mapping of keyed arrays from the specified file path.
-        
+
         Args:
             path (:class:`PathLike`): Path to the container file to load.
-            
+
         Returns:
             :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:
                 Mapping from keys to arrays.
@@ -97,9 +97,9 @@ class ContainerLoader(ABC):
 
 class CsvLoader(PreKeyLoader):
     """CSV file loader for array data.
-    
+
     Loads numeric data from CSV files, converting each row to a list of floats.
-    
+
     Attributes:
         delimiter (:obj:`str`): Column delimiter character. Defaults to ``','``.
     """
@@ -109,10 +109,10 @@ class CsvLoader(PreKeyLoader):
 
     def load_array(self, path: PathLike) -> ArrayLike:
         """Load CSV file as a 2D array.
-        
+
         Args:
             path (:class:`PathLike`): Path to the CSV file.
-            
+
         Returns:
             :class:`ArrayLike`: 2D list of float values.
         """
@@ -126,17 +126,17 @@ class CsvLoader(PreKeyLoader):
 
 class JsonLoader(PreKeyLoader):
     """JSON file loader for array data.
-    
+
     Loads array data from JSON files. The JSON file should contain a single
     array or nested array structure.
     """
 
     def load_array(self, path: PathLike) -> ArrayLike:
         """Load JSON file as an array.
-        
+
         Args:
             path (:class:`PathLike`): Path to the JSON file.
-            
+
         Returns:
             :class:`ArrayLike`: The parsed JSON array.
         """
@@ -146,20 +146,20 @@ class JsonLoader(PreKeyLoader):
 
 class NpyLoader(PreKeyLoader):
     """NumPy NPY file loader for array data.
-    
+
     Loads NumPy arrays from NPY files. Only supports single arrays,
     not NPZ archives.
     """
 
     def load_array(self, path: PathLike) -> ArrayLike:
         """Load NPY file as a NumPy array.
-        
+
         Args:
             path (:class:`PathLike`): Path to the NPY file.
-            
+
         Returns:
             :class:`ArrayLike`: The loaded NumPy array.
-            
+
         Raises:
             :exc:`DataFormatError`: If the file contains a mapping instead of a single array.
         """
@@ -173,21 +173,21 @@ class NpyLoader(PreKeyLoader):
 
 class NpzLoader(ContainerLoader):
     """NumPy NPZ archive loader for multiple keyed arrays.
-    
+
     Loads multiple NumPy arrays from NPZ archive files, where each array
     is associated with a string key.
     """
 
     def load_mapping(self, path: PathLike) -> Mapping[str, ArrayLike]:
         """Load NPZ archive as a mapping of arrays.
-        
+
         Args:
             path (:class:`PathLike`): Path to the NPZ file.
-            
+
         Returns:
             :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:
                 Mapping from array names to NumPy arrays.
-                
+
         Raises:
             :exc:`DataFormatError`: If the file is not a valid NPZ archive.
         """
@@ -201,20 +201,20 @@ class NpzLoader(ContainerLoader):
 
 class TorchLoader(PreKeyLoader, ContainerLoader):
     """PyTorch file loader for tensors and tensor dictionaries.
-    
+
     Supports loading both single tensors (PreKeyLoader) and dictionaries
     of tensors (ContainerLoader) from PyTorch .pt/.pth files.
     """
 
     def load_array(self, path: PathLike) -> ArrayLike:
         """Load PyTorch file as a single tensor.
-        
+
         Args:
             path (:class:`PathLike`): Path to the PyTorch file.
-            
+
         Returns:
             :class:`ArrayLike`: The loaded :class:`torch.Tensor`.
-            
+
         Raises:
             :exc:`DataFormatError`: If the file does not contain a single tensor.
         """
@@ -228,14 +228,14 @@ class TorchLoader(PreKeyLoader, ContainerLoader):
 
     def load_mapping(self, path: PathLike) -> Mapping[str, ArrayLike]:
         """Load PyTorch file as a mapping of tensors.
-        
+
         Args:
             path (:class:`PathLike`): Path to the PyTorch file.
-            
+
         Returns:
             :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:
                 Mapping from keys to tensors.
-                
+
         Raises:
             :exc:`DataFormatError`: If the file does not contain a valid mapping.
         """
@@ -249,21 +249,21 @@ class TorchLoader(PreKeyLoader, ContainerLoader):
 
 class SafetensorsLoader(ContainerLoader):
     """SafeTensors file loader for secure tensor storage.
-    
+
     Loads tensors from SafeTensors format files, which provide safe
     and efficient tensor serialization.
     """
 
     def load_mapping(self, path: PathLike) -> Mapping[str, ArrayLike]:
         """Load SafeTensors file as a mapping of tensors.
-        
+
         Args:
             path (:class:`PathLike`): Path to the SafeTensors file.
-            
+
         Returns:
             :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:
                 Mapping from keys to tensors.
-                
+
         Raises:
             :exc:`DataFormatError`: If the file does not contain a valid mapping.
         """
@@ -278,17 +278,17 @@ class SafetensorsLoader(ContainerLoader):
 
 class ZarrLoader(ContainerLoader):
     """Zarr group loader for chunked array storage.
-    
+
     Loads arrays from Zarr groups, which support efficient chunked
     storage and compression for large datasets.
     """
 
     def load_mapping(self, path: PathLike) -> Mapping[str, ArrayLike]:
         """Load Zarr group as a mapping of arrays.
-        
+
         Args:
             path (:class:`PathLike`): Path to the Zarr group directory.
-            
+
         Returns:
             :class:`~typing.Mapping`\\[:obj:`str`, :class:`ArrayLike`\\]:
                 Mapping from array names to :class:`zarr.Array` objects.

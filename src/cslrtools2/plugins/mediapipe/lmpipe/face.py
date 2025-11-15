@@ -66,7 +66,7 @@ class MediaPipeFaceEstimator(
         if self._setuped:
             return
         self._setuped = True
-        
+
         self._enable_suppress_stderr()
         self.landmarker = FaceLandmarker.create_from_options(
             self.landmarker_options
@@ -80,7 +80,7 @@ class MediaPipeFaceEstimator(
     @cache
     def shape(self) -> tuple[int, int]:
         return (FACE_LANDMARKS_NUM, self.channels)
-    
+
     @property
     @headers
     @cache
@@ -133,4 +133,3 @@ class MediaPipeFaceEstimator(
 
         # TODO: Implement face annotation
         return frame_src
-

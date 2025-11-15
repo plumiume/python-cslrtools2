@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from numpy.typing import (
         NDArray as _NDArray,
         ArrayLike as _ArrayLike,
-        DTypeLike as _DTypeLike 
+        DTypeLike as _DTypeLike
     )
     from cv2.typing import MatLike as _MatLike
 else:
@@ -40,16 +40,16 @@ else:
 
 class SupportsArray[R: _ArrayLike](Protocol):
     """Protocol for objects that support conversion to arrays.
-    
+
     This protocol defines objects that implement the :meth:`__array__` method,
     allowing them to be converted to NumPy arrays or similar array types.
-    
+
     Type Parameters:
         R: The return type of :meth:`__array__`, must be array-like.
-        
+
     Example:
         Custom class implementing the array protocol::
-        
+
             >>> import numpy as np
             >>> class MyArray:
             ...     def __init__(self, data):
@@ -92,5 +92,3 @@ else:
     NDArrayInt = object
     NDArrayFloat = object
     NDArrayStr = object
-
-

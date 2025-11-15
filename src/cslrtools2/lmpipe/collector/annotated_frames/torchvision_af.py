@@ -61,10 +61,10 @@ def torchvision_af_show_collector_creator[K: str](
     key_type: type[K]
     ) -> AnnotatedFramesShowCollector[K]:
     """Create a TorchVisionAnnotatedFramesShowCollector instance.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`AnnotatedFramesShowCollector[K]`: TorchVision-based annotated frames viewer.
     """

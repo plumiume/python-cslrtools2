@@ -108,7 +108,7 @@ class _ManagerState(IntEnum):
     STOPPED = auto()
 
 class _RenderableRegistry:
-    
+
     def __init__(self):
         self._map: dict[_RichObjectID, RichObject] = {}
         self._next_id: _RichObjectID = 0
@@ -190,7 +190,7 @@ class RichManager:
     renderables via references.
 
     Examples::
-        
+
         from lmpipe.app.cli.mp_rich import RichManager
 
         manager = RichManager()
@@ -311,7 +311,7 @@ class RichManager:
 
         if self._state != _ManagerState.INITIALIZED:
             raise RuntimeError("RichManager has already been started or stopped.")
-        
+
         self.thread = Thread(target=self._thread_target)
         self.thread.start()
         self._state = _ManagerState.STARTED
@@ -321,7 +321,7 @@ class RichManager:
 
         if self._state != _ManagerState.STARTED:
             raise RuntimeError("RichManager is not running.")
-        
+
         self._request_q.put(None)
         self.thread.join()
         self._state = _ManagerState.STOPPED

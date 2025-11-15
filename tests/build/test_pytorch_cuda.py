@@ -58,7 +58,7 @@ def test_pytorch_cuda():
     try:
         import torch
         import torchvision # pyright: ignore[reportMissingTypeStubs]
-        
+
         print("=" * 70)
         print("PyTorch環境情報")
         print("=" * 70)
@@ -66,7 +66,7 @@ def test_pytorch_cuda():
         print(f"Torchvision Version: {torchvision.__version__}")
         print(f"Python Version: {sys.version}")
         print(f"CUDA Available: {torch.cuda.is_available()}")
-        
+
         if torch.cuda.is_available():
             print(f"CUDA Version: {torch.version.cuda}")
             print(f"cuDNN Version: {torch.backends.cudnn.version()}")
@@ -77,7 +77,7 @@ def test_pytorch_cuda():
                 print(f"  Device {i}: {device_name}")
                 print(f"    Total Memory: {device_props.total_memory / 1024**3:.2f} GB")
                 print(f"    Compute Capability: {device_props.major}.{device_props.minor}")
-            
+
             # GPUテンソル演算テスト
             print("\n" + "=" * 70)
             print("GPUテンソル演算テスト")
@@ -99,9 +99,9 @@ def test_pytorch_cuda():
             print(f"  Matrix Shape: {z.shape}")
             print(f"  Matrix Device: {z.device}")
             print("  ✓ CPU行列演算成功")
-        
+
         return True
-        
+
     except ImportError as e:
         print(f"エラー: {e}", file=sys.stderr)
         print("PyTorchまたはtorchvisionがインストールされていません", file=sys.stderr)
@@ -118,12 +118,12 @@ def test_mediapipe():
     try:
         import mediapipe
         import mediapipe.python.solutions.pose as mp_pose # pyright: ignore[reportMissingTypeStubs]
-        
+
         print("\n" + "=" * 70)
         print("MediaPipe環境情報")
         print("=" * 70)
         print(f"MediaPipe Version: {mediapipe.__version__}") # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
-        
+
         # 簡単な初期化テスト
         pose = mp_pose.Pose(
             static_image_mode=True,
@@ -132,9 +132,9 @@ def test_mediapipe():
         )
         print("  ✓ MediaPipe Pose初期化成功")
         pose.close()
-        
+
         return True
-        
+
     except ImportError:
         print("\n" + "=" * 70)
         print("MediaPipe: インストールされていません（オプション）")
@@ -158,19 +158,19 @@ def main():
         help="MediaPipe互換性テストを実行"
     )
     args = parser.parse_args()
-    
+
     success = test_pytorch_cuda()
-    
+
     if args.test_mediapipe:
         success = test_mediapipe() and success
-    
+
     print("\n" + "=" * 70)
     if success:
         print("✓ すべてのテスト完了")
     else:
         print("✗ テスト失敗")
     print("=" * 70)
-    
+
     return 0 if success else 1
 
 

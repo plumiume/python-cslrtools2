@@ -89,4 +89,3 @@ class GlobalArgs(mixin.ReprMixin, mixin.CommandMixin):
     "left hand estimator arguments"
     face = FaceArgs
     "face estimator arguments"
-

@@ -14,18 +14,18 @@
 
 """SLDataset: Sign Language Dataset Management and Loading Utilities.
 
-**Software Type**: Data Access Layer / Data Management Module  
-**Pattern**: Repository Pattern, Data Transfer Object (DTO)  
+**Software Type**: Data Access Layer / Data Management Module
+**Pattern**: Repository Pattern, Data Transfer Object (DTO)
 **Dependencies**: PyTorch, Zarr, NumPy
 
 What This Module Does
 ----------------------
-SLDataset (Sign Language Dataset) is a **data abstraction layer** that provides 
-a unified interface for managing and loading sign language datasets. It solves 
-the problem of efficiently storing and accessing large-scale video datasets with 
+SLDataset (Sign Language Dataset) is a **data abstraction layer** that provides
+a unified interface for managing and loading sign language datasets. It solves
+the problem of efficiently storing and accessing large-scale video datasets with
 associated landmark annotations and labels.
 
-Think of it as a **database system** specifically designed for sign language data, 
+Think of it as a **database system** specifically designed for sign language data,
 where:
 - **Tables** = Zarr groups (metadata, connections, items)
 - **Rows** = Individual sign language samples
@@ -34,9 +34,9 @@ where:
 Key Concept
 -----------
 **Unified Schema**:
-    All sign language datasets, regardless of their original format, are converted 
+    All sign language datasets, regardless of their original format, are converted
     to a standardized schema::
-    
+
         Dataset Root (Zarr Group)
         ├── metadata/           # Dataset-level information (name, version, etc.)
         ├── connections/        # Landmark connectivity graphs
@@ -61,13 +61,13 @@ Core Components
 ---------------
 
 1. **SLDatasetItem** (``dataset.py``)
-   
+
    What it is:
-       Data Transfer Object (DTO) representing a single sign language sample. 
+       Data Transfer Object (DTO) representing a single sign language sample.
        Contains videos, landmarks, and target labels for one sign instance.
-   
+
    Software pattern: Value Object / Data Transfer Object (DTO)
-   
+
    Generic type parameters:
        - ``Kvid``: Video key type (e.g., "rgb", "depth")
        - ``Vvid``: Video value type (e.g., Tensor, Array)
@@ -75,11 +75,11 @@ Core Components
        - ``Vlm``: Landmark value type (e.g., Tensor, NDArray)
        - ``Ktgt``: Target key type (e.g., "gloss", "label")
        - ``Vtgt``: Target value type (e.g., Tensor, int)
-   
+
    Example::
-   
+
        from cslrtools2.sldataset import SLDatasetItem
-       
+
        item = SLDatasetItem(
            videos={"rgb": video_tensor},
            landmarks={"pose": pose_array, "left_hand": hand_array},
@@ -87,29 +87,29 @@ Core Components
        )
 
 2. **SLDataset** (``dataset.py``)
-   
+
    What it is:
-       PyTorch-compatible Dataset class for sign language data. Implements 
+       PyTorch-compatible Dataset class for sign language data. Implements
        the Repository pattern for data access.
-   
+
    Software pattern: Repository Pattern / PyTorch Dataset
-   
+
    Key features:
        - Random access: ``dataset[index]`` → ``SLDatasetItem``
        - Metadata storage: Dataset-level information
        - Connection graphs: Landmark connectivity for visualization
        - Zarr backend: Efficient storage and loading
-   
+
    Example::
-   
+
        from cslrtools2.sldataset import SLDataset
        from torch.utils.data import DataLoader
-       
+
        # Load from Zarr
        import zarr
        root = zarr.open("dataset.zarr", mode="r")
        dataset = SLDataset.from_zarr(root)
-       
+
        # Use with PyTorch
        loader = DataLoader(dataset, batch_size=32, shuffle=True)
        for batch in loader:
@@ -118,58 +118,58 @@ Core Components
            targets = batch.targets
 
 3. **IterableSLDataset** (``dataset.py``)
-   
+
    What it is:
-       PyTorch IterableDataset variant for streaming large datasets that don't 
+       PyTorch IterableDataset variant for streaming large datasets that don't
        fit in memory. Useful for very large sign language corpora.
-   
+
    Software pattern: Iterator Pattern / Stream Processing
-   
+
    Example::
-   
+
        from cslrtools2.sldataset import IterableSLDataset
-       
+
        dataset = IterableSLDataset.from_zarr(zarr_root)
        for item in dataset:
            process(item)
 
 4. **Array Loaders** (``array_loader.py``)
-   
+
    What it is:
-       Factory system for loading various array formats (NPY, NPZ, Zarr, 
+       Factory system for loading various array formats (NPY, NPZ, Zarr,
        SafeTensors, PyTorch). Implements the Strategy pattern.
-   
+
    Software pattern: Factory Pattern / Strategy Pattern
-   
+
    Supported formats:
        - NPY: NumPy single array (``.npy``)
        - NPZ: NumPy compressed archive (``.npz``)
        - Zarr: Chunked, compressed arrays (``.zarr``)
        - SafeTensors: Fast tensor serialization (``.safetensors``)
        - PyTorch: PyTorch tensor files (``.pt``, ``.pth``)
-   
+
    Example::
-   
+
        from cslrtools2.sldataset.array_loader import load_array
-       
+
        # Automatically detects format
        data = load_array("landmarks.npy")
        data = load_array("features.safetensors")
 
 5. **Plugins** (``../plugins/``)
-   
+
    What it is:
-       Dataset-specific adapters for popular sign language datasets. 
+       Dataset-specific adapters for popular sign language datasets.
        Converts original formats to the unified SLDataset schema.
-   
+
    Software pattern: Adapter Pattern / Plugin Architecture
-   
+
    Available plugins:
        - FluentSigners50: Adapter for FluentSigners-50 dataset
        - (More can be added via plugin system)
-   
+
    Example::
-   
+
        # Plugin automatically handles dataset-specific structure
        from cslrtools2.plugins.fluentsigners50.sldataset import load_fluentsigners50
        dataset = load_fluentsigners50("path/to/fs50")
@@ -178,26 +178,26 @@ Use Cases
 ---------
 
 1. **Loading Preprocessed Datasets**:
-   
+
    After using LMPipe to extract landmarks, load them for training::
-   
+
        from cslrtools2.sldataset import SLDataset
        import zarr
-       
+
        root = zarr.open("preprocessed_dataset.zarr", mode="r")
        dataset = SLDataset.from_zarr(root)
        print(f"Dataset size: {len(dataset)} samples")
 
 2. **PyTorch Training Loop**:
-   
+
    Integrate with PyTorch for model training::
-   
+
        from torch.utils.data import DataLoader
        from cslrtools2.sldataset import SLDataset
-       
+
        dataset = SLDataset.from_zarr(zarr.open("data.zarr"))
        loader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4)
-       
+
        for epoch in range(num_epochs):
            for batch in loader:
                landmarks = batch.landmarks["pose"]  # Shape: [B, T, N, 3]
@@ -205,30 +205,30 @@ Use Cases
                # Training logic...
 
 3. **Dataset Conversion**:
-   
+
    Convert from file system to Zarr format::
-   
+
        from cslrtools2.sldataset import SLDatasetItem
        import zarr
-       
+
        root = zarr.open("output.zarr", mode="w")
        items = []
-       
+
        for sample_path in dataset_paths:
            item = SLDatasetItem.from_file_system(sample_path)
            items.append(item)
-       
+
        # Save to Zarr
        from cslrtools2.sldataset import SLDataset
        dataset = SLDataset(metadata={...}, connections={...}, items=items)
        dataset.to_zarr(root)
 
 4. **Custom Collate Function**:
-   
+
    Handle variable-length sequences::
-   
+
        from cslrtools2.sldataset import collate_to_padded_batch
-       
+
        loader = DataLoader(
            dataset,
            batch_size=32,
@@ -246,7 +246,7 @@ Architecture
 
 **Type Safety**:
     Fully typed with generic type parameters for compile-time safety::
-    
+
         SLDataset[
             Kmeta: str,        # Metadata keys
             Kvid: str,         # Video keys
@@ -257,7 +257,7 @@ Architecture
 
 **Plugin System**:
     Extensible architecture for adding new dataset formats::
-    
+
         [project.entry-points."cslrtools2.sldataset.plugins"]
         "fluentsigners50" = "cslrtools2.plugins.fluentsigners50.sldataset:plugin_info"
 
@@ -280,10 +280,10 @@ The ``sldataset2`` command provides dataset management tools::
 
     # List dataset contents
     sldataset2 info dataset.zarr
-    
+
     # Convert format
     sldataset2 convert --from npy --to zarr input/ output.zarr
-    
+
     # Validate dataset
     sldataset2 validate dataset.zarr
 
@@ -328,13 +328,13 @@ Basic dataset loading::
 
     import zarr
     from cslrtools2.sldataset import SLDataset
-    
+
     root = zarr.open("my_dataset.zarr", mode="r")
     dataset = SLDataset.from_zarr(root)
-    
+
     print(f"Dataset size: {len(dataset)}")
     print(f"Metadata: {dataset.metadata}")
-    
+
     # Access a sample
     item = dataset[0]
     print(f"Videos: {item.videos.keys()}")
@@ -345,10 +345,10 @@ PyTorch integration::
 
     from torch.utils.data import DataLoader
     from cslrtools2.sldataset import SLDataset
-    
+
     dataset = SLDataset.from_zarr(zarr.open("data.zarr"))
     loader = DataLoader(dataset, batch_size=16, shuffle=True)
-    
+
     for batch in loader:
         # Process batch
         pass
@@ -356,7 +356,7 @@ PyTorch integration::
 Creating a custom dataset::
 
     from cslrtools2.sldataset import SLDataset, SLDatasetItem
-    
+
     items = [
         SLDatasetItem(
             videos={"rgb": video_data},
@@ -365,13 +365,13 @@ Creating a custom dataset::
         )
         for video_data, landmarks, label in my_data
     ]
-    
+
     dataset = SLDataset(
         metadata={"name": "MyDataset", "version": "1.0"},
         connections={},
         items=items
     )
-    
+
     # Save to Zarr
     import zarr
     root = zarr.open("my_dataset.zarr", mode="w")
@@ -387,4 +387,3 @@ Creating a custom dataset::
 #
 # The CLI (sldataset2 command) is defined as an entry point in pyproject.toml
 # and routes to cslrtools2.sldataset.app.cli.main()
-

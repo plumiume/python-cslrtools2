@@ -69,10 +69,10 @@ class NpzLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
 def npz_lmsc_creator[K: str](key_type: type[K]) -> NpzLandmarkMatrixSaveCollector[K]:
     """Create a NumPy .npz landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`NpzLandmarkMatrixSaveCollector[K]`: Container NumPy .npz landmark matrix saver.
     """

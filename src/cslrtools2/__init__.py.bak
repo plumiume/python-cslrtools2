@@ -1,0 +1,124 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""cslrtools2: Comprehensive toolkit for Continuous Sign Language Recognition.
+
+This package provides three main components for CSLR research:
+
+1. **lmpipe** - Landmark extraction pipeline with MediaPipe integration
+   - Video/image processing with parallel execution
+   - Multiple output formats (NPY, Zarr, SafeTensors, etc.)
+   - CLI: ``lmpipe`` command
+
+2. **sldataset** - Sign language dataset management utilities
+   - Zarr-based efficient storage
+   - PyTorch Dataset integration
+   - CLI: ``sldataset2`` command
+
+3. **convsize** - PyTorch convolution size calculation helpers
+   - Output size computation for conv/pooling layers
+   - Transpose convolution support
+
+Design Notes:
+    This ``__init__.py`` intentionally keeps imports minimal to avoid heavy 
+    dependencies at package import time. Submodules contain CLI applications 
+    with heavy dependencies (torch, mediapipe, opencv, etc.) that should only 
+    be loaded when explicitly used.
+
+Usage Pattern:
+    Recommended import style to avoid loading heavy dependencies::
+
+        # Lightweight - only imports package metadata
+        import cslrtools2
+        print(cslrtools2.__version__)
+
+        # Explicit submodule import - loads only what's needed
+        from cslrtools2.convsize import conv_size
+        from cslrtools2.sldataset import SLDataset
+        from cslrtools2.lmpipe.interface import LMPipeExecutor
+
+Architecture Note:
+    Python packaging standards require a single top-level package. This project 
+    uses a flat namespace (``cslrtools2.*``) rather than multiple top-level 
+    packages. CLI entry points (``lmpipe``, ``sldataset2``) are defined in 
+    ``pyproject.toml`` and route to app modules.
+
+    For more information, see:
+        - CLI applications: :mod:`cslrtools2.lmpipe.app.cli` and :mod:`cslrtools2.sldataset.app.cli`
+        - Core APIs: Individual submodule documentation
+
+Attributes:
+    __version__ (str): Package version string (e.g., "0.1.0")
+
+Example:
+    Lightweight package import::
+
+        >>> import cslrtools2
+        >>> cslrtools2.__version__
+        '0.1.0'
+
+    Explicit submodule imports::
+
+        >>> from cslrtools2.convsize import conv_size
+        >>> import torch
+        >>> result = conv_size(
+        ...     size=torch.tensor([224, 224]),
+        ...     kernel_size=torch.tensor([3, 3]),
+        ...     stride=torch.tensor([2, 2]),
+        ...     padding=torch.tensor([1, 1]),
+        ...     dilation=torch.tensor([1, 1])
+        ... )
+"""
+
+# Get version from package metadata
+try:
+    from ._version import __version__
+except ImportError:
+    # Fallback during development or when _version.py doesn't exist yet
+    try:
+        from importlib.metadata import version
+        __version__ = version("cslrtools2")
+    except Exception:
+        __version__ = "0.0.0+unknown"
+
+# Import exceptions for re-export (lightweight, no heavy dependencies)
+from .exceptions import (
+    CSLRToolsError,
+    ConfigurationError,
+    ValidationError,
+    LMPipeError,
+    SLDatasetError,
+)
+
+# Public API: Only expose lightweight, commonly-used symbols
+# Heavy imports (torch, cv2, mediapipe, etc.) are NOT imported here
+__all__ = [
+    "__version__",
+    # Exceptions (re-exported for convenience)
+    "CSLRToolsError",
+    "ConfigurationError",
+    "ValidationError",
+    "LMPipeError",
+    "SLDatasetError",
+    # Subpackages are accessible via explicit import:
+    # - from cslrtools2 import lmpipe
+    # - from cslrtools2 import sldataset
+    # - from cslrtools2 import convsize
+]
+
+# Note: We do NOT eagerly import submodules here to keep import time fast.
+# Users should explicitly import what they need:
+#   from cslrtools2.convsize import conv_size  # Lightweight
+#   from cslrtools2.sldataset import SLDataset # Medium weight (torch, zarr)
+#   from cslrtools2.lmpipe import ...          # Heavy (mediapipe, cv2)

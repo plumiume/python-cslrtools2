@@ -32,11 +32,11 @@ Example:
         ...     PoseLandmark,
         ...     HandLandmark
         ... )
-        >>> 
+        >>>
         >>> # Access specific landmarks by name
         >>> nose_idx = PoseLandmark.NOSE
         >>> wrist_idx = HandLandmark.WRIST
-        >>> 
+        >>>
         >>> # Use in landmark array indexing
         >>> nose_position = pose_landmarks[PoseLandmark.NOSE]
         >>> wrist_position = hand_landmarks[HandLandmark.WRIST]
@@ -47,7 +47,7 @@ Example:
         ...     POSE_CONNECTIONS,
         ...     HAND_CONNECTIONS
         ... )
-        >>> 
+        >>>
         >>> # Draw skeleton connections
         >>> for start_idx, end_idx in POSE_CONNECTIONS:
         ...     start_pt = landmarks[start_idx]
@@ -58,19 +58,19 @@ Landmark Enums
 --------------
 **PoseLandmark** (IntEnum, 33 landmarks):
     Enum for pose landmark indices from MediaPipe Pose model.
-    
+
     Key landmarks include:
     - ``NOSE`` (0): Nose tip
     - ``LEFT_SHOULDER`` (11), ``RIGHT_SHOULDER`` (12): Shoulders
     - ``LEFT_WRIST`` (15), ``RIGHT_WRIST`` (16): Wrists
     - ``LEFT_HIP`` (23), ``RIGHT_HIP`` (24): Hips
     - ``LEFT_ANKLE`` (27), ``RIGHT_ANKLE`` (28): Ankles
-    
+
     See ``PoseLandmark`` documentation for complete list.
 
 **HandLandmark** (IntEnum, 21 landmarks):
     Enum for hand landmark indices from MediaPipe Hands model.
-    
+
     Key landmarks include:
     - ``WRIST`` (0): Wrist
     - ``THUMB_TIP`` (4): Thumb tip
@@ -78,7 +78,7 @@ Landmark Enums
     - ``MIDDLE_FINGER_TIP`` (12): Middle finger tip
     - ``RING_FINGER_TIP`` (16): Ring finger tip
     - ``PINKY_TIP`` (20): Pinky tip
-    
+
     See ``HandLandmark`` documentation for complete list.
 
 Connection Sets
@@ -108,7 +108,7 @@ Type Safety
 For type checking and IDE support, use the provided type aliases::
 
     >>> from cslrtools2.plugins.mediapipe.lmpipe.constants import ConnectionSet
-    >>> 
+    >>>
     >>> def draw_connections(
     ...     frame: np.ndarray,
     ...     landmarks: np.ndarray,
@@ -126,7 +126,7 @@ you can simply replace them with the MediaPipe originals::
     # Old (cslrtools2 custom enum)
     from cslrtools2.plugins.mediapipe.lmpipe.pose import MediaPipePoseNames
     nose_idx = MediaPipePoseNames.NOSE
-    
+
     # New (MediaPipe official enum)
     from cslrtools2.plugins.mediapipe.lmpipe.constants import PoseLandmark
     nose_idx = PoseLandmark.NOSE

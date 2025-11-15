@@ -3,20 +3,49 @@
 ## Requirements
 
 - Python 3.12 or higher
-- pip or uv package manager
+- `uv` (recommended) or `pip` package manager
 
-## Basic Installation
+## Recommended: Using `uv`
+
+[`uv`](https://github.com/astral-sh/uv) is the recommended package manager for faster dependency resolution and installation:
+
+### Install `uv`
+
+```bash
+# macOS and Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Using pip
+pip install uv
+```
+
+### Install cslrtools2
+
+```bash
+# Core package
+uv pip install cslrtools2
+
+# With MediaPipe support
+uv pip install cslrtools2 --group mediapipe
+
+# With development tools
+uv pip install cslrtools2 --group dev
+
+# All optional dependencies
+uv pip install cslrtools2 --group mediapipe --group dev
+```
+
+## Using pip
+
+### Basic Installation
 
 Install the core package:
 
 ```bash
 pip install cslrtools2
-```
-
-Or using `uv`:
-
-```bash
-uv pip install cslrtools2
 ```
 
 ## Optional Dependencies
@@ -26,13 +55,7 @@ uv pip install cslrtools2
 For landmark extraction features using MediaPipe:
 
 ```bash
-pip install mediapipe
-```
-
-Or install from the optional dependency group:
-
-```bash
-pip install cslrtools2[mediapipe]
+pip install mediapipe>=0.10.14
 ```
 
 ### Development Tools
@@ -40,13 +63,32 @@ pip install cslrtools2[mediapipe]
 For development and testing:
 
 ```bash
-pip install cslrtools2[dev]
+pip install pytest pytest-cov pyright flake8 black sphinx sphinx-rtd-theme
 ```
 
-This includes:
-- pytest (testing framework)
-- pytest-cov (coverage reporting)
-- type stubs for dependencies
+## PyTorch with CUDA Support
+
+For optimal performance with GPU acceleration:
+
+### Prerequisites
+
+- **CUDA Toolkit**: 11.8 or 12.8 (check with `nvidia-smi`)
+- **NVIDIA GPU**: Compatible with CUDA
+
+### Installation
+
+```bash
+# CUDA 12.8 (recommended for newer GPUs)
+uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+
+# CUDA 11.8 (for older GPUs)
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+
+# CPU-only version
+pip install torch torchvision
+```
+
+See [PyTorch Getting Started](https://pytorch.org/get-started/locally/) for platform-specific instructions.
 
 ## From Source
 
@@ -55,29 +97,17 @@ Clone the repository and install in editable mode:
 ```bash
 git clone https://github.com/ikegami-yukino/python-cslrtools2.git
 cd python-cslrtools2
+
+# Using uv (recommended)
+uv pip install -e .
+
+# With optional dependencies
+uv pip install -e . --group mediapipe --group dev
+
+# Using pip
 pip install -e .
+pip install -e ".[dev,mediapipe]"  # Note: this syntax doesn't work with current setup
 ```
-
-### With Optional Dependencies
-
-```bash
-pip install -e ".[mediapipe,dev]"
-```
-
-## GPU/CUDA Requirements
-
-For optimal performance with PyTorch-based operations:
-
-- **PyTorch**: >= 2.0.0 (with CUDA support recommended)
-- **CUDA**: 11.8 or higher (for GPU acceleration)
-
-Install PyTorch with CUDA support:
-
-```bash
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-```
-
-See [PyTorch Getting Started](https://pytorch.org/get-started/locally/) for platform-specific instructions.
 
 ## Dependencies
 

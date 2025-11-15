@@ -26,7 +26,7 @@ The module contains:
 
 Example:
     Creating a custom runner:
-    
+
     >>> from cslrtools2.lmpipe.interface.runner import LMPipeRunner
     >>> class MyRunner(LMPipeRunner):
     ...     def on_start_batch_job(self, runspec):
@@ -99,20 +99,20 @@ def _runner_public_api[S: LMPipeRunner[Any], **P, R](
 
 class LMPipeRunner[K: str]:
     """Internal runner class for coordinating pipeline execution.
-    
+
     This class is responsible for the actual execution of processing tasks,
     coordinating between estimators, executors, and collectors. It handles
     parallel execution, event management, and resource allocation.
-    
+
     The runner is typically instantiated by LMPipeInterface and should not
     be used directly by end users. It provides extensibility points through
     method overrides and event handlers for custom processing workflows.
-        
+
     Note:
         This class is designed for extension. Subclasses can override methods
         like configure_executor() and event handlers to customize behavior.
     """
-    
+
     toplevel_call: bool = True
     "Indicates if this is the top-level call in nested executions."
 
@@ -124,7 +124,7 @@ class LMPipeRunner[K: str]:
             **self.__dict__,
             "executors": {}  # Exclude executors from serialization
         }
-    
+
     def __setstate__(self, state: dict[str, Any]):
         self.__dict__.update(state)
 
@@ -134,24 +134,24 @@ class LMPipeRunner[K: str]:
         options: LMPipeOptions = DEFAULT_LMPIPE_OPTIONS,
         ):
         """Initialize LMPipeRunner with interface and options.
-        
+
         Sets up the runner with necessary components including collectors,
         thread-local storage, and configuration. This constructor is typically
         called internally by :class:`LMPipeInterface` methods.
-        
+
         Args:
             interface (:class:`LMPipeInterface`\\[:obj:`K`\\]): Parent :class:`LMPipeInterface` instance.
             options (:class:`~cslrtools2.lmpipe.options.LMPipeOptions`):
                 Configuration options for execution. Defaults to :obj:`DEFAULT_LMPIPE_OPTIONS`.
-        
+
         Example:
             Typically instantiated internally::
-            
+
                 # Internal usage by LMPipeInterface
                 runner = LMPipeRunner(interface, options)
-            
+
             Custom runner subclass::
-            
+
                 class MyCustomRunner(LMPipeRunner):
                     def __init__(self, interface, options):
                         super().__init__(interface, options)
@@ -185,40 +185,40 @@ class LMPipeRunner[K: str]:
     @_runner_public_api
     def run(self, runspec: RunSpec[Path]):
         """Execute processing based on run specification with automatic type detection.
-        
+
         Analyzes the source path in the run specification and delegates to the
-        appropriate processing method (:meth:`run_batch` for directories, 
+        appropriate processing method (:meth:`run_batch` for directories,
         :meth:`run_single` for files).
         This is the main entry point for runner-level execution.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification containing source and destination paths.
-            
+
         Raises:
             ValueError: If source path type is not supported.
             FileNotFoundError: If source path does not exist.
-        
+
         Example:
             Internal usage by LMPipeInterface::
-            
+
                 runspec = RunSpec.from_pathlikes('input/', 'output/')
                 runner = LMPipeRunner(interface, options)
                 runner.run(runspec)
         """
         lmpipe_logger.info(f"Runner.run: processing {runspec.src}")
-        
+
         if runspec.src.is_dir():
-            lmpipe_logger.debug(f"Detected directory, delegating to run_batch")
+            lmpipe_logger.debug("Detected directory, delegating to run_batch")
             return self.run_batch(runspec)
-        
+
         if runspec.src.is_file():
-            lmpipe_logger.debug(f"Detected file, delegating to run_single")
+            lmpipe_logger.debug("Detected file, delegating to run_single")
             return self.run_single(runspec)
-        
+
         if runspec.src.exists():
             lmpipe_logger.error(f"Unsupported source path type: {runspec.src}")
             raise ValueError(f"Unsupported source path: {runspec.src}")
-        
+
         lmpipe_logger.error(f"Source path does not exist: {runspec.src}")
         raise FileNotFoundError(f"Source path does not exist: {runspec.src}")
 
@@ -226,30 +226,30 @@ class LMPipeRunner[K: str]:
     @_runner_public_api
     def run_batch(self, runspec: RunSpec[Path]):
         """Execute batch processing on multiple files using parallel execution.
-        
+
         Processes multiple files in the source directory using the configured
         executor for parallel processing. Handles task distribution, event
         management, and result collection across all batch tasks. Each file
         is processed independently, enabling efficient parallelization.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification with source directory and destination.
-        
+
         Example:
             Process multiple files in parallel::
-            
+
                 # Internally called by LMPipeInterface.run_batch()
                 runspec = RunSpec.from_pathlikes('videos/', 'results/')
                 runner = LMPipeRunner(interface, options)
                 runner.run_batch(runspec)
         """
         lmpipe_logger.info(f"Starting batch processing: {runspec.src}")
-        
+
         with (
             self._init_executor("batch") as executor,
             self._events_ctxmgr(self.on_start_batch_job, self.on_end_batch_job, runspec)
             ):
-            
+
             lmpipe_logger.debug(f"Batch executor configured: {type(executor).__name__}")
 
             futures = [
@@ -294,41 +294,41 @@ class LMPipeRunner[K: str]:
     @_runner_public_api
     def run_single(self, runspec: RunSpec[Path]):
         """Execute processing on a single file with automatic type detection.
-        
+
         Analyzes the file type and delegates to the appropriate specialized
         processing method (video, image sequence, or single image).
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification with source file and destination.
-            
+
         Raises:
             ValueError: If file type is not supported.
-        
+
         Subclass Development:
             Override to add custom file type detection or preprocessing::
-            
+
                 class MyRunner(LMPipeRunner):
                     def run_single(self, runspec):
                         # Custom preprocessing
                         self.preprocess_file(runspec.src)
-                        
+
                         # Call parent implementation
                         return super().run_single(runspec)
         """
         lmpipe_logger.info(f"Processing single file: {runspec.src}")
-        
+
         if is_video_file(runspec.src):
-            lmpipe_logger.debug(f"Detected video file, delegating to run_video")
+            lmpipe_logger.debug("Detected video file, delegating to run_video")
             return self.run_video(runspec)
-        
+
         if is_images_dir(runspec.src):
-            lmpipe_logger.debug(f"Detected image directory, delegating to run_sequence_images")
+            lmpipe_logger.debug("Detected image directory, delegating to run_sequence_images")
             return self.run_sequence_images(runspec)
-        
+
         if is_image_file(runspec.src):
-            lmpipe_logger.debug(f"Detected single image, delegating to run_single_image")
+            lmpipe_logger.debug("Detected single image, delegating to run_single_image")
             return self.run_single_image(runspec)
-        
+
         lmpipe_logger.error(f"Unsupported file type: {runspec.src}")
         raise ValueError(f"Unsupported source path: {runspec.src}")
 
@@ -336,28 +336,28 @@ class LMPipeRunner[K: str]:
     @_runner_public_api
     def run_video(self, runspec: RunSpec[Path]):
         """Execute processing on a video file.
-        
+
         Opens the video file, extracts frames sequentially, and processes
         each frame through the estimator pipeline.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification with source video file and destination.
-            
+
         Raises:
             ValueError: If video file cannot be opened.
-        
+
         Subclass Development:
             Override to add custom video processing logic::
-            
+
                 class MyRunner(LMPipeRunner):
                     def run_video(self, runspec):
                         # Custom video opening with additional parameters
                         capture = cv2.VideoCapture(str(runspec.src))
                         capture.set(cv2.CAP_PROP_BUFFERSIZE, 3)
-                        
+
                         if not capture.isOpened():
                             raise ValueError(f"Cannot open: {runspec.src}")
-                        
+
                         # Custom frame processing
                         results = self.process_frames(
                             self.preprocess_video_frames(
@@ -368,17 +368,17 @@ class LMPipeRunner[K: str]:
         """
         lmpipe_logger.info(f"Processing video file: {runspec.src}")
         capture = cv2.VideoCapture(str(runspec.src))
-        
+
         if not capture.isOpened():
             lmpipe_logger.error(f"Cannot open video file: {runspec.src}")
             raise ValueError(f"Cannot open video file: {runspec.src}")
-        
+
         frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = capture.get(cv2.CAP_PROP_FPS)
         lmpipe_logger.debug(f"Video properties: frames={frame_count}, fps={fps}")
-        
+
         results = self.process_frames(capture_to_frames(capture))
-        
+
         self._collect_results(runspec, results)
         lmpipe_logger.info(f"Video processing completed: {runspec.src}")
 
@@ -386,17 +386,17 @@ class LMPipeRunner[K: str]:
     @_runner_public_api
     def run_sequence_images(self, runspec: RunSpec[Path]):
         """Execute processing on an image sequence directory.
-        
+
         Processes all images in the directory as a sequence, maintaining
         temporal order for frame-based analysis.
-        
+
         Args:
             runspec (:class:`RunSpec`[Path]): Run specification with source directory and destination.
         """
         lmpipe_logger.info(f"Processing image sequence: {runspec.src}")
         image_count = len(list(runspec.src.glob('*')))
         lmpipe_logger.debug(f"Image sequence contains {image_count} files")
-        
+
         results = self.process_frames(seq_imgs_to_frames(runspec.src))
 
         self._collect_results(runspec, results)
@@ -406,9 +406,9 @@ class LMPipeRunner[K: str]:
     @_runner_public_api
     def run_single_image(self, runspec: RunSpec[Path]):
         """Execute processing on a single image file.
-        
+
         Loads and processes a single image through the estimator pipeline.
-        
+
         Args:
             runspec (:class:`RunSpec`[Path]): Run specification with source image file and destination.
         """
@@ -422,29 +422,29 @@ class LMPipeRunner[K: str]:
     @_runner_public_api
     def run_stream(self, runspec: RunSpec[int]):
         """Execute processing on a live video stream.
-        
+
         Captures frames from a live video stream (e.g., camera) and processes
         them in real-time through the estimator pipeline.
-        
+
         Args:
             runspec (`RunSpec[int]`): Run specification with stream index and destination.
-            
+
         Raises:
             ValueError: If video stream cannot be opened.
-        
+
         Subclass Development:
             Override to add stream-specific handling::
-            
+
                 class MyRunner(LMPipeRunner):
                     def run_stream(self, runspec):
                         # Configure camera settings
                         capture = cv2.VideoCapture(runspec.src)
                         capture.set(cv2.CAP_PROP_FPS, 30)
                         capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-                        
+
                         if not capture.isOpened():
                             raise ValueError(f"Cannot open: {runspec.src}")
-                        
+
                         # Add frame buffering
                         results = self.process_frames(
                             self.buffer_stream_frames(
@@ -455,11 +455,11 @@ class LMPipeRunner[K: str]:
         """
         lmpipe_logger.info(f"Starting stream processing: device={runspec.src}")
         capture = cv2.VideoCapture(runspec.src)
-        
+
         if not capture.isOpened():
             lmpipe_logger.error(f"Cannot open video stream: device={runspec.src}")
             raise ValueError(f"Cannot open video stream: {runspec.src}")
-        
+
         lmpipe_logger.debug(f"Stream opened successfully: device={runspec.src}")
         results = self.process_frames(capture_to_frames(capture))
 
@@ -469,32 +469,32 @@ class LMPipeRunner[K: str]:
 
     def process_frames(self, frames: Iterable[MatLike]) -> Iterable[ProcessResult[K]]:
         """Process a sequence of frames through the estimator pipeline.
-        
+
         Coordinates the processing of multiple frames using parallel execution.
         Manages resource allocation, task submission, and result collection
         for efficient frame-by-frame processing.
-        
+
         Args:
             frames (`Iterable[MatLike]`): Iterable of frame matrices to process.
-            
+
         Yields:
             :class:`ProcessResult[K]`: ProcessResult objects containing landmarks and annotated frames.
-        
+
         Subclass Development:
             Override to implement custom frame processing strategies::
-            
+
                 class MyRunner(LMPipeRunner):
                     def process_frames(self, frames):
                         # Add frame preprocessing
                         preprocessed = (self.preprocess(f) for f in frames)
-                        
+
                         # Use parent's parallel processing
                         for result in super().process_frames(preprocessed):
                             # Add postprocessing
                             yield self.postprocess_result(result)
-            
+
             Or implement completely custom parallel processing::
-            
+
                 class MyRunner(LMPipeRunner):
                     def process_frames(self, frames):
                         frame_list = list(frames)
@@ -507,7 +507,7 @@ class LMPipeRunner[K: str]:
                                 yield future.result()
         """
         lmpipe_logger.debug("Starting frame processing pipeline")
-        
+
         with (
             self._get_executor_resources(self.lmpipe_interface.estimator),
             self._init_executor("frames") as executor,
@@ -515,9 +515,9 @@ class LMPipeRunner[K: str]:
                 self.on_start_frames_job,
                 self.on_end_frames_job,
             )):
-            
+
             lmpipe_logger.debug(f"Frame executor configured: {type(executor).__name__}")
-            
+
             futures = [
                 self._submit_with_events(
                     executor.submit(
@@ -549,47 +549,47 @@ class LMPipeRunner[K: str]:
 
             for ftr in futures:
                 yield ftr.result()
-            
+
             lmpipe_logger.debug(f"Frame processing completed: {len(futures)} frames processed")
 
 
     def _call_estimator(self, frame_src: MatLike, frame_idx: int) -> ProcessResult[K]:
         """Execute estimator on a single frame.
-        
+
         Processes a single frame through the configured estimator, performing
         setup on the first frame, landmark estimation, and frame annotation.
-        
+
         Args:
             frame_src (`MatLike`): Input frame matrix to process.
             frame_idx (`int`): Index/ID of the frame in the sequence.
-            
+
         Returns:
             :class:`ProcessResult[K]`: ProcessResult containing frame ID, headers, landmarks, and annotated frame.
-        
+
         Subclass Development:
             Override to customize single frame processing::
-            
+
                 class MyRunner(LMPipeRunner):
                     def _call_estimator(self, frame_src, frame_idx):
                         # Add frame-level preprocessing
                         preprocessed = self.denoise(frame_src)
-                        
+
                         # Custom setup logic
                         if frame_idx == 0:
                             self.lmpipe_interface.estimator.setup()
                             self.initialize_tracking()
-                        
+
                         # Get estimator results
                         headers = self.lmpipe_interface.estimator.headers
                         landmarks = self.lmpipe_interface.estimator.estimate(
                             preprocessed, frame_idx
                         )
-                        
+
                         # Custom annotation
                         annotated_frame = self.custom_annotate(
                             frame_src, landmarks
                         )
-                        
+
                         return ProcessResult(
                             frame_id=frame_idx,
                             headers=headers,
@@ -606,7 +606,7 @@ class LMPipeRunner[K: str]:
         annotated_frame = self.lmpipe_interface.estimator.annotate(
             frame_src, frame_idx, landmarks
         )
-        
+
         if frame_idx % 100 == 0:
             lmpipe_logger.debug(f"Processed frame {frame_idx}")
 
@@ -616,11 +616,11 @@ class LMPipeRunner[K: str]:
             landmarks=landmarks,
             annotated_frame=annotated_frame
         )
-    
+
     @contextmanager
     def _get_executor_resources(self, estimator: Estimator[K]):
         """Context manager for allocating executor resources.
-        
+
         Args:
             estimator (:class:`Estimator`[K]): The estimator that will use the resources.
 
@@ -631,22 +631,22 @@ class LMPipeRunner[K: str]:
 
     def _collect_results(self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]):
         """Collect processing results using configured collectors.
-        
+
         Args:
             runspec (`RunSpec[Any]`): Run specification for context.
             results (`Iterable[ProcessResult[K]]`): Iterable of processing results to collect.
-        
+
         Subclass Development:
             Override to add custom result processing before collection::
-            
+
                 class MyRunner(LMPipeRunner):
                     def _collect_results(self, runspec, results):
                         # Filter or transform results
                         filtered = (r for r in results if self.is_valid(r))
-                        
+
                         # Call parent's collection
                         super()._collect_results(runspec, filtered)
-                        
+
                         # Add custom post-collection processing
                         self.generate_summary_report(runspec)
         """
@@ -659,15 +659,15 @@ class LMPipeRunner[K: str]:
 
     ###### Events ######
 
-    def on_start_batch_job(self, runspec: RunSpec[Path]): 
+    def on_start_batch_job(self, runspec: RunSpec[Path]):
         """Event handler called when a batch job starts.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification for the batch job.
-        
+
         Subclass Development:
             Override to add custom batch job initialization::
-            
+
                 class MyRunner(LMPipeRunner):
                     def on_start_batch_job(self, runspec):
                         print(f"Starting batch processing: {runspec.src}")
@@ -675,45 +675,45 @@ class LMPipeRunner[K: str]:
                         self.initialize_progress_bar()
         """
         ...
-        
-    def on_submit_batch_task(self, runspec: RunSpec[Path], task_id: int): 
+
+    def on_submit_batch_task(self, runspec: RunSpec[Path], task_id: int):
         """Event handler called when a batch task is submitted.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification for the batch job.
             task_id (`int`): Unique identifier for the task.
         """
         ...
-        
-    def on_start_batch_task(self, runspec: RunSpec[Path], task_id: int): 
+
+    def on_start_batch_task(self, runspec: RunSpec[Path], task_id: int):
         """Event handler called when a batch task starts execution.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification for the batch job.
             task_id (`int`): Unique identifier for the task.
         """
         ...
-        
-    def on_end_batch_task(self, runspec: RunSpec[Path], task_id: int): 
+
+    def on_end_batch_task(self, runspec: RunSpec[Path], task_id: int):
         """Event handler called when a batch task completes.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification for the batch job.
             task_id (`int`): Unique identifier for the task.
         """
         ...
-        
-    def on_success_batch_task(self, runspec: RunSpec[Path], task_id: int, result: Any): 
+
+    def on_success_batch_task(self, runspec: RunSpec[Path], task_id: int, result: Any):
         """Event handler called when a batch task completes successfully.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification for the batch job.
             task_id (`int`): Unique identifier for the task.
             result (`Any`): Result returned by the successful task.
-        
+
         Subclass Development:
             Override to track successful task completions::
-            
+
                 class MyRunner(LMPipeRunner):
                     def on_success_batch_task(self, runspec, task_id, result):
                         self.completed_tasks += 1
@@ -721,40 +721,40 @@ class LMPipeRunner[K: str]:
                         self.log_success(task_id, result)
         """
         ...
-        
-    def on_failure_batch_task(self, runspec: RunSpec[Path], task_id: int, error: Exception): 
+
+    def on_failure_batch_task(self, runspec: RunSpec[Path], task_id: int, error: Exception):
         """Event handler called when a batch task fails.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification for the batch job.
             task_id (`int`): Unique identifier for the task.
             error (`Exception`): Exception that caused the task failure.
-        
+
         Subclass Development:
             Override to implement custom error handling::
-            
+
                 class MyRunner(LMPipeRunner):
                     def on_failure_batch_task(self, runspec, task_id, error):
                         self.failed_tasks.append((task_id, error))
                         self.logger.error(f"Task {task_id} failed: {error}")
-                        
+
                         # Optionally retry
                         if self.should_retry(error):
                             self.retry_task(task_id)
         """
         ...
-        
-    def on_end_batch_job(self, runspec: RunSpec[Path]): 
+
+    def on_end_batch_job(self, runspec: RunSpec[Path]):
         """Event handler called when a batch job ends.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification for the batch job.
         """
         ...
-        
-    def on_determined_batch_task_count(self, runspec: RunSpec[Path], task_count: int): 
+
+    def on_determined_batch_task_count(self, runspec: RunSpec[Path], task_count: int):
         """Event handler called when batch task count is determined.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Run specification for the batch job.
             task_count (`int`): Total number of tasks in the batch.
@@ -762,59 +762,59 @@ class LMPipeRunner[K: str]:
         ...
 
 
-    def on_start_frames_job(self): 
+    def on_start_frames_job(self):
         """Event handler called when frame processing job starts."""
         ...
-        
-    def on_submit_frames_task(self, task_id: int): 
+
+    def on_submit_frames_task(self, task_id: int):
         """Event handler called when a frame processing task is submitted.
-        
+
         Args:
             task_id (`int`): Unique identifier for the frame task.
         """
         ...
-        
-    def on_start_frames_task(self, task_id: int): 
+
+    def on_start_frames_task(self, task_id: int):
         """Event handler called when a frame processing task starts.
-        
+
         Args:
             task_id (`int`): Unique identifier for the frame task.
         """
         ...
-        
-    def on_end_frames_task(self, task_id: int): 
+
+    def on_end_frames_task(self, task_id: int):
         """Event handler called when a frame processing task completes.
-        
+
         Args:
             task_id (`int`): Unique identifier for the frame task.
         """
         ...
-        
-    def on_success_frames_task(self, task_id: int, result: Any): 
+
+    def on_success_frames_task(self, task_id: int, result: Any):
         """Event handler called when a frame processing task succeeds.
-        
+
         Args:
             task_id (`int`): Unique identifier for the frame task.
             result (`Any`): Result returned by the successful task.
         """
         ...
-        
-    def on_failure_frames_task(self, task_id: int, error: Exception): 
+
+    def on_failure_frames_task(self, task_id: int, error: Exception):
         """Event handler called when a frame processing task fails.
-        
+
         Args:
             task_id (`int`): Unique identifier for the frame task.
             error (`Exception`): :class:`Exception` that caused the task failure.
         """
         ...
-        
-    def on_end_frames_job(self): 
+
+    def on_end_frames_job(self):
         """Event handler called when frame processing job ends."""
         ...
-        
-    def on_determined_frames_task_count(self, task_count: int): 
+
+    def on_determined_frames_task_count(self, task_count: int):
         """Event handler called when frame task count is determined.
-        
+
         Args:
             task_count (`int`): Total number of frame processing tasks.
         """
@@ -822,7 +822,7 @@ class LMPipeRunner[K: str]:
 
     def on_keyboard_interrupt(self, error: KeyboardInterrupt) -> None:
         """Event handler called when a keyboard interrupt occurs.
-        
+
         Args:
             error (`KeyboardInterrupt`): The keyboard interrupt exception.
 
@@ -833,7 +833,7 @@ class LMPipeRunner[K: str]:
 
     def on_general_exception(self, error: Exception) -> None:
         """Event handler called when a general exception occurs.
-        
+
         Args:
             error (`Exception`): The exception that occurred.
 
@@ -860,15 +860,15 @@ class LMPipeRunner[K: str]:
         *args: *Ts
         ):
         """Context manager for wrapping execution blocks with start/end event handlers.
-        
+
         Provides a convenient way to ensure event handlers are called at the beginning
         and end of an execution block, with guaranteed cleanup even if exceptions occur.
-        
+
         Args:
             on_start (`((*Ts) -> Any)`): Event handler to call when entering the context.
             on_end (`((*Ts) -> Any)`): Event handler to call when exiting the context.
             *args (`*Ts`): Arguments to pass to both event handlers.
-            
+
         Yields:
             None: Control is yielded to the wrapped execution block.
         """
@@ -887,18 +887,18 @@ class LMPipeRunner[K: str]:
         *args: *Ts
         ) -> Future[R]:
         """Submit a task with event callbacks for submission, success, and failure.
-        
+
         Wraps a Future with event handlers that are triggered at different stages
         of task execution: immediately on submission, on successful completion, or
         on failure. This provides a unified event-driven interface for task monitoring.
-        
+
         Args:
             ftr (`Future[R]`): The future representing the submitted task.
             on_submit (`((*Ts) -> Any)`): Event handler called immediately when task is submitted.
             on_success (`((*Ts, R) -> Any)`): Event handler called when task completes successfully.
             on_failure (`((*Ts, Exception) -> Any)`): Event handler called when task fails.
             *args (`*Ts`): Arguments to pass to the event handlers.
-            
+
         Returns:
             :class:`Future[R]`: The same future with event callbacks attached.
         """
@@ -916,12 +916,12 @@ class LMPipeRunner[K: str]:
 
     class _CallbackWithEvents[*Ts, R]:
         """Internal callback wrapper for handling task success and failure events.
-        
+
         This class wraps success and failure callbacks to be executed when a
         Future completes, providing a clean interface for event-driven task
         completion handling in the executor framework.
         """
-        
+
         def __init__(
             self,
             on_success: Callable[[*Ts, R], Any],
@@ -934,10 +934,10 @@ class LMPipeRunner[K: str]:
             "Callback invoked when the task fails."
             self.args = args
             "Arguments to pass to the callbacks along with result or error."
-            
+
         def __call__(self, ftr: Future[R]):
             """Execute the appropriate callback based on task completion status.
-            
+
             Args:
                 ftr (`Future[R]`): The completed future to process.
             """
@@ -961,7 +961,7 @@ class LMPipeRunner[K: str]:
 
         def __call__(self) -> R:
             """Execute the task with the stored arguments.
-            
+
             Returns:
                 :class:`R`: Result of the task execution.
             """
@@ -972,12 +972,12 @@ class LMPipeRunner[K: str]:
 
     class _local_runner_method[T: LMPipeRunner[Any], **P, R]:
         """Internal callable wrapper for executing runner methods in worker processes/threads.
-        
+
         This class serializes runner method calls for execution across process/thread
         boundaries by storing the method reference, runner ID, and arguments. When
         called in a worker, it retrieves the correct runner instance from thread-local
         storage and invokes the method with the stored arguments.
-        
+
         This pattern enables safe execution of instance methods in parallel executors
         where the runner instance may not be directly accessible.
         """
@@ -1001,13 +1001,13 @@ class LMPipeRunner[K: str]:
 
         def __call__(self) -> R:
             """Execute the stored method with the stored arguments.
-            
+
             Retrieves the runner instance from thread-local storage and invokes
             the method. Validates runner type and ID to ensure correct instance.
-            
+
             Returns:
                 :class:`R`: Result of the method invocation.
-                
+
             Raises:
                 :class:`TypeError`: If retrieved runner is not of expected type.
                 :class:`ValueError`: If runner ID does not match expected ID.
@@ -1020,23 +1020,23 @@ class LMPipeRunner[K: str]:
                     f"Expected runner of type {self.runner_type.__name__}, "
                     f"got {type(runner).__name__}."
                 )
-            
+
             if runner._id != self.runner_id:
                 raise ValueError(
                     f"Runner ID mismatch: expected {self.runner_id}, got {runner._id}."
                 )
 
             return self.method(runner, *self.args, **self.kwargs)
-        
+
     class _local(local):
         """Thread-local storage container for runner instances.
-        
+
         Provides a thread-local dictionary mapping runner IDs to runner instances,
         enabling worker processes/threads to access the appropriate runner instance
         for method execution. This is essential for parallel execution where each
         worker needs its own runner context.
         """
-        
+
         instances: dict[int, "LMPipeRunner[Any]"] = {}
         "Mapping of runner IDs to runner instances in current thread."
 
@@ -1053,24 +1053,24 @@ class LMPipeRunner[K: str]:
 
     def configure_executor(self, mode: ExecutorMode, initializer: Callable[[], Any]) -> Executor:
         """Configure and return an appropriate executor for the given mode.
-        
+
         This method can be overridden in subclasses to customize executor
         selection and configuration based on specific requirements.
-        
+
         Args:
             mode (`ExecutorMode`): Execution mode ("batch" or "frames").
             initializer (`(() -> Any)`): Function to initialize executor workers.
-            
+
         Returns:
             :class:`Executor`: Configured executor instance based on options and mode.
-            
+
         Note:
             Returns DummyExecutor if the current mode doesn't match the
             requested mode or if no specific executor type is configured.
-        
+
         Subclass Development:
             Override this method to implement custom executor logic::
-            
+
                 class MyRunner(LMPipeRunner):
                     def configure_executor(self, mode, initializer):
                         if mode == "batch":
@@ -1107,7 +1107,7 @@ class LMPipeRunner[K: str]:
                 max_workers=max_workers,
                 initializer=initializer
             )
-        
+
         if self.lmpipe_options['executor_type'] == 'thread':
             lmpipe_logger.info(
                 f"Using ThreadPoolExecutor: max_workers={max_cpus}"
@@ -1122,7 +1122,7 @@ class LMPipeRunner[K: str]:
 
     def _default_executor_initializer(self):
         """Default initializer function for executor workers.
-        
+
         Registers this runner instance in thread-local storage for
         access by worker processes/threads.
         """
@@ -1143,19 +1143,19 @@ class LMPipeRunner[K: str]:
 
     def _get_runspecs(self, runspec: RunSpec[Path]) -> Iterable[RunSpec[Path]]:
         """Generate run specifications for batch processing.
-        
+
         Walks through the source directory structure and creates individual
         run specifications for each file or image directory that should be processed.
-        
+
         Args:
             runspec (`RunSpec[Path]`): Base run specification with source directory.
-            
+
             Yields:
             Individual run specifications for each processable item.
         """
         lmpipe_logger.debug(f"Scanning directory for batch processing: {runspec.src}")
         spec_count = 0
-        
+
         for dirpath, _, filenames in runspec.src.walk():
 
             rel_dst = runspec.dst / dirpath.relative_to(runspec.src)
@@ -1165,7 +1165,7 @@ class LMPipeRunner[K: str]:
                 continue
 
             files = [dirpath / f for f in filenames if not f.startswith('.')]
-            
+
             all_image_files = files and all(
                 is_image_file(file_path) for file_path in files
             )
@@ -1186,47 +1186,47 @@ class LMPipeRunner[K: str]:
                 if self._apply_exist_rule(spec):
                     spec_count += 1
                     yield spec
-        
+
         lmpipe_logger.debug(f"Found {spec_count} files/directories to process")
 
     def _configure_collectors(self) -> list[Collector[K]]:
         """Configure and return list of result collectors.
-        
+
         Returns:
             `list[Collector[K]]`: List of configured collector instances.
-            
+
         Note:
             This is a placeholder for future collector configuration logic.
-        
+
         Subclass Development:
             Override to add custom collector initialization::
-            
+
                 class MyRunner(LMPipeRunner):
                     def _configure_collectors(self):
                         # Get default collectors
                         collectors = super()._configure_collectors()
-                        
+
                         # Add custom collectors based on options
                         if self.lmpipe_options.get('enable_csv_export'):
                             collectors.append(CsvLandmarkMatrixSaveCollector())
-                        
+
                         return collectors
         """
         lmpipe_logger.debug("Configuring collectors")
-        
+
         if callable(self.lmpipe_interface.collectors_or_factory):
             lmpipe_logger.debug("Using collector factory function")
             collectors = self.lmpipe_interface.collectors_or_factory()
         else:
             lmpipe_logger.debug("Using pre-configured collectors")
             collectors = self.lmpipe_interface.collectors_or_factory
-        
+
         if not collectors:
             lmpipe_logger.warning("No collectors configured - results will not be saved")
         else:
             collector_names = [type(c).__name__ for c in collectors]
             lmpipe_logger.info(f"Configured {len(collectors)} collectors: {', '.join(collector_names)}")
-        
+
         return collectors
 
     def _apply_exist_rule(self, runspec: RunSpec[Any]) -> bool:

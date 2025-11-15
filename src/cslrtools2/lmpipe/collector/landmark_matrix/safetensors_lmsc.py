@@ -70,10 +70,10 @@ class SafetensorsLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector
 
 def safetensors_lmsc_creator[K: str](key_type: type[K]) -> SafetensorsLandmarkMatrixSaveCollector[K]:
     """Create a Safetensors landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`SafetensorsLandmarkMatrixSaveCollector[K]`: Container Safetensors landmark matrix saver.
     """

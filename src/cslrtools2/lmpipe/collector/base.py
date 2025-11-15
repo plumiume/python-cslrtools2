@@ -24,14 +24,14 @@ if TYPE_CHECKING:
 
 class Collector[K: str](ABC):
     """Abstract base class for result collectors.
-    
+
     Collectors are responsible for saving or displaying the results from
     landmark detection pipelines. Implementations handle different output
     formats (CSV, JSON, video annotations, etc.).
-    
+
     Type Parameters:
         K: String type for landmark keys identifying different body parts.
-    
+
     Note:
         Subclasses must implement both :meth:`configure_from_options` and
         :meth:`collect_results` methods. The :meth:`log_start` and :meth:`log_end`
@@ -41,10 +41,10 @@ class Collector[K: str](ABC):
     @abstractmethod
     def configure_from_options(self, options: "LMPipeOptions") -> None:
         """Configure collector from LMPipe options.
-        
+
         This method is called after collector instantiation to set up
         configuration based on the provided options.
-        
+
         Args:
             options (:class:`~cslrtools2.lmpipe.options.LMPipeOptions`):
                 The pipeline options containing configuration.
@@ -54,7 +54,7 @@ class Collector[K: str](ABC):
     @abstractmethod
     def collect_results(self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]):
         """Collect and process the results from the estimator.
-        
+
         Args:
             runspec (:class:`~cslrtools2.lmpipe.runspec.RunSpec`\\[:obj:`~typing.Any`\\]):
                 The run specification for the current task.

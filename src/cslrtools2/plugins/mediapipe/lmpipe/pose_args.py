@@ -41,4 +41,3 @@ pose_info: Info[MediaPipePoseArgs.T, MediaPipePoseKey] = (
     MediaPipePoseArgs,
     get_pose_estimator
 )
-

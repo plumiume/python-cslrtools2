@@ -67,11 +67,11 @@ __all__ = [
 
 class CSLRToolsError(Exception):
     """Base exception for all cslrtools2 errors.
-    
+
     All custom exceptions in cslrtools2 inherit from this class.
     This allows users to catch all cslrtools2-specific errors with
     a single except clause.
-    
+
     Example:
         >>> try:
         ...     # Some cslrtools2 operation
@@ -88,12 +88,12 @@ class CSLRToolsError(Exception):
 
 class ConfigurationError(CSLRToolsError):
     """Raised when configuration is invalid or inconsistent.
-    
+
     This includes:
     - Invalid option combinations
     - Missing required configuration
     - Malformed configuration files
-    
+
     Example:
         >>> raise ConfigurationError(
         ...     "Invalid estimator configuration: missing model_path"
@@ -104,12 +104,12 @@ class ConfigurationError(CSLRToolsError):
 
 class ValidationError(CSLRToolsError):
     """Raised when input validation fails.
-    
+
     This includes:
     - Invalid argument values
     - Type mismatches
     - Out-of-range values
-    
+
     Example:
         >>> raise ValidationError(
         ...     f"Expected positive integer, got {value}"
@@ -124,7 +124,7 @@ class ValidationError(CSLRToolsError):
 
 class LMPipeError(CSLRToolsError):
     """Base exception for landmark pipeline errors.
-    
+
     All lmpipe-specific exceptions inherit from this class.
     """
     pass
@@ -132,12 +132,12 @@ class LMPipeError(CSLRToolsError):
 
 class EstimatorError(LMPipeError):
     """Raised when landmark estimation fails.
-    
+
     This includes:
     - Model initialization failures
     - Estimation computation errors
     - Invalid estimator state
-    
+
     Example:
         >>> raise EstimatorError(
         ...     "MediaPipe model initialization failed: invalid model file"
@@ -148,12 +148,12 @@ class EstimatorError(LMPipeError):
 
 class CollectorError(LMPipeError):
     """Raised when result collection fails.
-    
+
     This includes:
     - Output file write errors
     - Format conversion failures
     - Collector initialization errors
-    
+
     Example:
         >>> raise CollectorError(
         ...     f"Failed to write output to {path}: {reason}"
@@ -164,12 +164,12 @@ class CollectorError(LMPipeError):
 
 class VideoProcessingError(LMPipeError):
     """Raised when video processing fails.
-    
+
     This includes:
     - Cannot open video file
     - Video decode errors
     - Frame extraction failures
-    
+
     Example:
         >>> raise VideoProcessingError(
         ...     f"Cannot open video file: {path}. "
@@ -181,12 +181,12 @@ class VideoProcessingError(LMPipeError):
 
 class ModelDownloadError(LMPipeError):
     """Raised when model download fails.
-    
+
     This includes:
     - Network errors
     - HTTP errors
     - File write errors
-    
+
     Example:
         >>> raise ModelDownloadError(
         ...     f"Failed to download model from {url}. "
@@ -203,7 +203,7 @@ class ModelDownloadError(LMPipeError):
 
 class SLDatasetError(CSLRToolsError):
     """Base exception for dataset errors.
-    
+
     All sldataset-specific exceptions inherit from this class.
     """
     pass
@@ -211,12 +211,12 @@ class SLDatasetError(CSLRToolsError):
 
 class DataLoadError(SLDatasetError):
     """Raised when data loading fails.
-    
+
     This includes:
     - File not found
     - Data key not found
     - File format errors
-    
+
     Example:
         >>> raise DataLoadError(
         ...     f"Failed to load array from {path}: {reason}"
@@ -227,12 +227,12 @@ class DataLoadError(SLDatasetError):
 
 class DataFormatError(SLDatasetError):
     """Raised when data format is unexpected.
-    
+
     This includes:
     - Unexpected data types
     - Invalid data shapes
     - Missing required fields
-    
+
     Example:
         >>> raise DataFormatError(
         ...     f"Expected Tensor in file {path}, got {type(data).__name__}. "
@@ -244,12 +244,12 @@ class DataFormatError(SLDatasetError):
 
 class PluginError(SLDatasetError):
     """Raised when plugin loading or execution fails.
-    
+
     This includes:
     - Invalid plugin structure
     - Plugin load failures
     - Plugin execution errors
-    
+
     Example:
         >>> raise PluginError(
         ...     f"Plugin entry point {name} does not return a valid processor. "

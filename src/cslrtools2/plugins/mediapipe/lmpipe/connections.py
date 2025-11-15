@@ -81,4 +81,3 @@ __all__ = [
     # Type alias
     "ConnectionSet",
 ]
-
