@@ -135,11 +135,13 @@ MediaPipe is optional (separate dependency group) - estimators gracefully import
 ### Branching Strategy
 
 - `main` - stable production
-- `dev-ai/*` - AI agent collaborative development branches
+- `dev-ai/*` - AI agent collaborative development branches (short-lived/experimental)
+- `main-ai` - integration branch where multiple `dev-ai/*` branches are aggregated for bulk testing before main
+- `integration-ai` - recommended persistent integration branch (used for long-lived CI/integration tasks).
 - Use Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, etc.
-- Squash merge from `dev-ai/*` to `main` to consolidate AI agent commits
+- Squash merge from `dev-ai/*` to `main` to consolidate AI agent commits when appropriate
 
-See `BRANCHING_STRATEGY.md` for full rules.
+See `BRANCHING_STRATEGY.md` for full rules and workspace guidelines (worktree usage, `uv run` conventions).
 
 ### File Organization
 

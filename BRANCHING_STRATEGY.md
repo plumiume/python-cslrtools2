@@ -165,6 +165,85 @@ git push -u origin main-ai
 - 長期間マージされないブランチは定期的に見直す
 - mainブランチは常にデプロイ可能な状態を保つ
 
+## ワークスペース構成と Worktree の運用
+
+このプロジェクトは Git Worktree を利用した並列ワークスペース構成を推奨します。各作業ワークスペースは独立した仮想環境（`.venv`）を持ち、`uv` を使った実行／依存管理を行ってください。
+
+主なポイント:
+- 各ワークスペースで独立した `.venv` を保持する（共有しない）
+- `uv run python` を使ってスクリプトを実行する（必須）
+- Worktree を使うと複数タスクを並列で進められるが、同じブランチを複数のワークツリーで編集しない
+
+代表的なコマンド（PowerShell）:
+
+```powershell
+# worktree 一覧
+git worktree list
+
+# 新しい worktree を作る（新ブランチで）
+git worktree add ..\cslrtools2-<name> -b dev-ai/<task-name>
+
+# 既存ブランチで worktree を作る
+git worktree add ..\cslrtools2-<name> origin/dev-ai/<branch-name>
+
+# worktree 削除
+git worktree remove ..\cslrtools2-<name>
+
+# 依存を同期（uv を使う）
+cd ..\cslrtools2-<name>
+uv sync
+uv run pytest
+```
+
+運用の注意:
+- ワークスペースをまたいで同じブランチを編集すると競合やデータ損失の原因になります。
+- CI やデプロイの参照ブランチ名を変更する場合はスクリプトや設定を合わせて更新してください。
+
+## Worktree 用 Copilot 指示フロー
+
+新規に Worktree（ワークスペース）を作成した際、そこの作業で実行したいタスクやエージェントへの指示をリポジトリに保存するために、ワークスペース専用の指示ファイルを配置するフローを推奨します。
+
+ファイル名 (推奨): `.github/worktree-copilot-instructions.md`
+
+目的:
+- その Worktree で行いたい範囲（テスト、実験、データ生成など）を明確にして、コードエージェントが自動化タスクを理解・実行できるようにする。
+- 作業内容をワークスペースに紐づけて履歴化することで、後からの追跡や再実行を容易にする。
+
+テンプレート（例）:
+
+```markdown
+# worktree: <worktree-name or branch>
+
+## Goal
+- 短い一文で目的を説明。
+
+## Tasks
+- task-1: 具体的な操作（ex: run tests, create dataset slice）
+- task-2: 期待する成果物（ex: zarr files at /data/tests/...）
+
+## Constraints
+- time: 30m
+- resources: no GPU
+
+## Notes
+- 追加の背景情報や参照先ファイル
+```
+
+推奨フロー:
+1. Worktree を作成する際に `.github/worktree-copilot-instructions.md` を作成する（ローカルで編集）。
+2. 指示ファイルをコミットして push する。Worktree をチェックアウトしているコラボレーターや自動化がこれを参照できます。
+3. コードエージェントはこのファイルを読み取り、指定タスクを実行／提案を作成します。
+
+運用上の注意:
+- 指示ファイルは作業に応じて細かく分けてもよい（例: `tests-enhancement.md` など）。
+- センシティブな情報（API キー等）はここに書かない。必要な場合はシークレット管理を使う。
+
+---
+
+
+---
+
+
 ## トラブルシューティング
 
 ### コンフリクトが発生した場合
