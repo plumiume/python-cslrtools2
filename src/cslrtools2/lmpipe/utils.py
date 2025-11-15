@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """Utility helpers for LMPipe image and video handling.
 
 This module provides reusable helpers for the LMPipe pipeline, including

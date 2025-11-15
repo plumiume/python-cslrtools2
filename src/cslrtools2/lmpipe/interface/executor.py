@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from typing import Callable
 from concurrent.futures import Executor, Future
 from loky import ProcessPoolExecutor as LokyExecutor # pyright: ignore[reportMissingTypeStubs]

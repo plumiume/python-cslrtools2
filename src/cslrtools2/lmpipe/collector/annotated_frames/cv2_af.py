@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from pathlib import Path
 
 from ...estimator import ProcessResult
@@ -110,21 +113,21 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
             :class:`int`: FourCC code as integer.
         """
         if self.fourcc is not None:
-            return self._cv2.VideoWriter.fourcc(*self.fourcc)  # type: ignore
+            return self._cv2.VideoWriter.fourcc(*self.fourcc)  # pyright: ignore[reportAttributeAccessIssue]
 
         # Auto-select codec based on extension
         ext_lower = self.extension.lower()
         if ext_lower == ".mp4":
-            return self._cv2.VideoWriter.fourcc(*"mp4v")  # type: ignore
+            return self._cv2.VideoWriter.fourcc(*"mp4v")  # pyright: ignore[reportAttributeAccessIssue]
         elif ext_lower == ".avi":
-            return self._cv2.VideoWriter.fourcc(*"XVID")  # type: ignore
+            return self._cv2.VideoWriter.fourcc(*"XVID")  # pyright: ignore[reportAttributeAccessIssue]
         elif ext_lower == ".mov":
-            return self._cv2.VideoWriter.fourcc(*"mp4v")  # type: ignore
+            return self._cv2.VideoWriter.fourcc(*"mp4v")  # pyright: ignore[reportAttributeAccessIssue]
         elif ext_lower == ".mkv":
-            return self._cv2.VideoWriter.fourcc(*"X264")  # type: ignore
+            return self._cv2.VideoWriter.fourcc(*"X264")  # pyright: ignore[reportAttributeAccessIssue]
         else:
             # Default fallback
-            return self._cv2.VideoWriter.fourcc(*"mp4v")  # type: ignore
+            return self._cv2.VideoWriter.fourcc(*"mp4v")  # pyright: ignore[reportAttributeAccessIssue]
 
     def _open_file(self, path: Path):
         if self._is_video_mode:
