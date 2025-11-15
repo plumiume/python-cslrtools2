@@ -21,7 +21,7 @@ from typing import Literal, Mapping
 import numpy as np
 import pytest
 
-from cslrtools2.lmpipe.estimator import Estimator, ProcessResult, shape, headers, estimate
+from cslrtools2.lmpipe.estimator import Estimator, ProcessResult, shape, headers, estimate, annotate
 from cslrtools2.typings import MatLike, NDArrayFloat
 
 
@@ -344,3 +344,157 @@ class TestDecoratorUsage:
         assert isinstance(headers_result, Mapping)
         assert "coords" in headers_result
         assert len(headers_result["coords"]) == 2
+
+
+class TestDecoratorWithKeyOptions:
+    """Test decorators with KeyOptions TypedDict pattern.
+    
+    These tests target the _typeddict_typeis branches in decorators.
+    """
+    
+    def test_shape_decorator_with_keyoptions(self) -> None:
+        """Test shape decorator with KeyOptions pattern (lines 181, 188, 196)."""
+        from cslrtools2.lmpipe.estimator import KeyOptions  # pyright: ignore[reportUnusedImport]
+        
+        class KeyOptionsShapeEstimator(Estimator[Literal["part"]]):
+            @property
+            @shape({"key": "part"})  # type: ignore[reportArgumentType]
+            def shape(self) -> tuple[int, int]:
+                return (8, 4)
+            
+            @estimate
+            def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["part"], NDArrayFloat]:
+                return {"part": np.zeros((8, 4), dtype=np.float32)}
+            
+            def configure_estimator_name(self) -> Literal["part"]:
+                return "part"
+        
+        estimator = KeyOptionsShapeEstimator()
+        shapes = estimator.shape
+        
+        assert isinstance(shapes, Mapping)
+        assert "part" in shapes
+        assert shapes["part"] == (8, 4)
+    
+    def test_shape_decorator_with_invalid_argument(self) -> None:
+        """Test shape decorator with invalid non-callable argument (line 188)."""
+        with pytest.raises(TypeError, match="First argument must be a callable or KeyOptions TypedDict"):
+            @shape(123)  # type: ignore[reportArgumentType]
+            def invalid_shape(self) -> tuple[int, int]:
+                return (1, 1)
+    
+    def test_headers_decorator_with_keyoptions(self) -> None:
+        """Test headers decorator with KeyOptions pattern (lines 287, 294, 302)."""
+        from cslrtools2.lmpipe.estimator import KeyOptions  # pyright: ignore[reportUnusedImport]
+        
+        class KeyOptionsHeadersEstimator(Estimator[Literal["feature"]]):
+            @property
+            @shape
+            def shape(self) -> tuple[int, int]:
+                return (4, 3)
+            
+            @property
+            @headers({"key": "feature"})  # type: ignore[reportArgumentType]
+            def headers(self) -> list[str]:
+                return ["a", "b", "c"]
+            
+            @estimate
+            def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["feature"], NDArrayFloat]:
+                return {"feature": np.zeros((4, 3), dtype=np.float32)}
+            
+            def configure_estimator_name(self) -> Literal["feature"]:
+                return "feature"
+        
+        estimator = KeyOptionsHeadersEstimator()
+        headers_result = estimator.headers
+        
+        assert isinstance(headers_result, Mapping)
+        assert "feature" in headers_result
+        assert len(headers_result["feature"]) == 3
+    
+    def test_headers_decorator_with_invalid_argument(self) -> None:
+        """Test headers decorator with invalid non-callable argument (line 294)."""
+        with pytest.raises(TypeError, match="First argument must be a callable or KeyOptions TypedDict"):
+            @headers("invalid")  # type: ignore[reportArgumentType]
+            def invalid_headers(self) -> list[str]:
+                return ["x"]
+    
+    def test_estimate_decorator_with_keyoptions(self) -> None:
+        """Test estimate decorator with KeyOptions pattern (lines 412, 419, 428)."""
+        from cslrtools2.lmpipe.estimator import KeyOptions  # pyright: ignore[reportUnusedImport]
+        
+        class KeyOptionsEstimateEstimator(Estimator[Literal["output"]]):
+            @property
+            @shape
+            def shape(self) -> tuple[int, int]:
+                return (6, 2)
+            
+            @estimate({"key": "output"})  # type: ignore[reportArgumentType]
+            def estimate(self, frame_src: MatLike, frame_idx: int) -> Mapping[Literal["output"], NDArrayFloat]:
+                return {"output": np.zeros((6, 2), dtype=np.float32)}
+            
+            def configure_estimator_name(self) -> Literal["output"]:
+                return "output"
+        
+        estimator = KeyOptionsEstimateEstimator()
+        frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        result = estimator.estimate(frame, 0)
+        
+        assert isinstance(result, Mapping)
+        assert "output" in result
+        assert result["output"].shape == (6, 2)
+    
+    def test_estimate_decorator_with_invalid_argument(self) -> None:
+        """Test estimate decorator with invalid non-callable argument (line 419)."""
+        with pytest.raises(TypeError, match="First argument must be a callable or KeyOptions TypedDict"):
+            @estimate([1, 2, 3])  # type: ignore[reportArgumentType]
+            def invalid_estimate(self, frame_src: MatLike | None, frame_idx: int) -> NDArrayFloat:
+                return np.zeros((1, 1), dtype=np.float32)
+    
+    def test_annotate_decorator_with_keyoptions(self) -> None:
+        """Test annotate decorator with KeyOptions pattern (lines 557, 566, 580)."""
+        from cslrtools2.lmpipe.estimator import KeyOptions  # pyright: ignore[reportUnusedImport]
+        
+        class KeyOptionsAnnotateEstimator(Estimator[Literal["anno"]]):
+            @property
+            @shape
+            def shape(self) -> tuple[int, int]:
+                return (3, 2)
+            
+            @estimate
+            def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["anno"], NDArrayFloat]:
+                return {"anno": np.zeros((3, 2), dtype=np.float32)}
+            
+            @annotate({"key": "anno"})  # type: ignore[reportArgumentType]
+            def annotate(
+                self,
+                frame_src: MatLike,
+                frame_idx: int,
+                landmarks: Mapping[Literal["anno"], NDArrayFloat]
+            ) -> MatLike:
+                return frame_src.copy()
+            
+            def configure_estimator_name(self) -> Literal["anno"]:
+                return "anno"
+        
+        estimator = KeyOptionsAnnotateEstimator()
+        frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        landmarks: Mapping[Literal["anno"], NDArrayFloat] = {
+            "anno": np.zeros((3, 2), dtype=np.float32)
+        }
+        result = estimator.annotate(frame, 0, landmarks)
+        
+        assert result is not None
+        assert result.shape == frame.shape
+    
+    def test_annotate_decorator_with_invalid_argument(self) -> None:
+        """Test annotate decorator with invalid non-callable argument (line 566)."""
+        with pytest.raises(TypeError, match="First argument must be a callable or KeyOptions TypedDict"):
+            @annotate(42.0)  # type: ignore[reportArgumentType]
+            def invalid_annotate(
+                self,
+                frame_src: MatLike,
+                frame_idx: int,
+                landmarks: Mapping[Literal["test"], NDArrayFloat]
+            ) -> MatLike:
+                return frame_src
