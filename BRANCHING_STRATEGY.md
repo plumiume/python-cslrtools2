@@ -165,39 +165,83 @@ git push -u origin main-ai
 - 長期間マージされないブランチは定期的に見直す
 - mainブランチは常にデプロイ可能な状態を保つ
 
-## ワークスペース構成と Worktree の運用
+## ワークスペース構成と Worktree の運用（オンデマンド構成）
 
-このプロジェクトは Git Worktree を利用した並列ワークスペース構成を推奨します。各作業ワークスペースは独立した仮想環境（`.venv`）を持ち、`uv` を使った実行／依存管理を行ってください。
+このプロジェクトは Git Worktree を利用した並列ワークスペース構成を**オンデマンド**で行います。必要なタスクが発生した際に、そのタスク専用のワークツリーを作成し、作業完了後は削除する運用を推奨します。
 
-主なポイント:
-- 各ワークスペースで独立した `.venv` を保持する（共有しない）
-- `uv run python` を使ってスクリプトを実行する（必須）
-- Worktree を使うと複数タスクを並列で進められるが、同じブランチを複数のワークツリーで編集しない
+### オンデマンド構成の理由
+- ワークツリーを事前に用意せず、必要なときだけ作成することで、ディスク容量と管理コストを削減
+- タスク固有の環境を明確に分離し、作業終了後にクリーンアップできる
+- 複数の開発者/エージェントが同時に異なるタスクを進める場合も柔軟に対応可能
 
-代表的なコマンド（PowerShell）:
+### 基本的な運用フロー
+
+**1. 新しいタスクのワークツリーを作成**
 
 ```powershell
-# worktree 一覧
-git worktree list
+# 新しいブランチでワークツリーを作成
+git worktree add ..\cslrtools2-<task-name> -b dev-ai/<task-name>
 
-# 新しい worktree を作る（新ブランチで）
-git worktree add ..\cslrtools2-<name> -b dev-ai/<task-name>
-
-# 既存ブランチで worktree を作る
-git worktree add ..\cslrtools2-<name> origin/dev-ai/<branch-name>
-
-# worktree 削除
-git worktree remove ..\cslrtools2-<name>
-
-# 依存を同期（uv を使う）
-cd ..\cslrtools2-<name>
-uv sync
-uv run pytest
+# または、既存のブランチをチェックアウト
+git worktree add ..\cslrtools2-<task-name> origin/dev-ai/<existing-branch>
 ```
 
-運用の注意:
-- ワークスペースをまたいで同じブランチを編集すると競合やデータ損失の原因になります。
-- CI やデプロイの参照ブランチ名を変更する場合はスクリプトや設定を合わせて更新してください。
+**2. ワークツリーで環境をセットアップ**
+
+```powershell
+cd ..\cslrtools2-<task-name>
+
+# 依存関係を同期（uvを使用）
+uv sync
+
+# MediaPipeが必要な場合
+# uv sync --group mediapipe
+
+# テストを実行して環境を確認
+uv run pytest -q
+```
+
+**3. 作業完了後にワークツリーを削除**
+
+```powershell
+# 変更をコミット・プッシュした後
+cd ..\<元のディレクトリ>
+
+# ワークツリーを削除
+git worktree remove ..\cslrtools2-<task-name>
+
+# マージ済みならリモートブランチも削除
+git push origin --delete dev-ai/<task-name>
+```
+
+### 重要なポイント
+- **各ワークツリーで独立した `.venv` を保持**（共有しない）
+- **必ず `uv run python` を使ってスクリプトを実行**（bare python コマンドは使わない）
+- **同じブランチを複数のワークツリーで編集しない**（Git が禁止しています）
+- **長期間放置しない**（作業が完了したらワークツリーを削除してリソースを解放）
+
+### クイックリファレンス
+
+```powershell
+# 現在のワークツリー一覧を確認
+git worktree list
+
+# ワークツリー作成からクリーンアップまで（例）
+git worktree add ..\cslrtools2-fix-bug -b dev-ai/fix-bug
+cd ..\cslrtools2-fix-bug
+uv sync
+# ... 作業 ...
+git add .
+git commit -m "fix: Resolve bug"
+git push origin dev-ai/fix-bug
+cd ..\<元のディレクトリ>
+git worktree remove ..\cslrtools2-fix-bug
+```
+
+### 運用の注意
+- ワークツリーをまたいで同じブランチを編集すると競合やデータ損失の原因になります
+- CI やデプロイの参照ブランチ名を変更する場合はスクリプトや設定を合わせて更新してください
+- `.venv` や `__pycache__` は Git 管理対象外なので、各ワークツリーで再生成が必要です
 
 ## Worktree 用 Copilot 指示フロー
 
