@@ -8,6 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+.venv-*/
 
 # Assets
 src/cslrtools2/assets/
@@ -26,12 +27,13 @@ docker-compose.override.yaml
 .docker/
 
 # Test files and outputs
-test_*.py
-analyze_*.py
-check_*.py
-create_*.py
-process_*.py
-test_output/
+/test_*.py
+/analyze_*.py
+/check_*.py
+/create_*.py
+/process_*.py
+/test_output/
+
 *_frame/
 *.mp4
 
