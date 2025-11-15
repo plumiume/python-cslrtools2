@@ -56,9 +56,16 @@ url = "https://download.pytorch.org/whl/cu128"
 
 ## マルチ環境テスト戦略
 
-### docker-compose.yaml構成
+### Docker設定の配置
 
-プロジェクトルートに以下の5つのテスト環境を定義:
+- **場所**: `tests/build/`
+- **Dockerfile**: マルチステージビルドで5つの環境を定義
+- **docker-compose.yaml**: 各環境を簡単に起動・テストするための設定
+- **test_pytorch_cuda.py**: 環境検証スクリプト
+
+プロジェクトルートから独立させることで、テスト環境を明確に分離。
+
+### テスト環境構成
 
 1. **pytorch-cu128** - CUDA 12.8（メイン開発環境）
 2. **pytorch-cu126** - CUDA 12.6（後方互換性）
@@ -66,19 +73,22 @@ url = "https://download.pytorch.org/whl/cu128"
 4. **pytorch-cpu** - CPU版（CI/CD用）
 5. **pytorch-2.3-cu128** - PyTorch 2.3.0（最小バージョン検証）
 
-各環境は独立した仮想環境（venv）を持ち、同時に複数のPyTorchバージョンをテスト可能。
+すべての環境が単一のDockerfileのマルチステージビルドで管理され、docker-composeの`target`で切り替え可能。
 
 ### 使用方法
 
 ```bash
+# tests/buildディレクトリに移動
+cd tests/build
+
 # 特定環境でビルド
 docker compose build pytorch-cu128
 
 # 特定環境でコマンド実行
-docker compose run --rm pytorch-cu128 uv run python test_pytorch_cuda.py
+docker compose run --rm pytorch-cu128 uv run python tests/build/test_pytorch_cuda.py
 
 # MediaPipe互換性テスト
-docker compose run --rm pytorch-cu128 uv run python test_pytorch_cuda.py --test-mediapipe
+docker compose run --rm pytorch-cu128 uv run python tests/build/test_pytorch_cuda.py --test-mediapipe
 
 # バッチ処理例（複数動画を並列処理）
 docker compose run --rm pytorch-cu128 uv run lmpipe mediapipe.holistic videos/
@@ -86,24 +96,31 @@ docker compose run --rm pytorch-cu128 uv run lmpipe mediapipe.holistic videos/
 # CPU版でユニットテスト
 docker compose run --rm pytorch-cpu uv run pytest
 
-# 全環境でテスト
-for env in pytorch-cu128 pytorch-cu126 pytorch-cu130 pytorch-cpu; do
-  echo "Testing $env..."
-  docker compose run --rm $env uv run python test_pytorch_cuda.py
-done
+# 全環境でテスト（PowerShell）
+foreach ($env in @('pytorch-cu128', 'pytorch-cu126', 'pytorch-cu130', 'pytorch-cpu')) {
+  Write-Host "`n=== Testing $env ===" -ForegroundColor Cyan
+  docker compose run --rm $env uv run python tests/build/test_pytorch_cuda.py
+}
 ```
 
 ### 各Dockerfileの役割
 
-| ファイル | ベースイメージ | PyTorch Index | 用途 |
-|---------|--------------|--------------|------|
-| `.devcontainer/Dockerfile` | `nvidia/cuda:12.8.0-cudnn-devel-ubuntu24.04` | cu128 | メイン開発（Dev Container兼用） |
-| `Dockerfile.cu126` | `nvidia/cuda:12.6.0-cudnn-devel-ubuntu24.04` | cu126 | CUDA 12.6後方互換性検証 |
-| `Dockerfile.cu130` | `nvidia/cuda:13.0.2-cudnn-devel-ubuntu24.04` | cu130 | CUDA 13.0最新検証 |
-| `Dockerfile.cpu` | `ubuntu:24.04` | cpu | CPU専用CI/CD |
-| `Dockerfile.torch23` | `nvidia/cuda:12.8.0-cudnn-devel-ubuntu24.04` | cu128 | PyTorch 2.3.0下方互換性 |
+| ファイル | 内容 | 用途 |
+|---------|------|------|
+| `tests/build/Dockerfile` | マルチステージビルド（5つのターゲット） | すべてのテスト環境 |
+| `.devcontainer/Dockerfile` | CUDA 12.8環境 | メイン開発（Dev Container専用） |
 
-**注意**: `pytorch-2.3-cu128`環境では`pyproject.toml`の`torch>=2.9.0`を一時的に`torch>=2.3.0,<2.4.0`に変更してテストする必要がある。
+**マルチステージビルドのターゲット:**
+- `cpu` - Ubuntu 24.04ベース、CPU専用
+- `cuda-12.6` - CUDA 12.6 + cuDNN
+- `cuda-12.8` - CUDA 12.8 + cuDNN（メイン）
+- `cuda-13.0` - CUDA 13.0 + cuDNN（最新）
+- `pytorch-2.3` - CUDA 12.8、PyTorch 2.3.0検証用
+
+**利点:**
+1. 単一ファイルで全環境を管理
+2. 共通レイヤーのキャッシュでビルド高速化
+3. 保守性向上（変更が一箇所に集約）
 
 ## Dev Container vs docker-compose.yaml
 
@@ -155,6 +172,7 @@ WORKDIR /workspace
 - Ubuntu 24.04 LTS対応
 - 既存ubuntuユーザー活用でシンプル
 - UID 1000でホスト環境との親和性が高い
+- UVキャッシュを全環境で共有し、ビルド時間を短縮
 
 
 
@@ -209,26 +227,29 @@ uv run python test_pytorch_cuda.py --test-mediapipe
 ### 2. マルチ環境テスト（docker-compose）
 
 ```bash
+# tests/buildディレクトリに移動
+cd tests/build
+
 # 特定環境のビルド
 docker compose build pytorch-cu128
 
 # 環境確認
-docker compose run --rm pytorch-cu128 uv run python test_pytorch_cuda.py
+docker compose run --rm pytorch-cu128 uv run python tests/build/test_pytorch_cuda.py
 
 # MediaPipe互換性確認
-docker compose run --rm pytorch-cu128 uv run python test_pytorch_cuda.py --test-mediapipe
+docker compose run --rm pytorch-cu128 uv run python tests/build/test_pytorch_cuda.py --test-mediapipe
 
-# 全CUDA環境でテスト
-for cuda_env in pytorch-cu128 pytorch-cu126 pytorch-cu130; do
-  docker compose run --rm $cuda_env uv run python test_pytorch_cuda.py
-done
+# 全CUDA環境でテスト（PowerShell）
+foreach ($env in @('pytorch-cu128', 'pytorch-cu126', 'pytorch-cu130')) {
+  docker compose run --rm $env uv run python tests/build/test_pytorch_cuda.py
+}
 
 # CPU版テスト
-docker compose run --rm pytorch-cpu uv run python test_pytorch_cuda.py
+docker compose run --rm pytorch-cpu uv run python tests/build/test_pytorch_cuda.py
 
 # PyTorch 2.3.0テスト（pyproject.toml一時変更が必要）
 # torch>=2.9.0 -> torch>=2.3.0,<2.4.0
-docker compose run --rm pytorch-2.3-cu128 uv run python test_pytorch_cuda.py
+docker compose run --rm pytorch-2.3-cu128 uv run python tests/build/test_pytorch_cuda.py
 ```
 
 ### 3. バッチ処理例
@@ -252,28 +273,30 @@ docker compose run --rm pytorch-cpu uv run pytest tests/
 # Docker関連（ビルド済みイメージ、オーバーライド設定）
 docker-compose.override.yaml
 .docker/
+# Docker test環境は除外しない (tests/build/)
 
-# テストスクリプト（一時的な検証用）
-test_pytorch_cuda.py
-
-# その他のテスト用スクリプト
-test_*.py
-analyze_*.py
-check_*.py
+# プロジェクトルートの一時テストスクリプトは除外
+/test_*.py
+/analyze_*.py
+/check_*.py
 ```
 
 **注意**: 
-- `docker-compose.yaml`と各`Dockerfile.*`は**トラッキング対象**（リポジトリに含める）
-- `test_pytorch_cuda.py`は一時的な検証用スクリプトのため`.gitignore`に追加
+- `tests/build/`のファイルは**トラッキング対象**（リポジトリに含める）
+- プロジェクトルートの`test_*.py`等は`.gitignore`で除外
 
 ## 推奨アクション
 
 ### 完了済み ✅
-- `.devcontainer/Dockerfile`作成（CUDA 12.8、ubuntuユーザー活用）
-- `.devcontainer/devcontainer.json`設定
-- `docker-compose.yaml`作成（5つのテスト環境定義）
-- 各環境用Dockerfile作成（`Dockerfile.cu126`, `Dockerfile.cu130`, `Dockerfile.cpu`, `Dockerfile.torch23`）
-- `test_pytorch_cuda.py`実装（環境検証スクリプト）
+- `tests/build/Dockerfile`作成（マルチステージビルド、5つのターゲット）
+- `tests/build/docker-compose.yaml`作成（5つのテスト環境定義）
+- `tests/build/README.md`作成（使用方法ドキュメント）
+- `tests/build/test_pytorch_cuda.py`実装（環境検証スクリプト）
+- `tests/build/DOCKER_STRATEGY.md`配置（戦略ドキュメント）
+- `.devcontainer/Dockerfile`設定（CUDA 12.8、rootユーザー）
+- `.devcontainer/devcontainer.json`設定（UVキャッシュ共有）
+- UVキャッシュ共有の実装（6.9GB、全環境で共有）
+- マルチステージビルドによる統合
 
 ### 次のステップ
 1. **短期**: 各環境でのビルドとテスト実行

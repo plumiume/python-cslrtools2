@@ -1,7 +1,7 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
-build/
+/build/
 dist/
 wheels/
 *.egg-info
@@ -25,6 +25,7 @@ log.txt
 # Docker
 docker-compose.override.yaml
 .docker/
+# Docker test環境は除外しない (tests/build/)
 
 # Test files and outputs
 /test_*.py

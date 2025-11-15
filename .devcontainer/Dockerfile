@@ -15,10 +15,5 @@ RUN apt-get update && apt-get install -y \
 # uvのインストール（マルチステージビルドでコピー）
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# 既存のubuntuユーザー（UID 1000）を活用
-# ベースイメージに含まれるubuntuユーザーにsudo権限を追加
-RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu \
-    && chmod 0440 /etc/sudoers.d/ubuntu
-
-USER ubuntu
+# rootユーザーで実行（UVキャッシュの権限問題を回避）
 WORKDIR /workspace

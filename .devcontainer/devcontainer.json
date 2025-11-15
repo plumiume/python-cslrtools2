@@ -8,8 +8,12 @@
 		"all"
 	],
 	"containerEnv": {
-		"UV_PROJECT_ENVIRONMENT": "/home/ubuntu/.venv"
+		"UV_PROJECT_ENVIRONMENT": "/root/.venv",
+		"UV_CACHE_DIR": "/root/.cache/uv"
 	},
+	"mounts": [
+		"source=python-cslrtools2-uv-cache,target=/root/.cache/uv,type=volume"
+	],
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -18,7 +22,7 @@
 				"charliermarsh.ruff"
 			],
 			"settings": {
-				"python.defaultInterpreterPath": "/home/ubuntu/.venv/bin/python",
+				"python.defaultInterpreterPath": "/root/.venv/bin/python",
 				"python.analysis.typeCheckingMode": "strict",
 				"files.watcherExclude": {
 					"**/.venv/**": true
@@ -30,5 +34,5 @@
 		}
 	},
 	"postCreateCommand": "uv sync --all-groups",
-	"remoteUser": "ubuntu"
+	"remoteUser": "root"
 }

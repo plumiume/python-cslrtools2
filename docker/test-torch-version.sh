@@ -15,6 +15,7 @@ set -e
 TORCH_VERSION_CONSTRAINT="${TORCH_VERSION_CONSTRAINT:->=2.3.0,<2.4.0}"
 TORCHVISION_VERSION_CONSTRAINT="${TORCHVISION_VERSION_CONSTRAINT:->=0.18.0,<0.19.0}"
 PYTORCH_INDEX_URL="${PYTORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}"
+PYPI_INDEX_URL="${PYPI_INDEX_URL:-http://pypi-nginx/pypi/}"
 
 echo "========================================"
 echo "PyTorch Version Test"
@@ -22,6 +23,7 @@ echo "========================================"
 echo "Torch constraint: ${TORCH_VERSION_CONSTRAINT}"
 echo "Torchvision constraint: ${TORCHVISION_VERSION_CONSTRAINT}"
 echo "PyTorch index: ${PYTORCH_INDEX_URL}"
+echo "PyPI index: ${PYPI_INDEX_URL}"
 echo ""
 
 # 一時プロジェクトを初期化
@@ -38,7 +40,7 @@ explicit = true
 
 [[tool.uv.index]]
 name = "pypi"
-url = "https://pypi.org/simple"
+url = "${PYPI_INDEX_URL}"
 default = true
 
 [tool.uv.sources]
