@@ -57,6 +57,10 @@ torch = { index = "pytorch" }
 torchvision = { index = "pytorch" }
 
 [dependency-groups]
+dev = [
+    "pyright>=1.1.407",
+    "pytest>=9.0.1",
+]
 mediapipe = [
     "mediapipe>=0.10.14",
 ]
