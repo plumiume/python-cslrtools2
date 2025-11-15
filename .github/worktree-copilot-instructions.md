@@ -15,7 +15,8 @@ Tasks for the agent
    - Fix small logic bugs surfaced by tests
    - Add or update unit tests that cover the regression
 3. Run lint/typecheck (if configured) and report any critical issues.
-4. Prepare a short changelog entry describing what was changed and why (for PR body).
+4. Add `# pyright: ignore[reportUnusedImport]` comments to imports that provide effects by import alone (e.g., `import pytest`). These imports trigger Pyright's `reportUnusedImport` warning but are necessary for test framework registration or side effects. Use this comment to suppress false positives.
+5. Prepare a short changelog entry describing what was changed and why (for PR body).
 
 Constraints & Environment
 - Use `uv` for all Python execution (e.g., `uv run pytest`, `uv run python`) to respect workspace virtual envs.
@@ -26,6 +27,7 @@ Outputs expected from agent
 - A small list of failing tests (if any) with one-line summary and failing assertion/trace snippet.
 - A set of proposed git patches (or commits) with clear commit messages following Conventional Commits.
 - Updated or new tests (pytest) that reproduce and validate the fix.
+- Pyright ignore comments added to imports that are used for side effects only.
 - A suggested PR title and body.
 
 Try it (examples)
@@ -35,8 +37,11 @@ uv run pytest -q
 
 # run a single failing test (example)
 uv run pytest tests/src/test_dataset.py::test_loader -q
+
+# check for unused import warnings
+uv run pyright tests/
 ```
 
 Notes
 - The worktree is configured with an independent `.venv`. Ensure `uv sync` has been run if dependencies are out of date.
-- If heavy external deps (MediaPipe) are required, mock or stub them in tests to keep runtime lightweight.
+- For imports like `import pytest` that register fixtures or enable test discovery, use `# pyright: ignore[reportUnusedImport]` on the same line.
