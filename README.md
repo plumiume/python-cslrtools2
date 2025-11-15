@@ -266,6 +266,27 @@ pytest
 pytest --cov=cslrtools2 --cov-report=html
 ```
 
+### Docker Test Environments
+
+Multiple PyTorch+CUDA environments for testing. See [`tests/build/`](tests/build/) for details.
+
+```bash
+cd tests/build
+
+# Build and test specific environment
+docker compose build pytorch-cu128
+docker compose run --rm pytorch-cu128 uv run python tests/build/test_pytorch_cuda.py
+
+# Test all environments
+foreach ($env in @('pytorch-cu128', 'pytorch-cu126', 'pytorch-cu130', 'pytorch-cpu')) {
+    docker compose run --rm $env uv run python tests/build/test_pytorch_cuda.py
+}
+```
+
+For more information, see:
+- [`tests/build/README.md`](tests/build/README.md) - Quick start guide
+- [`tests/build/DOCKER_STRATEGY.md`](tests/build/DOCKER_STRATEGY.md) - Detailed strategy
+
 ---
 
 ## 📄 License
