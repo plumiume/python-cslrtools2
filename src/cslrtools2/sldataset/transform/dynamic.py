@@ -60,7 +60,7 @@ class UniformSpeedChange[
 
         self.video_keys = video_keys
         self.landmark_keys = landmark_keys
-        
+
         self.min_scale = min_scale
         self.max_scale = max_scale
         self.rand_factory = rand_factory
@@ -78,7 +78,7 @@ class UniformSpeedChange[
         videos = {**item.videos}
 
         for kvid in self.video_keys:
-            
+
             vvid = item.videos[kvid]
 
             time_indices = torch.arange(0, vvid.shape[1] * scale) / scale
@@ -126,7 +126,7 @@ class RondomResizeCrop[
 
         self.video_keys = video_keys
         self.landmark_keys = landmark_keys
-        
+
         self.min_scale = min_scale
         self.max_scale = max_scale
         self.gen = self._ensure_generator(gen)
@@ -145,7 +145,7 @@ class RondomResizeCrop[
         videos = {**item.videos}
 
         for kvid in self.video_keys:
-            
+
             vvid = item.videos[kvid]
 
             t_new = int(vvid.shape[1] * scale)

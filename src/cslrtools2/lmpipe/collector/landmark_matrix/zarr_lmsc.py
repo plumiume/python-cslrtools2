@@ -24,7 +24,7 @@ from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 class ZarrLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
     """Write landmarks into Zarr array storage.
-    
+
     Supports two modes:
     - Container mode (per_key=False): Single ``landmarks.zarr/`` directory with all keys as datasets
     - Per-key mode (per_key=True): Multiple ``{key}.zarr/`` directories in ``landmarks/`` directory
@@ -32,7 +32,7 @@ class ZarrLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
     def __init__(self, *, per_key: bool = False) -> None:
         """Initialize the Zarr landmark matrix save collector.
-        
+
         Args:
             per_key (:class:`bool`, optional): If True, save each key to a separate .zarr directory.
                 If False, save all keys to a single landmarks.zarr directory. Defaults to False.
@@ -99,10 +99,10 @@ class ZarrLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
 def zarr_lmsc_creator[K: str](key_type: type[K]) -> ZarrLandmarkMatrixSaveCollector[K]:
     """Create a Zarr landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`ZarrLandmarkMatrixSaveCollector[K]`: Zarr landmark matrix saver (container mode by default).
     """

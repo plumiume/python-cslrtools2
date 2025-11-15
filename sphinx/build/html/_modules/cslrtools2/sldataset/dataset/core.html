@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cslrtools2.sldataset.dataset.core &mdash; cslrtools2 0.1.dev54+gb18e68278.d20251115 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=9bb56542"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            cslrtools2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">cslrtools2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cslrtools2.html">cslrtools2 package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/ikegami-yukino/python-cslrtools2">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/cslrtools2/">PyPI Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">cslrtools2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cslrtools2.sldataset.dataset.core</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cslrtools2.sldataset.dataset.core</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2025 cslrtools2 contributors</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="c1"># (root) / metadata / {km: Any}</span>
+<span class="c1"># (root) / connections / {klm}.{klm}</span>
+<span class="c1"># (root) / items / {idx} / videos / {kvid}</span>
+<span class="c1"># (root) / items / {idx} / landmarks /{klm}</span>
+<span class="c1"># (root) / items / {idx} / targets / {ktgt}</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span> <span class="c1"># pyright: ignore[reportWildcardImportFromLibrary]</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Dataset</span> <span class="k">as</span> <span class="n">_Dataset</span><span class="p">,</span>
+    <span class="n">IterableDataset</span> <span class="k">as</span> <span class="n">_IterableDataset</span>
+<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">zarr.api.synchronous</span><span class="w"> </span><span class="kn">import</span> <span class="n">StoreLike</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">StoreLike</span> <span class="o">=</span> <span class="nb">object</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...typings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">sldataset_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_tensor</span><span class="p">,</span> <span class="n">get_group</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.holder</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLKeyHolder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.item</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SLDatasetItem</span><span class="p">,</span>
+    <span class="n">DefaultSLDatasetItem</span><span class="p">,</span>
+    <span class="n">TensorSLDatasetItem</span><span class="p">,</span>
+    <span class="n">ZarrSLDatasetItem</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">######## Type Aliases ########</span>
+
+<span class="nb">type</span> <span class="n">DefaultSLDataset</span><span class="p">[</span>
+    <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">]</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">[</span>
+    <span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]</span>
+<span class="p">]</span>
+
+<span class="nb">type</span> <span class="n">DefaultIterableSLDataset</span><span class="p">[</span>
+    <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">]</span> <span class="o">=</span> <span class="n">IterableDataset</span><span class="p">[</span>
+    <span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]</span>
+<span class="p">]</span>
+
+
+<span class="c1">######## Dataset ABC Class ########</span>
+
+<div class="viewcode-block" id="Dataset">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.Dataset">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Dataset</span><span class="p">[</span><span class="n">Item</span><span class="p">](</span><span class="n">_Dataset</span><span class="p">[</span><span class="n">Item</span><span class="p">],</span> <span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span> <span class="o">...</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Item</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="IterableDataset">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.IterableDataset">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IterableDataset</span><span class="p">[</span><span class="n">Item</span><span class="p">](</span><span class="n">_IterableDataset</span><span class="p">[</span><span class="n">Item</span><span class="p">],</span> <span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Item</span><span class="p">]:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="SLDatasetBatch">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetBatch">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SLDatasetBatch</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span><span class="p">](</span>
+    <span class="n">SLKeyHolder</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]</span>
+    <span class="p">):</span>
+
+<div class="viewcode-block" id="SLDatasetBatch.__init__">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetBatch.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">SLDataset</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">],</span>
+        <span class="n">item</span><span class="p">:</span> <span class="n">TensorSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">],</span>
+        <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">item</span>
+
+        <span class="n">sldataset_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Created SLDatasetBatch with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">videos</span><span class="p">)</span><span class="si">}</span><span class="s2"> videos, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">landmarks</span><span class="p">)</span><span class="si">}</span><span class="s2"> landmarks, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span><span class="si">}</span><span class="s2"> targets&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SLDatasetBatch.to">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetBatch.to">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">to_partially</span><span class="p">(</span><span class="n">device</span><span class="p">),</span>
+            <span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SLDatasetBatch.from_batch">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetBatch.from_batch">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_batch</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">SLDataset</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">batch</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+
+        <span class="n">b0</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">SLDataset</span><span class="p">(</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+                <span class="n">connections</span><span class="o">=</span><span class="p">{</span>
+                    <span class="n">k</span><span class="p">:</span> <span class="n">as_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">},</span>
+                <span class="n">items</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">items</span>
+            <span class="p">),</span>
+            <span class="n">item</span><span class="o">=</span><span class="n">SLDatasetItem</span><span class="p">(</span>
+                <span class="n">videos</span><span class="o">=</span><span class="p">{</span>
+                    <span class="n">kvid</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span>
+                        <span class="n">as_tensor</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">videos</span><span class="p">[</span><span class="n">kvid</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">batch</span>
+                    <span class="p">])</span>
+                    <span class="k">for</span> <span class="n">kvid</span> <span class="ow">in</span> <span class="n">b0</span><span class="o">.</span><span class="n">videos</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="p">},</span>
+                <span class="n">landmarks</span><span class="o">=</span><span class="p">{</span>
+                    <span class="n">klm</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span>
+                        <span class="n">as_tensor</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">landmarks</span><span class="p">[</span><span class="n">klm</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">batch</span>
+                    <span class="p">])</span>
+                    <span class="k">for</span> <span class="n">klm</span> <span class="ow">in</span> <span class="n">b0</span><span class="o">.</span><span class="n">landmarks</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="p">},</span>
+                <span class="n">targets</span><span class="o">=</span><span class="p">{</span>
+                    <span class="n">ktgt</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span>
+                        <span class="n">as_tensor</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">ktgt</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">batch</span>
+                    <span class="p">])</span>
+                    <span class="k">for</span> <span class="n">ktgt</span> <span class="ow">in</span> <span class="n">b0</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1">######## Dataset Classes ########</span>
+
+<div class="viewcode-block" id="SLDataset">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDataset">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SLDataset</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Vconn</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">](</span>
+    <span class="n">SLKeyHolder</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">],</span>
+    <span class="n">Dataset</span><span class="p">[</span><span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]]</span>
+    <span class="p">):</span>
+
+<div class="viewcode-block" id="SLDataset.__init__">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDataset.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">connections</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Klm</span><span class="p">,</span> <span class="n">Klm</span><span class="p">],</span> <span class="n">Vconn</span><span class="p">],</span>
+        <span class="n">items</span><span class="p">:</span> <span class="n">DefaultSLDataset</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]]</span>
+        <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="n">connections</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">items</span>
+
+        <span class="n">sldataset_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Initialized SLDataset with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2"> items, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span><span class="si">}</span><span class="s2"> metadata entries, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">connections</span><span class="p">)</span><span class="si">}</span><span class="s2"> landmark connections&quot;</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]:</span>
+        <span class="n">sldataset_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching dataset item at index </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SLDataset.to_partially">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDataset.to_partially">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_partially</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SLDataset</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
+
+        <span class="k">return</span> <span class="n">SLDataset</span><span class="p">(</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="n">connections</span><span class="o">=</span><span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">as_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">},</span>
+            <span class="n">items</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SLDataset.from_zarr">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDataset.from_zarr">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_zarr</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SLDataset</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span><span class="p">]:</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">get_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">is_metadata_key</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="n">connections</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Klm</span><span class="p">,</span> <span class="n">Klm</span><span class="p">],</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">kconn</span><span class="p">,</span> <span class="n">vconn</span> <span class="ow">in</span> <span class="n">get_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s2">&quot;connections&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">arrays</span><span class="p">():</span>
+            <span class="n">klm1</span><span class="p">,</span> <span class="n">klm2</span> <span class="o">=</span> <span class="n">kconn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">is_landmark_key</span><span class="p">(</span><span class="n">klm1</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">is_landmark_key</span><span class="p">(</span><span class="n">klm2</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">connections</span><span class="p">[(</span><span class="n">klm1</span><span class="p">,</span> <span class="n">klm2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">vconn</span>
+
+        <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ZarrSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item_group</span> <span class="ow">in</span> <span class="n">get_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s2">&quot;items&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">group_values</span><span class="p">():</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">SLDatasetItem</span><span class="p">[</span>
+                    <span class="n">Kvid</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span><span class="p">,</span>
+                    <span class="n">Klm</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span><span class="p">,</span>
+                    <span class="n">Ktgt</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Array</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">from_zarr</span><span class="p">(</span><span class="n">item_group</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">SLDataset</span><span class="p">(</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="n">connections</span><span class="o">=</span><span class="n">connections</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="n">items</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+
+<div class="viewcode-block" id="IterableSLDataset">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.IterableSLDataset">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IterableSLDataset</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Vconn</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">](</span>
+    <span class="n">SLKeyHolder</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">],</span>
+    <span class="n">IterableDataset</span><span class="p">[</span><span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]]</span>
+    <span class="p">):</span>
+
+<div class="viewcode-block" id="IterableSLDataset.__init__">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.IterableSLDataset.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">connections</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Klm</span><span class="p">,</span> <span class="n">Klm</span><span class="p">],</span> <span class="n">Vconn</span><span class="p">],</span>
+        <span class="n">items</span><span class="p">:</span> <span class="n">IterableDataset</span><span class="p">[</span><span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]]</span>
+        <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="n">connections</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">items</span>
+
+        <span class="n">sldataset_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Initialized IterableSLDataset with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span><span class="si">}</span><span class="s2"> metadata entries, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">connections</span><span class="p">)</span><span class="si">}</span><span class="s2"> landmark connections&quot;</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">DefaultSLDatasetItem</span><span class="p">[</span><span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">]]:</span>
+        <span class="n">sldataset_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting iteration over IterableSLDataset&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IterableSLDataset.to_partially">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.IterableSLDataset.to_partially">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_partially</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IterableSLDataset</span><span class="p">[</span><span class="n">Kmeta</span><span class="p">,</span> <span class="n">Kvid</span><span class="p">,</span> <span class="n">Klm</span><span class="p">,</span> <span class="n">Ktgt</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
+
+        <span class="k">return</span> <span class="n">IterableSLDataset</span><span class="p">(</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="n">connections</span><span class="o">=</span><span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">as_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">},</span>
+            <span class="n">items</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="dataset_to_zarr">
+<a class="viewcode-back" href="../../../../cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.dataset_to_zarr">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dataset_to_zarr</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n">SLDataset</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span>
+        <span class="n">IterableSLDataset</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="p">),</span>
+    <span class="n">store_or_group</span><span class="p">:</span> <span class="n">StoreLike</span> <span class="o">|</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">store_or_group</span><span class="p">,</span> <span class="n">zarr</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+        <span class="n">root_group</span> <span class="o">=</span> <span class="n">store_or_group</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">root_group</span> <span class="o">=</span> <span class="n">zarr</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">store_or_group</span><span class="p">)</span>
+
+    <span class="n">metadata_group</span> <span class="o">=</span> <span class="n">root_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">)</span>
+    <span class="n">metadata_group</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+
+    <span class="n">connections_group</span> <span class="o">=</span> <span class="n">root_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;connections&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">klm1</span><span class="p">,</span> <span class="n">klm2</span><span class="p">),</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">connections_group</span><span class="o">.</span><span class="n">create_array</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">klm1</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">klm2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">items_group</span> <span class="o">=</span> <span class="n">root_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;items&quot;</span><span class="p">)</span>
+    <span class="n">item_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="n">dataset</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">IterableSLDataset</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)))</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">item_iter</span><span class="p">):</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">to_zarr</span><span class="p">(</span><span class="n">items_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">root_group</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, plumiume.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

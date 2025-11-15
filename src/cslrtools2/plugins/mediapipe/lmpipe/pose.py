@@ -55,7 +55,7 @@ compatibility. New code should import directly from the constants module::
 
 class MediaPipePosePartROI(BaseROI):
     """Base class for MediaPipe Pose-based ROI extraction.
-    
+
     Provides common affine transformation matrix operations for extracting
     and normalizing ROI regions from pose landmarks.
     """
@@ -66,12 +66,12 @@ class MediaPipePosePartROI(BaseROI):
 
     def _safe_init(self, landmarks: list[NDArrayFloat], height: int, width: int) -> bool:
         """Safe initialization with NaN checking and exception handling.
-        
+
         Args:
             landmarks: List of landmark arrays to check for NaN
             height: Frame height in pixels
             width: Frame width in pixels
-            
+
         Returns:
             True if initialization succeeded, False otherwise
         """
@@ -88,7 +88,7 @@ class MediaPipePosePartROI(BaseROI):
         except (ValueError, ZeroDivisionError):
             self.return_none = True
             return False
-        
+
         self.roi_dsize = roi_size_px
         self.inv_dsize = (width, height)
 
@@ -117,11 +117,11 @@ class MediaPipePosePartROI(BaseROI):
         self, height: int, width: int
     ) -> tuple[tuple[float, float], float, tuple[int, int]]:
         """Calculate ROI center, size, and angle from landmarks.
-        
+
         Args:
             height: Frame height in pixels
             width: Frame width in pixels
-        
+
         Returns:
             Tuple of (center_px, angle_rad, size_px)
             - center_px: ROI center in pixel coordinates [x, y]
@@ -131,7 +131,7 @@ class MediaPipePosePartROI(BaseROI):
         ...
 
     def apply_roi(self, frame_src: MatLike) -> MatLike | None:
-        
+
         if self.return_none:
             return None
 
@@ -146,7 +146,7 @@ class MediaPipePosePartROI(BaseROI):
     def apply_world_coords[K: str](
         self, local_coords: Mapping[K, NDArrayFloat] # key: Array(N, >=2)
         ) -> Mapping[K, NDArrayFloat | None]:
-        
+
         if self.return_none:
             return {
                 klm: None
@@ -173,11 +173,11 @@ class MediaPipePosePartROI(BaseROI):
             result[klm] = np.concatenate([world_norm, ex], axis=1)
 
         return result
-    
+
 
 class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
     """Both hands ROI using left and right wrist landmarks from pose estimation.
-    
+
     Generates normalized affine transformation matrix for both hands region extraction.
     ROI vector: right wrist -> left wrist (reversed)
     ROI size: max of left hand and right hand ROI sizes
@@ -198,7 +198,7 @@ class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
         width: int
         ):
         """Initialize Both Hands ROI with pose landmarks.
-        
+
         Args:
             left_wrist: Left wrist landmark coordinates [x, y, z, c]
             left_elbow: Left elbow landmark coordinates [x, y, z, c]
@@ -211,15 +211,15 @@ class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
         self.left_elbow = left_elbow
         self.right_wrist = right_wrist
         self.right_elbow = right_elbow
-        
+
         # Use common initialization framework
         self._safe_init([left_wrist, left_elbow, right_wrist, right_elbow], height, width)
-    
+
     def _calculate_roi_parameters(
         self, height: int, width: int
     ) -> tuple[tuple[float, float], float, tuple[int, int]]:
         """Calculate ROI center, size, and angle from landmarks.
-        
+
         ROI is oriented from right wrist to left wrist, with the center
         adjusted so that the line segment fits within size/2 from the center.
         Returns a rectangular ROI with width based on wrist distance and height
@@ -234,20 +234,20 @@ class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
         left_elbow_px = np.array([self.left_elbow[0] * width, self.left_elbow[1] * height])
         right_wrist_px = np.array([self.right_wrist[0] * width, self.right_wrist[1] * height])
         right_elbow_px = np.array([self.right_elbow[0] * width, self.right_elbow[1] * height])
-        
+
         # Calculate hand sizes (for height)
         left_distance = np.linalg.norm(left_wrist_px - left_elbow_px)
         right_distance = np.linalg.norm(right_wrist_px - right_elbow_px)
         max_distance = max(left_distance, right_distance)
         size_px = int(self.size_weight * max_distance + self.pad_weight * long_side)
-        
+
         # Calculate wrist-to-wrist distance (for width)
         wrist_distance = int(np.linalg.norm(left_wrist_px - right_wrist_px))
         size_px_pair = (size_px + wrist_distance, size_px)
-        
+
         # Calculate center (midpoint between left and right wrists)
         center_px = (left_wrist_px + right_wrist_px) / 2
-        
+
         # Calculate rotation angle (right wrist -> left wrist, reversed)
         diff = left_wrist_px - right_wrist_px
         angle_rad = np.arctan2(diff[1], diff[0])
@@ -257,7 +257,7 @@ class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
 
 class MediaPipePoseHandROI(MediaPipePosePartROI):
     """Hand ROI using wrist and elbow landmarks from pose estimation.
-    
+
     Generates normalized affine transformation matrix for hand region extraction.
     """
 
@@ -273,7 +273,7 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
         width: int
         ):
         """Initialize Hand ROI with pose landmarks.
-        
+
         Args:
             wrist: Wrist landmark coordinates [x, y, z, c]
             elbow: Elbow landmark coordinates [x, y, z, c]
@@ -282,10 +282,10 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
         """
         self.wrist = wrist
         self.elbow = elbow
-        
+
         # Use common initialization framework
         self._safe_init([wrist, elbow], height, width)
-    
+
     def _calculate_roi_parameters(
         self, height: int, width: int
     ) -> tuple[tuple[float, float], float, tuple[int, int]]:
@@ -297,14 +297,14 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
         # Convert normalized coordinates to pixel coordinates
         wrist_px = np.array([self.wrist[0] * width, self.wrist[1] * height])
         elbow_px = np.array([self.elbow[0] * width, self.elbow[1] * height])
-        
+
         # Calculate center (weighted towards wrist)
         center_px = wrist_px + self.center_weight * (wrist_px - elbow_px)
 
         # Calculate size based on wrist-elbow distance
         distance = np.linalg.norm(wrist_px - elbow_px)
         size_px = int(self.size_weight * distance + self.pad_weight * long_side)
-        
+
         # Calculate rotation angle
         diff = wrist_px - elbow_px
         angle_rad = np.arctan2(diff[1], diff[0])
@@ -314,7 +314,7 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
 
 class MediaPipePoseFaceROI(MediaPipePosePartROI):
     """Face ROI using ear and nose landmarks from pose estimation.
-    
+
     Generates normalized affine transformation matrix for face region extraction.
     """
 
@@ -331,7 +331,7 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
         width: int
     ):
         """Initialize Face ROI with pose landmarks.
-        
+
         Args:
             left_ear: Left ear landmark coordinates [x, y, z, c]
             right_ear: Right ear landmark coordinates [x, y, z, c]
@@ -342,10 +342,10 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
         self.left_ear = left_ear
         self.right_ear = right_ear
         self.nose = nose
-        
+
         # Use common initialization framework
         self._safe_init([left_ear, right_ear, nose], height, width)
-    
+
     def _calculate_roi_parameters(
         self, height: int, width: int
     ) -> tuple[tuple[float, float], float, tuple[int, int]]:
@@ -358,13 +358,13 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
         left_ear_px = np.array([self.left_ear[0] * width, self.left_ear[1] * height])
         right_ear_px = np.array([self.right_ear[0] * width, self.right_ear[1] * height])
         nose_px = np.array([self.nose[0] * width, self.nose[1] * height])
-        
+
         # Calculate ear center
         ear_center = (left_ear_px + right_ear_px) / 2
-        
+
         # Calculate ROI center (weighted towards nose)
         center_px = ear_center + self.center_weight * (nose_px - ear_center)
-        
+
         # Calculate size based on ear distance
         ear_distance = np.linalg.norm(right_ear_px - left_ear_px)
         size_px = int(self.size_weight * ear_distance + self.pad_weight * long_side)
@@ -421,7 +421,7 @@ class MediaPipePoseEstimator(
     @cache
     def shape(self) -> tuple[int, int]:
         return (len(MediaPipePoseNames), self.channels)
-    
+
     @property
     @headers
     @cache
@@ -454,7 +454,7 @@ class MediaPipePoseEstimator(
 
         if not landmarks:
             return None
-        
+
         return np.array([
             self._get_array_from_landmarks(lm)
             for lm in landmarks[0]

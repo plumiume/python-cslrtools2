@@ -75,11 +75,11 @@ class SLDatasetItem[
     Ktgt: str, Vtgt: ArrayLike
     ](SLKeyHolder[Never, Kvid, Klm, Ktgt]):
     """Single item from a sign language dataset.
-    
+
     Contains video data, landmark coordinates, and target labels for
     one sample in the dataset. Supports conversion to different devices
     for PyTorch training.
-    
+
     Type Parameters:
         Kvid: String type for video data keys.
         Vvid: Array-like type for video data values.
@@ -87,7 +87,7 @@ class SLDatasetItem[
         Vlm: Array-like type for landmark data values.
         Ktgt: String type for target/label keys.
         Vtgt: Array-like type for target/label values.
-    
+
     Attributes:
         videos (:class:`~typing.Mapping`\\[:obj:`Kvid`, :obj:`Vvid`\\]):
             Video data mapping. Each value has shape ``[N, T, H, W, C]``
@@ -110,7 +110,7 @@ class SLDatasetItem[
         self.videos = videos
         self.landmarks = landmarks
         self.targets = targets
-        
+
         sldataset_logger.debug(
             f"Initialized SLDatasetItem with {len(videos)} videos, "
             f"{len(landmarks)} landmark types, {len(targets)} targets"
@@ -118,13 +118,13 @@ class SLDatasetItem[
 
     def to(self, device: torch.device) -> TensorSLDatasetItem[Kvid, Klm, Ktgt]:
         """Move all data to the specified device.
-        
+
         Converts all video, landmark, and target data to :class:`torch.Tensor`
         and moves them to the specified :class:`torch.device`.
-        
+
         Args:
             device (:class:`torch.device`): Target device (e.g., ``'cuda'``, ``'cpu'``).
-            
+
         Returns:
             :class:`TensorSLDatasetItem`\\[:obj:`Kvid`, :obj:`Klm`, :obj:`Ktgt`\\]:
                 New dataset item with all data on the specified device.
@@ -147,10 +147,10 @@ class SLDatasetItem[
 
     def to_zarr(self, store_or_group: StoreLike | zarr.Group) -> zarr.Group:
         """Save item to Zarr storage.
-        
+
         Args:
             store_or_group: Zarr store path or group object.
-            
+
         Returns:
             Zarr group containing the saved item.
         """
@@ -188,12 +188,12 @@ class SLDatasetItem[
         extra_container_load_funcs: Mapping[str, ContainerLoadFunc] = {}
         ) -> DefaultSLDatasetItem[Kvid, Klm, Ktgt]:
         """Load item from file system.
-        
+
         Args:
             path: Path to the item directory.
             extra_prekey_load_funcs: Additional per-key file loaders.
             extra_container_load_funcs: Additional container file loaders.
-            
+
         Returns:
             Loaded dataset item.
         """
@@ -243,7 +243,7 @@ class SLDatasetItem[
         container_load_funcs: Mapping[str, ContainerLoadFunc]
         ) -> Mapping[K, ArrayLike]:
         """Load category data from file system.
-        
+
         Supports both per-key files (one file per key) and container files
         (all keys in one file).
         """
@@ -285,10 +285,10 @@ class SLDatasetItem[
         cls, group: zarr.Group
     ) -> ZarrSLDatasetItem[Kvid, Klm, Ktgt]:
         """Load item from Zarr group.
-        
+
         Args:
             group: Zarr group containing the item data.
-            
+
         Returns:
             Loaded dataset item with Zarr arrays.
         """

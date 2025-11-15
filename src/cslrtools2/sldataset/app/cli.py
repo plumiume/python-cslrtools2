@@ -20,7 +20,7 @@ and preprocessing operations through a plugin system.
 
 Example:
     Process FluentSigners50 dataset::
-    
+
         $ sldataset fluentsigners50 --input-dir data/ --output-dir processed/
 """
 
@@ -30,20 +30,20 @@ from .args import CliArgs, plugins
 
 def main():
     """Main entry point for the sldataset CLI.
-    
+
     Parses command-line arguments and dispatches to the appropriate
     dataset processor based on the selected command.
-    
+
     Raises:
         :exc:`ConfigurationError`: If an unknown command is specified.
     """
 
     args = CliArgs.parse_args()
-    
+
     sldataset_logger.info(f"Starting sldataset CLI with command: {args.command}")
 
     assert args.command
-    
+
     pl_info = plugins.get(args.command)
 
     if pl_info is None:

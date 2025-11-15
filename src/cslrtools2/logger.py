@@ -68,13 +68,13 @@ def configure_logger(
     handler: logging.Handler | None = None,
 ) -> None:
     """Configure a logger with standard settings.
-    
+
     Args:
         logger: Logger instance to configure.
         level: Logging level (default: INFO).
         formatter: Formatter to use (default: standard_formatter).
         handler: Handler to use (default: StreamHandler to stdout).
-    
+
     Example:
         >>> import logging
         >>> from cslrtools2.logger import configure_logger, detailed_formatter
@@ -82,9 +82,9 @@ def configure_logger(
         >>> configure_logger(logger, level=logging.DEBUG, formatter=detailed_formatter)
     """
     logger.setLevel(level)
-    
+
     if handler is None:
         handler = logging.StreamHandler()
-    
+
     handler.setFormatter(formatter)
     logger.addHandler(handler)

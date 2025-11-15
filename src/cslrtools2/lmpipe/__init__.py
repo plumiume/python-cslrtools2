@@ -14,87 +14,87 @@
 
 """LMPipe: Landmark Extraction Pipeline Framework for Sign Language Videos.
 
-**Software Type**: Processing Pipeline Framework / ETL (Extract-Transform-Load) System  
-**Pattern**: Pipeline Pattern, Plugin Architecture  
+**Software Type**: Processing Pipeline Framework / ETL (Extract-Transform-Load) System
+**Pattern**: Pipeline Pattern, Plugin Architecture
 **Dependencies**: MediaPipe, OpenCV, NumPy, Rich (for progress bars)
 
 What This Module Does
 ----------------------
-LMPipe (Landmark Pipeline) is a **video processing framework** that extracts skeletal 
+LMPipe (Landmark Pipeline) is a **video processing framework** that extracts skeletal
 landmark data from sign language videos. It implements a complete ETL pipeline:
 
 1. **Extract**: Read video frames from files, cameras, or image sequences
 2. **Transform**: Detect landmarks (pose, hands, face) using MediaPipe
 3. **Load**: Save landmarks to various formats (NPY, Zarr, SafeTensors, etc.)
 
-Think of it as a **batch processing system** for converting raw videos into 
-machine-learning-ready data. It's designed to handle large-scale video datasets 
+Think of it as a **batch processing system** for converting raw videos into
+machine-learning-ready data. It's designed to handle large-scale video datasets
 with parallel processing and progress tracking.
 
 Key Concept
 -----------
 **Pipeline Architecture**:
     LMPipe follows the Pipeline pattern where data flows through these stages::
-    
+
         Video File(s) → Frame Extraction → Landmark Detection → Data Collection → Output File(s)
                       ↑                    ↑                     ↑
                       RunSpec              Estimator            Collector
-    
+
     Each stage is modular and can be customized through plugins.
 
 Core Components
 ---------------
 
 1. **Estimator** (``estimator.py``)
-   
+
    What it is:
-       Abstract base class for landmark detection models. Defines the interface 
+       Abstract base class for landmark detection models. Defines the interface
        that all landmark detectors must implement.
-   
+
    Software pattern: Strategy Pattern / Abstract Factory
-   
+
    Example::
-   
+
        from cslrtools2.lmpipe.estimator import Estimator
-       
+
        class MyEstimator(Estimator):
            def process(self, frame):
                # Your landmark detection logic
                return ProcessResult(landmarks={...}, annotated_frame=frame)
 
 2. **Collector** (``collector/``)
-   
+
    What it is:
-       Output handlers that save landmark data to various file formats. 
+       Output handlers that save landmark data to various file formats.
        Implements the Collector pattern for flexible output strategies.
-   
+
    Software pattern: Collector Pattern / Visitor Pattern
-   
+
    Supported formats:
        - ``landmark_matrix/``: NPY, NPZ, Zarr, SafeTensors, PyTorch, JSON, CSV
        - ``annotated_frames/``: OpenCV, matplotlib, PIL, torchvision
-   
+
    Example::
-   
+
        from cslrtools2.lmpipe.collector import NpyLandmarkMatrixCollector
        collector = NpyLandmarkMatrixCollector(output_path="landmarks.npy")
 
 3. **Interface** (``interface/``)
-   
+
    What it is:
-       Main user-facing API that orchestrates the entire pipeline. 
+       Main user-facing API that orchestrates the entire pipeline.
        Provides both Python API and CLI functionality.
-   
+
    Software pattern: Facade Pattern / Coordinator
-   
+
    Key classes:
        - ``LMPipeInterface``: User-facing API for running pipelines
        - ``LMPipeRunner``: Internal execution coordinator (1,252 lines)
-   
+
    Example::
-   
+
        from cslrtools2.lmpipe.interface import LMPipeInterface
-       
+
        interface = LMPipeInterface(
            estimator=my_estimator,
            collectors=[npy_collector],
@@ -103,28 +103,28 @@ Core Components
        interface.run("input_video.mp4", "output_dir/")
 
 4. **RunSpec** (``runspec.py``)
-   
+
    What it is:
-       Specification object that defines a single processing job. 
+       Specification object that defines a single processing job.
        Encapsulates source (video/camera) and destination (output directory).
-   
+
    Software pattern: Value Object / Data Transfer Object (DTO)
-   
+
    Example::
-   
+
        from cslrtools2.lmpipe.runspec import RunSpec
        spec = RunSpec.from_pathlikes("input.mp4", "output/")
 
 5. **Options** (``options.py``)
-   
+
    What it is:
-       Configuration management for pipeline execution (parallel vs sequential, 
+       Configuration management for pipeline execution (parallel vs sequential,
        executor type, etc.)
-   
+
    Software pattern: Configuration Object
-   
+
    Example::
-   
+
        from cslrtools2.lmpipe.options import LMPipeOptions, ExecutorMode
        options = LMPipeOptions(
            mode=ExecutorMode.PARALLEL,
@@ -138,7 +138,7 @@ Architecture
 **Plugin System**:
     LMPipe supports plugins for custom estimators and dataset-specific logic.
     Plugins are registered via entry points in ``pyproject.toml``::
-    
+
         [project.entry-points."cslrtools2.lmpipe.plugins"]
         "mediapipe.holistic" = "cslrtools2.plugins.mediapipe.lmpipe.holistic_args:holistic_info"
         "mediapipe.pose" = "cslrtools2.plugins.mediapipe.lmpipe.pose_args:pose_info"
@@ -151,42 +151,42 @@ Architecture
 
 **Progress Tracking**:
     Built-in progress bars using Rich library for better user experience::
-    
+
         Processing videos... ━━━━━━━━━━━━━━━━━━━━ 100% 0:02:15
 
 Use Cases
 ---------
 
 1. **Research Dataset Preprocessing**:
-   
+
    Extract landmarks from thousands of sign language videos::
-   
+
        lmpipe mediapipe.holistic videos/ -o dataset.zarr --workers 8
 
 2. **Real-time Landmark Extraction**:
-   
+
    Process webcam feed::
-   
+
        lmpipe mediapipe.pose 0 -o live_landmarks.npz
 
 3. **Custom Estimator Development**:
-   
+
    Build your own landmark detector::
-   
+
        from cslrtools2.lmpipe import Estimator, LMPipeInterface
-       
+
        class MyEstimator(Estimator):
            def process(self, frame):
                # Your logic
                return ProcessResult(...)
-       
+
        interface = LMPipeInterface(MyEstimator())
        interface.run("video.mp4", "output/")
 
 4. **Batch Video Processing**:
-   
+
    Process entire directory with progress tracking::
-   
+
        from cslrtools2.lmpipe.interface import LMPipeInterface
        interface = LMPipeInterface(estimator, collectors, workers=4)
        interface.run_batch("video_directory/", "output_directory/")
@@ -198,13 +198,13 @@ The ``lmpipe`` command provides a full-featured CLI::
 
     # Basic usage
     lmpipe mediapipe.holistic input.mp4 -o landmarks.npz
-    
+
     # With options
     lmpipe mediapipe.pose videos/ -o output.zarr \\
         --workers 4 \\
         --format zarr \\
         --annotated-frames opencv
-    
+
     # List available plugins
     lmpipe --list-plugins
 
@@ -267,17 +267,17 @@ Basic usage with MediaPipe::
     from cslrtools2.lmpipe.interface import LMPipeInterface
     from cslrtools2.plugins.mediapipe.lmpipe import HolisticEstimator
     from cslrtools2.lmpipe.collector import NpzLandmarkMatrixCollector
-    
+
     estimator = HolisticEstimator()
     collector = NpzLandmarkMatrixCollector("output.npz")
-    
+
     interface = LMPipeInterface(estimator, [collector])
     interface.run("input_video.mp4", "output_directory/")
 
 Custom estimator::
 
     from cslrtools2.lmpipe.estimator import Estimator, ProcessResult
-    
+
     class MyEstimator(Estimator):
         def process(self, frame):
             # Your landmark detection code
@@ -286,10 +286,10 @@ Custom estimator::
                 landmarks=landmarks,
                 annotated_frame=frame
             )
-        
+
         def configure_estimator_name(self):
             return "my_estimator"
-    
+
     interface = LMPipeInterface(MyEstimator(), collectors)
     interface.run_batch("videos/", "output/")
 

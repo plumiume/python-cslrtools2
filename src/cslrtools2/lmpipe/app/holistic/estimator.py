@@ -34,21 +34,21 @@ class HolisticPoseEstimator[K: str](Estimator[K]):
         landmarks: Mapping[K, NDArrayFloat],
         height: int, width: int
         ) -> BaseROI: ...
-    
+
     @abstractmethod
     def configure_right_hand_roi(
         self,
         landmarks: Mapping[K, NDArrayFloat],
         height: int, width: int
         ) -> BaseROI: ...
-    
+
     @abstractmethod
     def configure_both_hands_roi(
         self,
         landmarks: Mapping[K, NDArrayFloat],
         height: int, width: int
         ) -> BaseROI: ...
-    
+
     @abstractmethod
     def configure_face_roi(
         self,
@@ -289,4 +289,3 @@ class HolisticEstimator(Estimator[str]):
             self.left_hand_estimator.setup()
         if self.face_estimator:
             self.face_estimator.setup()
-

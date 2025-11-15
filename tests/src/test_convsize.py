@@ -19,7 +19,6 @@ convolution output dimensions.
 """
 
 from __future__ import annotations
-import pytest # pyright: ignore[reportUnusedImport]
 import torch
 import torch.nn as nn
 
@@ -109,10 +108,10 @@ class TestConvSizeClass:
         """Test ConvSize forward method."""
         conv_layer = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, dilation=1)
         conv = ConvSize(conv_layer)
-        
+
         input_size = torch.tensor([224, 224], dtype=torch.int64)
         output = conv.forward(input_size)
-        
+
         # Should match manual calculation
         expected = torch.tensor([112, 112], dtype=torch.int64)
         assert torch.equal(output, expected)
@@ -121,10 +120,10 @@ class TestConvSizeClass:
         """Test ConvSize can be called like a function."""
         conv_layer = nn.Conv2d(3, 64, kernel_size=5, stride=1, padding=2, dilation=1)
         conv = ConvSize(conv_layer)
-        
+
         input_size = torch.tensor([32, 32], dtype=torch.int64)
         output = conv(input_size)
-        
+
         # (32 + 2*2 - 1*(5-1) - 1) / 1 + 1 = 32 (same padding)
         expected = torch.tensor([32, 32], dtype=torch.int64)
         assert torch.equal(output, expected)
@@ -134,14 +133,14 @@ class TestConvSizeClass:
         # Simulate two conv layers
         conv1_layer = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, dilation=1)
         conv1 = ConvSize(conv1_layer)
-        
+
         conv2_layer = nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1, dilation=1)
         conv2 = ConvSize(conv2_layer)
-        
+
         input_size = torch.tensor([224, 224], dtype=torch.int64)
         output1 = conv1(input_size)  # 112x112
         output2 = conv2(output1)      # 56x56
-        
+
         assert torch.equal(output1, torch.tensor([112, 112], dtype=torch.int64))
         assert torch.equal(output2, torch.tensor([56, 56], dtype=torch.int64))
 
@@ -158,7 +157,7 @@ class TestEdgeCases:
         dilation = torch.tensor([1, 1], dtype=torch.int64)
 
         output = conv_size(size, kernel_size, stride, padding, dilation)
-        
+
         # (100 + 2*5 - 1*(11-1) - 1) / 1 + 1 = 100
         assert torch.equal(output, torch.tensor([100, 100], dtype=torch.int64))
 
@@ -171,7 +170,7 @@ class TestEdgeCases:
         dilation = torch.tensor([1, 1, 1], dtype=torch.int64)
 
         output = conv_size(size, kernel_size, stride, padding, dilation)
-        
+
         # Each dimension: (n + 2*1 - 1*(3-1) - 1) / 2 + 1
         # D: (16 + 2 - 2 - 1) / 2 + 1 = 8
         # H: (32 + 2 - 2 - 1) / 2 + 1 = 16

@@ -38,7 +38,7 @@ class LoggingOptions(TypedDict):
 
 class LoggingOptionsPartial(TypedDict, total=False):
     """Partial Logging configuration for pipeline execution.
-    
+
     Same as LoggingOptions but with all fields optional.
     """
     log_level: str
@@ -72,7 +72,7 @@ class RuntimeResources(TypedDict):
 
 class RuntimeResourcesPartial(TypedDict, total=False):
     """Partial Runtime resource allocation for parallel execution.
-    
+
     Same as RuntimeResources but with all fields optional.
     """
     cpu: float
@@ -114,7 +114,7 @@ class ExecutorOptions(TypedDict):
 
 class ExecutorOptionsPartial(TypedDict, total=False):
     """Partial Parallel execution configuration.
-    
+
     Same as ExecutorOptions but with all fields optional.
     """
     max_cpus: int
@@ -157,7 +157,7 @@ class CollectorOptions(TypedDict):
 
 class CollectorOptionsPartial(TypedDict, total=False):
     """Partial Output collection and saving configuration.
-    
+
     Same as CollectorOptions but with all fields optional.
     """
     landmark_matrix_save_file_format: str | None
@@ -215,7 +215,7 @@ class LMPipeOptionsPartial(
     total=False
     ):
     """Partial lmpipeoptions configuration options.
-    
+
     Same as LMPipeOptions but with all fields optional, useful for
     overriding specific configuration values.
     """

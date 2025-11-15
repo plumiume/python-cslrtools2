@@ -133,11 +133,11 @@ def matplotlib_af_save_collector_creator[K: str](
     key_type: type[K]
     ) -> AnnotatedFramesSaveCollector[K]:
     """Create a MatplotlibAnnotatedFramesSaveCollector instance.
-    
+
     Args:
         file_ext (`str`): File extension for output (e.g., '.png', '.jpg').
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`AnnotatedFramesSaveCollector[K]`: Matplotlib-based annotated frames saver.
     """
@@ -149,10 +149,10 @@ def matplotlib_af_show_collector_creator[K: str](
     key_type: type[K]
     ) -> AnnotatedFramesShowCollector[K]:
     """Create a MatplotlibAnnotatedFramesShowCollector instance.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`AnnotatedFramesShowCollector[K]`: Matplotlib-based annotated frames viewer.
     """

@@ -21,14 +21,14 @@ from ..exceptions import DataLoadError
 
 def get_array(group: zarr.Group, path: str) -> zarr.Array:
     """Retrieve a Zarr array from a group by path.
-    
+
     Args:
         group (:class:`zarr.Group`): The Zarr group to search in.
         path (:obj:`str`): The path to the array within the group.
-        
+
     Returns:
         :class:`zarr.Array`: The Zarr array at the specified path.
-        
+
     Raises:
         :exc:`DataLoadError`: If no array is found at the specified path.
     """
@@ -43,14 +43,14 @@ def get_array(group: zarr.Group, path: str) -> zarr.Array:
 
 def get_group(group: zarr.Group, path: str) -> zarr.Group:
     """Retrieve a Zarr subgroup from a group by path.
-    
+
     Args:
         group (:class:`zarr.Group`): The parent Zarr group to search in.
         path (:obj:`str`): The path to the subgroup within the parent group.
-        
+
     Returns:
         :class:`zarr.Group`: The Zarr subgroup at the specified path.
-        
+
     Raises:
         :exc:`DataLoadError`: If no group is found at the specified path.
     """
@@ -65,13 +65,13 @@ def get_group(group: zarr.Group, path: str) -> zarr.Group:
 
 def as_tensor(data: ArrayLike) -> torch.Tensor:
     """Convert array-like data to a PyTorch tensor.
-    
+
     Handles conversion from various array types including :class:`torch.Tensor`,
     :class:`numpy.ndarray`, and other array-like objects.
-    
+
     Args:
         data (:class:`ArrayLike`): Array-like data to convert.
-        
+
     Returns:
         :class:`torch.Tensor`: The converted tensor. If input is already a
             :class:`torch.Tensor`, returns it directly without copying.
@@ -81,5 +81,3 @@ def as_tensor(data: ArrayLike) -> torch.Tensor:
     if isinstance(data, np.ndarray):
         return torch.as_tensor(data)
     return torch.as_tensor(np.asarray(data))
-
-

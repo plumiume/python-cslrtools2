@@ -17,7 +17,7 @@ from clipar import mixin
 
 class MediaPipeBaseArgs(mixin.ReprMixin):
     """Common configuration arguments for MediaPipe estimators.
-    
+
     This class defines shared settings that apply to all MediaPipe-based
     landmark estimators including device selection, running mode, output
     dimensions, and visualization options.

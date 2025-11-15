@@ -1,0 +1,843 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cslrtools2 package &mdash; cslrtools2 0.1.dev54+gb18e68278.d20251115 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=9bb56542"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cslrtools2.plugins package" href="cslrtools2.plugins.html" />
+    <link rel="prev" title="cslrtools2" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            cslrtools2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cslrtools2</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">cslrtools2 package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.plugins.html">cslrtools2.plugins package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html">cslrtools2.sldataset package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.typings.html">cslrtools2.typings package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-cslrtools2.convsize">cslrtools2.convsize module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.convsize.conv_size"><code class="docutils literal notranslate"><span class="pre">conv_size()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.convsize.conv_transpose_size"><code class="docutils literal notranslate"><span class="pre">conv_transpose_size()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.convsize.ConvSize"><code class="docutils literal notranslate"><span class="pre">ConvSize</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.convsize.ConvTransposeSize"><code class="docutils literal notranslate"><span class="pre">ConvTransposeSize</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-cslrtools2">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#what-this-package-does">What This Package Does</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main-components">Main Components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#software-architecture">Software Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usage-patterns">Usage Patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#target-audience">Target Audience</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quick-links">Quick Links</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.CSLRToolsError"><code class="docutils literal notranslate"><span class="pre">CSLRToolsError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.ConfigurationError"><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.ValidationError"><code class="docutils literal notranslate"><span class="pre">ValidationError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.LMPipeError"><code class="docutils literal notranslate"><span class="pre">LMPipeError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.SLDatasetError"><code class="docutils literal notranslate"><span class="pre">SLDatasetError</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">cslrtools2 package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.plugins.html">cslrtools2.plugins package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html">cslrtools2.sldataset package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.typings.html">cslrtools2.typings package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-cslrtools2.convsize">cslrtools2.convsize module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.convsize.conv_size"><code class="docutils literal notranslate"><span class="pre">conv_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.convsize.conv_transpose_size"><code class="docutils literal notranslate"><span class="pre">conv_transpose_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.convsize.ConvSize"><code class="docutils literal notranslate"><span class="pre">ConvSize</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.convsize.ConvSize.__init__"><code class="docutils literal notranslate"><span class="pre">ConvSize.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.convsize.ConvSize.forward"><code class="docutils literal notranslate"><span class="pre">ConvSize.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.convsize.ConvTransposeSize"><code class="docutils literal notranslate"><span class="pre">ConvTransposeSize</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.convsize.ConvTransposeSize.__init__"><code class="docutils literal notranslate"><span class="pre">ConvTransposeSize.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.convsize.ConvTransposeSize.forward"><code class="docutils literal notranslate"><span class="pre">ConvTransposeSize.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-cslrtools2">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-this-package-does">What This Package Does</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-components">Main Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#software-architecture">Software Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usage-patterns">Usage Patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#target-audience">Target Audience</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quick-links">Quick Links</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cslrtools2.__version__"><code class="docutils literal notranslate"><span class="pre">__version__</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.CSLRToolsError"><code class="docutils literal notranslate"><span class="pre">CSLRToolsError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.ConfigurationError"><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.ValidationError"><code class="docutils literal notranslate"><span class="pre">ValidationError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.LMPipeError"><code class="docutils literal notranslate"><span class="pre">LMPipeError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cslrtools2.SLDatasetError"><code class="docutils literal notranslate"><span class="pre">SLDatasetError</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/ikegami-yukino/python-cslrtools2">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/cslrtools2/">PyPI Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">cslrtools2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">cslrtools2</a></li>
+      <li class="breadcrumb-item active">cslrtools2 package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cslrtools2.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cslrtools2-package">
+<h1>cslrtools2 package<a class="headerlink" href="#cslrtools2-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cslrtools2.plugins.html">cslrtools2.plugins package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.plugins.html#module-cslrtools2.plugins">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cslrtools2.sldataset.html">cslrtools2.sldataset package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.sldataset.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.sldataset.html#module-cslrtools2.sldataset.array_loader">cslrtools2.sldataset.array_loader module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.PreKeyLoader"><code class="docutils literal notranslate"><span class="pre">PreKeyLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.PreKeyLoader.load_array"><code class="docutils literal notranslate"><span class="pre">PreKeyLoader.load_array()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.ContainerLoader"><code class="docutils literal notranslate"><span class="pre">ContainerLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.ContainerLoader.load_mapping"><code class="docutils literal notranslate"><span class="pre">ContainerLoader.load_mapping()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.CsvLoader"><code class="docutils literal notranslate"><span class="pre">CsvLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.CsvLoader.delimiter"><code class="docutils literal notranslate"><span class="pre">CsvLoader.delimiter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.CsvLoader.__init__"><code class="docutils literal notranslate"><span class="pre">CsvLoader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.CsvLoader.load_array"><code class="docutils literal notranslate"><span class="pre">CsvLoader.load_array()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.JsonLoader"><code class="docutils literal notranslate"><span class="pre">JsonLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.JsonLoader.load_array"><code class="docutils literal notranslate"><span class="pre">JsonLoader.load_array()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.NpyLoader"><code class="docutils literal notranslate"><span class="pre">NpyLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.NpyLoader.load_array"><code class="docutils literal notranslate"><span class="pre">NpyLoader.load_array()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.NpzLoader"><code class="docutils literal notranslate"><span class="pre">NpzLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.NpzLoader.load_mapping"><code class="docutils literal notranslate"><span class="pre">NpzLoader.load_mapping()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.TorchLoader"><code class="docutils literal notranslate"><span class="pre">TorchLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.TorchLoader.load_array"><code class="docutils literal notranslate"><span class="pre">TorchLoader.load_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.TorchLoader.load_mapping"><code class="docutils literal notranslate"><span class="pre">TorchLoader.load_mapping()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.SafetensorsLoader"><code class="docutils literal notranslate"><span class="pre">SafetensorsLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.SafetensorsLoader.load_mapping"><code class="docutils literal notranslate"><span class="pre">SafetensorsLoader.load_mapping()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.ZarrLoader"><code class="docutils literal notranslate"><span class="pre">ZarrLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.array_loader.ZarrLoader.load_mapping"><code class="docutils literal notranslate"><span class="pre">ZarrLoader.load_mapping()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.sldataset.html#module-cslrtools2.sldataset.dataset">cslrtools2.sldataset.dataset module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLKeyHolder"><code class="docutils literal notranslate"><span class="pre">SLKeyHolder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLKeyHolder.is_landmark_key"><code class="docutils literal notranslate"><span class="pre">SLKeyHolder.is_landmark_key()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLKeyHolder.is_metadata_key"><code class="docutils literal notranslate"><span class="pre">SLKeyHolder.is_metadata_key()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLKeyHolder.is_target_key"><code class="docutils literal notranslate"><span class="pre">SLKeyHolder.is_target_key()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLKeyHolder.is_video_key"><code class="docutils literal notranslate"><span class="pre">SLKeyHolder.is_video_key()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.videos"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem.videos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.landmarks"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem.landmarks</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.targets"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem.targets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.__init__"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.from_file_system"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem.from_file_system()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.from_zarr"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem.from_zarr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.to"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem.to()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetItem.to_zarr"><code class="docutils literal notranslate"><span class="pre">SLDatasetItem.to_zarr()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.IterableDataset"><code class="docutils literal notranslate"><span class="pre">IterableDataset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetBatch"><code class="docutils literal notranslate"><span class="pre">SLDatasetBatch</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetBatch.__init__"><code class="docutils literal notranslate"><span class="pre">SLDatasetBatch.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetBatch.from_batch"><code class="docutils literal notranslate"><span class="pre">SLDatasetBatch.from_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDatasetBatch.to"><code class="docutils literal notranslate"><span class="pre">SLDatasetBatch.to()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDataset"><code class="docutils literal notranslate"><span class="pre">SLDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDataset.__init__"><code class="docutils literal notranslate"><span class="pre">SLDataset.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDataset.from_zarr"><code class="docutils literal notranslate"><span class="pre">SLDataset.from_zarr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.SLDataset.to_partially"><code class="docutils literal notranslate"><span class="pre">SLDataset.to_partially()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.IterableSLDataset"><code class="docutils literal notranslate"><span class="pre">IterableSLDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.IterableSLDataset.__init__"><code class="docutils literal notranslate"><span class="pre">IterableSLDataset.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.IterableSLDataset.to_partially"><code class="docutils literal notranslate"><span class="pre">IterableSLDataset.to_partially()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.dataset.dataset_to_zarr"><code class="docutils literal notranslate"><span class="pre">dataset_to_zarr()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.sldataset.html#module-cslrtools2.sldataset.utils">cslrtools2.sldataset.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.utils.get_array"><code class="docutils literal notranslate"><span class="pre">get_array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.utils.get_group"><code class="docutils literal notranslate"><span class="pre">get_group()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#cslrtools2.sldataset.utils.as_tensor"><code class="docutils literal notranslate"><span class="pre">as_tensor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.sldataset.html#module-cslrtools2.sldataset">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#what-this-module-does">What This Module Does</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#key-concept">Key Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#core-components">Core Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#use-cases">Use Cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#architecture">Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#performance">Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#software-engineering-patterns-used">Software Engineering Patterns Used</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#see-also">See Also</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.sldataset.html#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cslrtools2.typings.html">cslrtools2.typings package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.typings.html#module-cslrtools2.typings">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.typings.html#cslrtools2.typings.SupportsArray"><code class="docutils literal notranslate"><span class="pre">SupportsArray</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.typings.html#cslrtools2.typings.SupportsArray.__init__"><code class="docutils literal notranslate"><span class="pre">SupportsArray.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cslrtools2.convsize">
+<span id="cslrtools2-convsize-module"></span><h2>cslrtools2.convsize module<a class="headerlink" href="#module-cslrtools2.convsize" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cslrtools2.convsize.conv_size">
+<span class="sig-prename descclassname"><span class="pre">cslrtools2.convsize.</span></span><span class="sig-name descname"><span class="pre">conv_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dilation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/convsize.html#conv_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.convsize.conv_size" title="Link to this definition"></a></dt>
+<dd><p>Calculate the output size of a convolution operation.</p>
+<p>Computes the spatial dimensions of the output feature map for a
+convolution layer given the input size and convolution parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<cite>Tensor</cite>) – Input spatial dimensions tensor. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>
+where N is the number of spatial dimensions (typically 2 for
+height and width).</p></li>
+<li><p><strong>kernel_size</strong> (<cite>Tensor</cite>) – Convolution kernel size tensor. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+<li><p><strong>stride</strong> (<cite>Tensor</cite>) – Stride of the convolution. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+<li><p><strong>padding</strong> (<cite>Tensor</cite>) – Padding applied to the input. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+<li><p><strong>dilation</strong> (<cite>Tensor</cite>) – Spacing between kernel elements. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Output spatial dimensions. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> matching the</dt><dd><p>input size tensor shape.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function implements the standard convolution output size formula used
+by <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv2d</span></code></a> and <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv3d.html#torch.nn.Conv3d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv3d</span></code></a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{output} = \left\lfloor \frac{\text{input} + 2 \times \text{padding} - \text{dilation} \times (\text{kernel} - 1) - 1}{\text{stride}} \right\rfloor + 1\]</div>
+</div>
+<p class="rubric">Example</p>
+<p>Calculate output size for a 2D convolution:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.convsize</span><span class="w"> </span><span class="kn">import</span> <span class="n">conv_size</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output</span> <span class="o">=</span> <span class="n">conv_size</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">size</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">kernel_size</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">stride</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">padding</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">dilation</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output</span>
+<span class="go">tensor([112, 112])</span>
+</pre></div>
+</div>
+<p>Verify with PyTorch <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv2d</span></code></a> layer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([1, 64, 112, 112])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cslrtools2.convsize.conv_transpose_size">
+<span class="sig-prename descclassname"><span class="pre">cslrtools2.convsize.</span></span><span class="sig-name descname"><span class="pre">conv_transpose_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_padding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dilation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/convsize.html#conv_transpose_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.convsize.conv_transpose_size" title="Link to this definition"></a></dt>
+<dd><p>Calculate the output size of a transposed convolution operation.</p>
+<p>Computes the spatial dimensions of the output feature map for a
+transposed convolution (deconvolution) layer given the input size
+and convolution parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<cite>Tensor</cite>) – Input spatial dimensions tensor. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>
+where N is the number of spatial dimensions.</p></li>
+<li><p><strong>kernel_size</strong> (<cite>Tensor</cite>) – Convolution kernel size tensor. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+<li><p><strong>stride</strong> (<cite>Tensor</cite>) – Stride of the transposed convolution. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+<li><p><strong>padding</strong> (<cite>Tensor</cite>) – Padding applied to the input. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+<li><p><strong>output_padding</strong> (<cite>Tensor</cite>) – Additional size added to one side of
+the output shape. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+<li><p><strong>dilation</strong> (<cite>Tensor</cite>) – Spacing between kernel elements. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Output spatial dimensions. Shape: <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> matching</dt><dd><p>the input size tensor shape.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function implements the transposed convolution output size formula
+used by <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose2d.html#torch.nn.ConvTranspose2d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose2d</span></code></a> and <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose3d.html#torch.nn.ConvTranspose3d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose3d</span></code></a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{output} = (\text{input} - 1) \times \text{stride} - 2 \times \text{padding} + \text{dilation} \times (\text{kernel} - 1) + \text{output\_padding} + 1\]</div>
+</div>
+<p class="rubric">Example</p>
+<p>Calculate output size for a 2D transposed convolution:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.convsize</span><span class="w"> </span><span class="kn">import</span> <span class="n">conv_transpose_size</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output</span> <span class="o">=</span> <span class="n">conv_transpose_size</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">size</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">112</span><span class="p">,</span> <span class="mi">112</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">kernel_size</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">stride</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">padding</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">output_padding</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">dilation</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output</span>
+<span class="go">tensor([224, 224])</span>
+</pre></div>
+</div>
+<p>Verify with PyTorch <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose2d.html#torch.nn.ConvTranspose2d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose2d</span></code></a> layer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deconv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">output_padding</span><span class="o">=</span><span class="mi">1</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">112</span><span class="p">,</span> <span class="mi">112</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">deconv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([1, 3, 224, 224])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.convsize.ConvSize">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.convsize.</span></span><span class="sig-name descname"><span class="pre">ConvSize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/convsize.html#ConvSize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.convsize.ConvSize" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_ConvNd</span></code>]</p>
+<p>Calculate the output size of a convolutional layer.</p>
+<p>A <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> that computes the spatial output dimensions
+for convolutional layers (<a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv1d.html#torch.nn.Conv1d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv1d</span></code></a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv2d</span></code></a>,
+<a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv3d.html#torch.nn.Conv3d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv3d</span></code></a>) given their parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conv</strong> (<em>_ConvNd</em>) – A convolutional layer instance (e.g., <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv1d.html#torch.nn.Conv1d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv1d</span></code></a>,
+<a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv2d</span></code></a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv3d.html#torch.nn.Conv3d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Conv3d</span></code></a>).</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Input: <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a> of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">channels,</span> <span class="pre">...)</span></code>
+or <a class="reference external" href="https://docs.pytorch.org/docs/stable/size.html#torch.Size" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Size</span></code></a>.</p></li>
+<li><p>Output: <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a> of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">out_channels,</span> <span class="pre">...)</span></code>
+or <a class="reference external" href="https://docs.pytorch.org/docs/stable/size.html#torch.Size" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Size</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Calculate output size for a 2D convolutional layer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.convsize</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConvSize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv_size_calc</span> <span class="o">=</span> <span class="n">ConvSize</span><span class="p">(</span><span class="n">conv</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_size</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output_size</span> <span class="o">=</span> <span class="n">conv_size_calc</span><span class="p">(</span><span class="n">input_size</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output_size</span>
+<span class="go">tensor([112, 112])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.convsize.ConvSize.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/convsize.html#ConvSize.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.convsize.ConvSize.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.convsize.ConvSize.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">slice(None,</span> <span class="pre">None,</span> <span class="pre">None)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/convsize.html#ConvSize.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.convsize.ConvSize.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> | <a class="reference external" href="https://docs.pytorch.org/docs/stable/size.html#torch.Size" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Size</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.convsize.ConvTransposeSize">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.convsize.</span></span><span class="sig-name descname"><span class="pre">ConvTransposeSize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/convsize.html#ConvTransposeSize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.convsize.ConvTransposeSize" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_ConvTransposeNd</span></code>]</p>
+<p>Calculate the output size of a transposed convolutional layer.</p>
+<p>A <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> that computes the spatial output dimensions
+for transposed convolutional layers (<a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose1d.html#torch.nn.ConvTranspose1d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose1d</span></code></a>,
+<a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose2d.html#torch.nn.ConvTranspose2d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose2d</span></code></a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose3d.html#torch.nn.ConvTranspose3d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose3d</span></code></a>)
+given their parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conv</strong> (<em>_ConvTransposeNd</em>) – A transposed convolutional layer instance
+(e.g., <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose1d.html#torch.nn.ConvTranspose1d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose1d</span></code></a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose2d.html#torch.nn.ConvTranspose2d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose2d</span></code></a>,
+<a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ConvTranspose3d.html#torch.nn.ConvTranspose3d" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.ConvTranspose3d</span></code></a>).</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Input: <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a> of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">channels,</span> <span class="pre">...)</span></code>
+or <a class="reference external" href="https://docs.pytorch.org/docs/stable/size.html#torch.Size" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Size</span></code></a>.</p></li>
+<li><p>Output: <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a> of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">out_channels,</span> <span class="pre">...)</span></code>
+or <a class="reference external" href="https://docs.pytorch.org/docs/stable/size.html#torch.Size" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Size</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Calculate output size for a 2D transposed convolutional layer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.convsize</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConvTransposeSize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deconv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">output_padding</span><span class="o">=</span><span class="mi">1</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deconv_size_calc</span> <span class="o">=</span> <span class="n">ConvTransposeSize</span><span class="p">(</span><span class="n">deconv</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_size</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">112</span><span class="p">,</span> <span class="mi">112</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output_size</span> <span class="o">=</span> <span class="n">deconv_size_calc</span><span class="p">(</span><span class="n">input_size</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output_size</span>
+<span class="go">tensor([224, 224])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.convsize.ConvTransposeSize.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/convsize.html#ConvTransposeSize.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.convsize.ConvTransposeSize.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.convsize.ConvTransposeSize.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">slice(None,</span> <span class="pre">None,</span> <span class="pre">None)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/convsize.html#ConvTransposeSize.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.convsize.ConvTransposeSize.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> | <a class="reference external" href="https://docs.pytorch.org/docs/stable/size.html#torch.Size" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Size</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cslrtools2">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cslrtools2" title="Link to this heading"></a></h2>
+<p>cslrtools2: Comprehensive toolkit for Continuous Sign Language Recognition.</p>
+<p><strong>Software Type</strong>: Research Library / Toolkit Package
+<strong>Domain</strong>: Computer Vision, Sign Language Recognition, Deep Learning
+<strong>License</strong>: Apache 2.0</p>
+<section id="what-this-package-does">
+<h3>What This Package Does<a class="headerlink" href="#what-this-package-does" title="Link to this heading"></a></h3>
+<p>cslrtools2 is a <strong>research-oriented library</strong> that provides end-to-end tools for
+analyzing sign language videos using computer vision and deep learning techniques.
+It bridges the gap between raw video data and machine learning models by offering:</p>
+<ol class="arabic simple">
+<li><p><strong>Data Preprocessing</strong>: Extract skeletal landmarks from sign language videos</p></li>
+<li><p><strong>Data Management</strong>: Efficiently store and load large-scale sign language datasets</p></li>
+<li><p><strong>Model Building</strong>: Helper utilities for constructing PyTorch neural networks</p></li>
+</ol>
+<p>The package is designed for researchers, data scientists, and developers working on:
+- Continuous Sign Language Recognition (CSLR) systems
+- Sign language video analysis and preprocessing
+- Gesture recognition and human pose estimation research</p>
+</section>
+<section id="main-components">
+<h3>Main Components<a class="headerlink" href="#main-components" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>lmpipe</strong> - Landmark Extraction Pipeline (Framework/Processing Pipeline)</p>
+<dl class="simple">
+<dt>What it does:</dt><dd><p>Converts sign language videos into structured landmark data that machine
+learning models can process. Think of it as a preprocessing pipeline that
+transforms raw videos into numerical representations.</p>
+</dd>
+<dt>Key features:</dt><dd><ul class="simple">
+<li><p>Parallel video processing with progress tracking</p></li>
+<li><p>MediaPipe integration for pose, hand, and face detection</p></li>
+<li><p>Multiple output formats: NPY, NPZ, Zarr, SafeTensors, PyTorch, JSON, CSV</p></li>
+<li><p>Batch processing for large video datasets</p></li>
+<li><p>Annotated frame visualization</p></li>
+</ul>
+</dd>
+</dl>
+<p>Command-line tool: <code class="docutils literal notranslate"><span class="pre">lmpipe</span></code></p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract landmarks from a video</span>
+<span class="n">lmpipe</span> <span class="n">mediapipe</span><span class="o">.</span><span class="n">holistic</span> <span class="n">input_video</span><span class="o">.</span><span class="n">mp4</span> <span class="o">-</span><span class="n">o</span> <span class="n">landmarks</span><span class="o">.</span><span class="n">npz</span>
+
+<span class="c1"># Process entire directory with 4 workers</span>
+<span class="n">lmpipe</span> <span class="n">mediapipe</span><span class="o">.</span><span class="n">pose</span> <span class="n">videos</span><span class="o">/</span> <span class="o">-</span><span class="n">o</span> <span class="n">output</span><span class="o">.</span><span class="n">zarr</span> <span class="o">--</span><span class="n">workers</span> <span class="mi">4</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>sldataset</strong> - Sign Language Dataset Management (Data Layer/Utility Module)</p>
+<dl class="simple">
+<dt>What it does:</dt><dd><p>Provides a unified interface for managing sign language datasets with
+efficient storage and PyTorch integration. It’s a data abstraction layer
+that handles the complexity of storing videos, landmarks, and labels together.</p>
+</dd>
+<dt>Key features:</dt><dd><ul class="simple">
+<li><p>Zarr-based storage for large arrays (efficient, compressed, chunked)</p></li>
+<li><p>PyTorch <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">IterableDataset</span></code> compatibility</p></li>
+<li><p>Flexible schema supporting videos, landmarks, and arbitrary targets</p></li>
+<li><p>Plugin architecture for specific datasets (e.g., FluentSigners50)</p></li>
+<li><p>Array loader system for various file formats</p></li>
+</ul>
+</dd>
+</dl>
+<p>Command-line tool: <code class="docutils literal notranslate"><span class="pre">sldataset2</span></code></p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load a dataset in Python</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">SLDataset</span><span class="o">.</span><span class="n">from_zarr</span><span class="p">(</span><span class="n">zarr_group</span><span class="p">)</span>
+
+<span class="c1"># Use with PyTorch DataLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>convsize</strong> - PyTorch Convolution Utilities (Helper/Utility Module)</p>
+<dl class="simple">
+<dt>What it does:</dt><dd><p>Calculates output tensor dimensions for PyTorch convolutional layers.
+Useful when designing neural network architectures to avoid shape mismatch
+errors and understand how tensor sizes change through the network.</p>
+</dd>
+<dt>Key features:</dt><dd><ul class="simple">
+<li><p>Output size calculation for Conv1d, Conv2d, Conv3d</p></li>
+<li><p>Pooling layer size calculation</p></li>
+<li><p>Transpose convolution (deconvolution) support</p></li>
+<li><p>Layer-by-layer shape tracking</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.convsize</span><span class="w"> </span><span class="kn">import</span> <span class="n">conv_size</span>
+<span class="n">output_h</span><span class="p">,</span> <span class="n">output_w</span> <span class="o">=</span> <span class="n">conv_size</span><span class="p">(</span>
+    <span class="n">input_h</span><span class="o">=</span><span class="mi">224</span><span class="p">,</span> <span class="n">input_w</span><span class="o">=</span><span class="mi">224</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="software-architecture">
+<h3>Software Architecture<a class="headerlink" href="#software-architecture" title="Link to this heading"></a></h3>
+<p><strong>Package Type</strong>: Namespace Package (Single Top-Level)</p>
+<blockquote>
+<div><p>Python packaging best practices require a single top-level package. This
+project follows a modular architecture with clear separation of concerns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cslrtools2/</span></code> (root package - minimal imports)
+- <code class="docutils literal notranslate"><span class="pre">lmpipe/</span></code> (processing framework)
+- <code class="docutils literal notranslate"><span class="pre">sldataset/</span></code> (data management)
+- <code class="docutils literal notranslate"><span class="pre">convsize.py</span></code> (utilities)
+- <code class="docutils literal notranslate"><span class="pre">plugins/</span></code> (extensible components)</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Design Philosophy</strong>: Lazy Loading</p>
+<blockquote>
+<div><p>This <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> intentionally keeps imports minimal to avoid loading
+heavy dependencies (torch, mediapipe, opencv, zarr) at package import time.
+Each submodule is designed to be imported explicitly when needed.</p>
+</div></blockquote>
+</section>
+<section id="usage-patterns">
+<h3>Usage Patterns<a class="headerlink" href="#usage-patterns" title="Link to this heading"></a></h3>
+<p>Recommended import style to avoid unnecessary dependency loading:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ✅ Lightweight - only loads version metadata (~37ms)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cslrtools2</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cslrtools2</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+
+<span class="c1"># ✅ Explicit submodule import - loads only what&#39;s needed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.convsize</span><span class="w"> </span><span class="kn">import</span> <span class="n">conv_size</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.lmpipe.interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">LMPipeInterface</span>
+
+<span class="c1"># ❌ Avoid wildcard imports - loads everything</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>  <span class="c1"># Don&#39;t do this</span>
+</pre></div>
+</div>
+</section>
+<section id="command-line-interface">
+<h3>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h3>
+<p>Two CLI applications are provided as console scripts (defined in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>):</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lmpipe</span></code> → <code class="xref py py-func docutils literal notranslate"><span class="pre">cslrtools2.lmpipe.app.cli.main()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sldataset2</span></code> → <code class="xref py py-func docutils literal notranslate"><span class="pre">cslrtools2.sldataset.app.cli.main()</span></code></p></li>
+</ol>
+<p>These are separate entry points that load their respective heavy dependencies
+only when the command is executed.</p>
+</section>
+<section id="target-audience">
+<h3>Target Audience<a class="headerlink" href="#target-audience" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Researchers</strong>: Working on sign language recognition, gesture analysis</p></li>
+<li><p><strong>Data Scientists</strong>: Preprocessing sign language video datasets</p></li>
+<li><p><strong>ML Engineers</strong>: Building CSLR models with PyTorch</p></li>
+<li><p><strong>Students</strong>: Learning computer vision and deep learning</p></li>
+</ul>
+</section>
+<section id="quick-links">
+<h3>Quick Links<a class="headerlink" href="#quick-links" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Documentation</strong>: <a class="reference external" href="https://ikegami-yukino.github.io/python-cslrtools2/">https://ikegami-yukino.github.io/python-cslrtools2/</a></p></li>
+<li><p><strong>Repository</strong>: <a class="reference external" href="https://github.com/ikegami-yukino/python-cslrtools2">https://github.com/ikegami-yukino/python-cslrtools2</a></p></li>
+<li><p><strong>Issues</strong>: <a class="reference external" href="https://github.com/ikegami-yukino/python-cslrtools2/issues">https://github.com/ikegami-yukino/python-cslrtools2/issues</a></p></li>
+<li><p><strong>PyPI</strong>: <a class="reference external" href="https://pypi.org/project/cslrtools2/">https://pypi.org/project/cslrtools2/</a></p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cslrtools2.__version__">
+<span class="sig-prename descclassname"><span class="pre">cslrtools2.</span></span><span class="sig-name descname"><span class="pre">__version__</span></span><a class="headerlink" href="#cslrtools2.__version__" title="Link to this definition"></a></dt>
+<dd><p>Package version string (e.g., “0.1.0”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p>LMPipe API: <code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.lmpipe</span></code></p></li>
+<li><p>SLDataset API: <a class="reference internal" href="cslrtools2.sldataset.html#module-cslrtools2.sldataset" title="cslrtools2.sldataset"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.sldataset</span></code></a></p></li>
+<li><p>CLI Documentation: <code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.lmpipe.app.cli</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.sldataset.app.cli</span></code></p></li>
+</ul>
+</div>
+</section>
+<dl class="py exception">
+<dt class="sig sig-object py" id="cslrtools2.CSLRToolsError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.</span></span><span class="sig-name descname"><span class="pre">CSLRToolsError</span></span><a class="reference internal" href="_modules/cslrtools2/exceptions.html#CSLRToolsError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.CSLRToolsError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Base exception for all cslrtools2 errors.</p>
+<p>All custom exceptions in cslrtools2 inherit from this class.
+This allows users to catch all cslrtools2-specific errors with
+a single except clause.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="c1"># Some cslrtools2 operation</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">... </span><span class="k">except</span> <span class="n">CSLRToolsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cslrtools2 error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cslrtools2.ConfigurationError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.</span></span><span class="sig-name descname"><span class="pre">ConfigurationError</span></span><a class="reference internal" href="_modules/cslrtools2/exceptions.html#ConfigurationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.ConfigurationError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.CSLRToolsError" title="cslrtools2.exceptions.CSLRToolsError"><code class="xref py py-class docutils literal notranslate"><span class="pre">CSLRToolsError</span></code></a></p>
+<p>Raised when configuration is invalid or inconsistent.</p>
+<p>This includes:
+- Invalid option combinations
+- Missing required configuration
+- Malformed configuration files</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s2">&quot;Invalid estimator configuration: missing model_path&quot;</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cslrtools2.ValidationError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.</span></span><span class="sig-name descname"><span class="pre">ValidationError</span></span><a class="reference internal" href="_modules/cslrtools2/exceptions.html#ValidationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.ValidationError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.CSLRToolsError" title="cslrtools2.exceptions.CSLRToolsError"><code class="xref py py-class docutils literal notranslate"><span class="pre">CSLRToolsError</span></code></a></p>
+<p>Raised when input validation fails.</p>
+<p>This includes:
+- Invalid argument values
+- Type mismatches
+- Out-of-range values</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="sa">f</span><span class="s2">&quot;Expected positive integer, got </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cslrtools2.LMPipeError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.</span></span><span class="sig-name descname"><span class="pre">LMPipeError</span></span><a class="reference internal" href="_modules/cslrtools2/exceptions.html#LMPipeError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.LMPipeError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.CSLRToolsError" title="cslrtools2.exceptions.CSLRToolsError"><code class="xref py py-class docutils literal notranslate"><span class="pre">CSLRToolsError</span></code></a></p>
+<p>Base exception for landmark pipeline errors.</p>
+<p>All lmpipe-specific exceptions inherit from this class.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cslrtools2.SLDatasetError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.</span></span><span class="sig-name descname"><span class="pre">SLDatasetError</span></span><a class="reference internal" href="_modules/cslrtools2/exceptions.html#SLDatasetError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.SLDatasetError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.CSLRToolsError" title="cslrtools2.exceptions.CSLRToolsError"><code class="xref py py-class docutils literal notranslate"><span class="pre">CSLRToolsError</span></code></a></p>
+<p>Base exception for dataset errors.</p>
+<p>All sldataset-specific exceptions inherit from this class.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="cslrtools2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cslrtools2.plugins.html" class="btn btn-neutral float-right" title="cslrtools2.plugins package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, plumiume.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

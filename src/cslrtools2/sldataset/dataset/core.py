@@ -87,7 +87,7 @@ class SLDatasetBatch[Kmeta: str, Kvid: str, Klm: str, Ktgt: str](
         ):
         self.dataset = dataset
         self.item = item
-        
+
         sldataset_logger.debug(
             f"Created SLDatasetBatch with {len(item.videos)} videos, "
             f"{len(item.landmarks)} landmarks, {len(item.targets)} targets"
@@ -99,7 +99,7 @@ class SLDatasetBatch[Kmeta: str, Kvid: str, Klm: str, Ktgt: str](
             dataset=self.dataset.to_partially(device),
             item=self.item.to(device)
         )
-    
+
     @classmethod
     def from_batch(
         cls,
@@ -153,11 +153,11 @@ class SLDataset[Kmeta: str, Kvid: str, Klm: str, Ktgt: str, Vconn: ArrayLike](
         connections: Mapping[tuple[Klm, Klm], Vconn],
         items: DefaultSLDataset[Kvid, Klm, Ktgt] | Sequence[DefaultSLDatasetItem[Kvid, Klm, Ktgt]]
         ):
-    
+
         self.metadata = metadata
         self.connections = connections
         self.items = items
-        
+
         sldataset_logger.info(
             f"Initialized SLDataset with {len(items)} items, "
             f"{len(metadata)} metadata entries, {len(connections)} landmark connections"
@@ -230,11 +230,11 @@ class IterableSLDataset[Kmeta: str, Kvid: str, Klm: str, Ktgt: str, Vconn: Array
         connections: Mapping[tuple[Klm, Klm], Vconn],
         items: IterableDataset[DefaultSLDatasetItem[Kvid, Klm, Ktgt]]
         ):
-    
+
         self.metadata = metadata
         self.connections = connections
         self.items = items
-        
+
         sldataset_logger.info(
             f"Initialized IterableSLDataset with {len(metadata)} metadata entries, "
             f"{len(connections)} landmark connections"
@@ -287,6 +287,3 @@ def dataset_to_zarr(
         item.to_zarr(items_group.create_group(str(idx)))
 
     return root_group
-
-
-

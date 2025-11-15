@@ -42,19 +42,19 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
         """Initialize the OpenCV annotated frames saver.
 
         Args:
-            extension (`str`, optional): File extension for output. 
+            extension (`str`, optional): File extension for output.
                 Image formats: .png, .jpg, .bmp, etc.
                 Video formats: .mp4, .avi, .mov, .mkv, etc.
                 Defaults to ".png".
-            height (`int | None`, optional): Video height in pixels. 
+            height (`int | None`, optional): Video height in pixels.
                 Required for video output. Defaults to None.
-            width (`int | None`, optional): Video width in pixels. 
+            width (`int | None`, optional): Video width in pixels.
                 Required for video output. Defaults to None.
-            fps (`int | None`, optional): Video frames per second. 
+            fps (`int | None`, optional): Video frames per second.
                 Required for video output. Defaults to None.
-            fourcc (`str | None`, optional): Video codec FourCC code (e.g., 'mp4v', 'XVID', 'MJPG'). 
+            fourcc (`str | None`, optional): Video codec FourCC code (e.g., 'mp4v', 'XVID', 'MJPG').
                 Only used for video output. Auto-selected based on extension if None. Defaults to None.
-        
+
         Raises:
             ValueError: If extension is a video format but height, width, or fps is not provided.
         """
@@ -66,10 +66,10 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
             ) from exc
         self._cv2 = cv2
         self.extension = extension
-        
+
         # Determine mode based on extension
         self._is_video_mode = is_video_ext_from_mimetype(extension)
-        
+
         # Validate video parameters
         if self._is_video_mode:
             if height is None or width is None or fps is None:
@@ -77,12 +77,12 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
                     f"Video mode (extension={extension}) requires height, width, and fps to be specified. "
                     f"Got: height={height}, width={width}, fps={fps}"
                 )
-        
+
         self.height = height
         self.width = width
         self.fps = fps
         self.fourcc = fourcc
-        
+
         # State variables
         self._frames_dir: Path | None = None
         self._video_writer: "cv2.VideoWriter | None" = None
@@ -105,13 +105,13 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
 
     def _get_fourcc_code(self) -> int:
         """Get the FourCC code for video encoding.
-        
+
         Returns:
             :class:`int`: FourCC code as integer.
         """
         if self.fourcc is not None:
             return self._cv2.VideoWriter.fourcc(*self.fourcc)  # type: ignore
-        
+
         # Auto-select codec based on extension
         ext_lower = self.extension.lower()
         if ext_lower == ".mp4":
@@ -130,10 +130,10 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
         if self._is_video_mode:
             # Video mode: create video writer statically
             assert self.width is not None and self.height is not None and self.fps is not None
-            
+
             self._video_path = path / f"annotated_frames{self.extension}"
             self._video_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             # Create VideoWriter with specified parameters
             fourcc_code = self._get_fourcc_code()
             self._video_writer = self._cv2.VideoWriter(
@@ -210,11 +210,11 @@ def cv2_af_save_collector_creator[K: str](
     key_type: type[K]
     ) -> AnnotatedFramesSaveCollector[K]:
     """Create a Cv2AnnotatedFramesSaveCollector instance.
-    
+
     Args:
         file_ext (`str`): File extension for output (e.g., '.png', '.mp4').
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`AnnotatedFramesSaveCollector[K]`: OpenCV-based annotated frames saver.
     """
@@ -226,10 +226,10 @@ def cv2_af_show_collector_creator[K: str](
     key_type: type[K]
     ) -> AnnotatedFramesShowCollector[K]:
     """Create a Cv2AnnotatedFramesShowCollector instance.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`AnnotatedFramesShowCollector[K]`: OpenCV-based annotated frames viewer.
     """
@@ -238,5 +238,3 @@ def cv2_af_show_collector_creator[K: str](
 # Register backend name aliases
 af_save_aliases["cv2"] = cv2_af_save_collector_creator
 af_show_aliases["cv2"] = cv2_af_show_collector_creator
-
-
