@@ -14,6 +14,8 @@
 
 # pyright: reportUnnecessaryIsInstance=false
 
+from __future__ import annotations
+
 from typing import (
     TypeVar, Generic, overload,
     Sequence
@@ -210,7 +212,9 @@ class ConvSize(nn.Module, Generic[_ConvNd]):
         dim: int | Sequence[int] | slice = slice(None)
         ) -> Size: ...
 
-    def forward( # type: ignore[reportInconsistentOverload]
+    def forward( # pyright: ignore[reportInconsistentOverload]
+        # Reason: Cannot express "arg is Tensor XOR arg is Size" constraint in Python type system.
+        # Overloads guarantee correct usage, runtime isinstance checks handle validation.
         self,
         arg: Tensor | Size,
         dim: int | Sequence[int] | slice = slice(None)
@@ -314,7 +318,9 @@ class ConvTransposeSize(nn.Module, Generic[_ConvTransposeNd]):
         dim: int | Sequence[int] | slice = slice(None)
         ) -> Size: ...
 
-    def forward( # type: ignore[reportInconsistentOverload]
+    def forward( # pyright: ignore[reportInconsistentOverload]
+        # Reason: Cannot express "arg is Tensor XOR arg is Size" constraint in Python type system.
+        # Overloads guarantee correct usage, runtime isinstance checks handle validation.
         self,
         arg: Tensor | Size,
         dim: int | Sequence[int] | slice = slice(None)

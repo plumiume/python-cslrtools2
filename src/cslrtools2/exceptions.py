@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """Custom exceptions for cslrtools2.
 
 This module defines the exception hierarchy for cslrtools2, providing

@@ -14,6 +14,8 @@
 
 # pyright: reportUnnecessaryIsInstance=false
 
+from __future__ import annotations
+
 import numpy as np
 
 from ...estimator import ProcessResult

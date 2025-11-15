@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """cslrtools2: Comprehensive toolkit for Continuous Sign Language Recognition.
 
 **Software Type**: Research Library / Toolkit Package

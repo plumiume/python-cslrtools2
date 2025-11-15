@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """LMPipe: Landmark Extraction Pipeline Framework for Sign Language Videos.
 
 **Software Type**: Processing Pipeline Framework / ETL (Extract-Transform-Load) System

@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """SLDataset: Sign Language Dataset Management and Loading Utilities.
 
 **Software Type**: Data Access Layer / Data Management Module

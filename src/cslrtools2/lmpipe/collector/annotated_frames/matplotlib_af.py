@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -25,6 +28,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
     from matplotlib.image import AxesImage
+else:
+    Axes = None  # pyright: ignore
+    Figure = None  # pyright: ignore
+    AxesImage = None  # pyright: ignore
 
 
 class MatplotlibAnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
@@ -107,17 +114,20 @@ class MatplotlibAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollecto
     def _setup(self):
         self._plt.ion()
         self._fig, self._ax = self._plt.subplots(figsize=self.figsize)
-        self._ax.axis('off') # type: ignore
+        self._ax.axis('off')  # pyright: ignore[reportAttributeAccessIssue]
 
     def _update(self, result: ProcessResult[K]):
-        if self._im is None:
-            self._im = self._ax.imshow(result.annotated_frame) # type: ignore
-        else:
-            self._im.set_data(result.annotated_frame)
+        if self._ax is not None:
+            if self._im is None:
+                self._im = self._ax.imshow(result.annotated_frame)  # pyright: ignore[reportUnknownMemberType]
+            else:
+                self._im.set_data(result.annotated_frame)
 
-        self._ax.set_title(f"Frame {result.frame_id}") # type: ignore
-        self._fig.canvas.draw() # type: ignore
-        self._fig.canvas.flush_events() # type: ignore
+            self._ax.set_title(f"Frame {result.frame_id}")  # pyright: ignore[reportUnknownMemberType]
+
+        if self._fig is not None:
+            self._fig.canvas.draw()  # pyright: ignore[reportUnknownMemberType]
+            self._fig.canvas.flush_events()  # pyright: ignore[reportUnknownMemberType]
         self._plt.pause(0.001)
 
     def _cleanup(self):

@@ -19,7 +19,7 @@ from __future__ import annotations
 from typing import * # pyright: ignore[reportWildcardImportFromLibrary]
 
 import numpy as np
-from scipy.interpolate import (
+from scipy.interpolate import ( # pyright: ignore[reportMissingTypeStubs]
     CubicSpline
 )
 import torch
@@ -83,7 +83,7 @@ class CubicSplineInterpolateMissingLandmarks[
                 cs = CubicSpline(
                     x[is_not_nan],
                     y[is_not_nan],
-                    bc_type=self.bc_type, # type: ignore
+                    bc_type=self.bc_type,  # pyright: ignore[reportArgumentType]
                     extrapolate=self.extrapolation
                 )
                 store.append(cs(x))

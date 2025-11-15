@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """Command-line interface for LMPipe landmark extraction.
 
 This module provides the main CLI entry point for running landmark

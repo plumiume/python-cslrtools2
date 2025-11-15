@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from typing import Any
 from clipar import namespace, mixin
 from clipar.entities import NamespaceWrapper

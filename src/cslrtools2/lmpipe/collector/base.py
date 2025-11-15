@@ -22,6 +22,8 @@ from ..runspec import RunSpec
 
 if TYPE_CHECKING:
     from ..options import LMPipeOptions
+else:
+    LMPipeOptions = "LMPipeOptions"
 
 
 class Collector[K: str](ABC):

@@ -14,6 +14,8 @@
 
 # pyright: reportWildcardImportFromLibrary=false
 
+from __future__ import annotations
+
 from typing import *
 from types import TracebackType
 from enum import IntEnum, auto
@@ -174,7 +176,7 @@ class RenderableRef[T: RichObject]:
                 "RenderableRef refers to a non-existent renderable."
             )
 
-        return renderable # type: ignore
+        return renderable # pyright: ignore[reportReturnType]
 
     @property
     def renderable_id(self) -> _RichObjectID:
