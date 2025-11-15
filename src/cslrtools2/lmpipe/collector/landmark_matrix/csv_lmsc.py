@@ -133,8 +133,13 @@ class CsvLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
         for raw_key, array in result.items():
             key = str(raw_key)
             sample_matrix = np.atleast_2d(np.asarray(array, dtype=float))
-            flattened = sample_matrix.reshape(sample_matrix.shape[0], -1)
-            writer = self._ensure_writer(key, flattened.shape[1])
+            # Calculate flattened width using prod to handle empty arrays gracefully
+            num_samples = sample_matrix.shape[0]
+            sample_width = int(np.prod(sample_matrix.shape[1:])) if num_samples > 0 else 0
+            flattened = sample_matrix.reshape(num_samples, sample_width)
+            
+            # Ensure writer is created even for empty arrays (creates file with header only)
+            writer = self._ensure_writer(key, sample_width)
             for sample in flattened:
                 row: dict[str, str | int | float] = {
                     "key": key,

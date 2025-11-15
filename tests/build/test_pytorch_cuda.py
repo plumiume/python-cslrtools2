@@ -116,7 +116,7 @@ def test_pytorch_cuda():
 def test_mediapipe():
     """MediaPipeの動作確認（オプション）"""
     try:
-        import mediapipe
+        import mediapipe # pyright: ignore[reportMissingTypeStubs]
         import mediapipe.python.solutions.pose as mp_pose # pyright: ignore[reportMissingTypeStubs]
 
         print("\n" + "=" * 70)

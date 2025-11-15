@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Iterable
 
@@ -39,7 +41,7 @@ class Collector[K: str](ABC):
     """
 
     @abstractmethod
-    def configure_from_options(self, options: "LMPipeOptions") -> None:
+    def configure_from_options(self, options: LMPipeOptions) -> None:
         """Configure collector from LMPipe options.
 
         This method is called after collector instantiation to set up

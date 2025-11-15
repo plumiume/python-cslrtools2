@@ -228,7 +228,7 @@ class IterableSLDataset[Kmeta: str, Kvid: str, Klm: str, Ktgt: str, Vconn: Array
         self,
         metadata: Mapping[Kmeta, Any],
         connections: Mapping[tuple[Klm, Klm], Vconn],
-        items: IterableDataset[DefaultSLDatasetItem[Kvid, Klm, Ktgt]]
+        items: IterableDataset[DefaultSLDatasetItem[Kvid, Klm, Ktgt]] | Iterable[DefaultSLDatasetItem[Kvid, Klm, Ktgt]]
         ):
 
         self.metadata = metadata
