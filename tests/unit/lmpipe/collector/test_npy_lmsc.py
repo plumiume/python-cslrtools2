@@ -3,18 +3,26 @@
 Tests for NpyLandmarkMatrixSaveCollector.
 Coverage target: 39% → 85%+
 """
+
 from __future__ import annotations
 
-import pytest  # pyright: ignore[reportUnusedImport]
 import numpy as np
+import pytest  # pyright: ignore[reportUnusedImport]
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Mapping
 
 from cslrtools2.lmpipe.collector.landmark_matrix.npy_lmsc import (
     NpyLandmarkMatrixSaveCollector,
     npy_lmsc_creator,
 )
-from cslrtools2.typings import NDArrayFloat
+from cslrtools2.typings import NDArrayFloat, NDArrayStr
+
+
+def _make_empty_headers[K: str](
+    landmarks: Mapping[K, NDArrayFloat],
+) -> dict[K, NDArrayStr]:
+    """Create empty header mappings for landmarks (used when headers are not needed)."""
+    return {key: np.array([], dtype=str) for key in landmarks.keys()}
 
 
 @pytest.fixture
@@ -29,9 +37,7 @@ def temp_output_dir(tmp_path: Path) -> Path:
 def sample_single_key_result() -> dict[Literal["pose"], NDArrayFloat]:
     """Create a sample result with a single key."""
     np.random.seed(42)
-    return {
-        "pose": np.random.rand(10, 33, 3).astype(np.float32)
-    }
+    return {"pose": np.random.rand(10, 33, 3).astype(np.float32)}
 
 
 @pytest.fixture
@@ -46,7 +52,7 @@ def sample_multi_key_result() -> dict[Literal["pose", "left_hand"], NDArrayFloat
 
 class TestNPYLMSCInitialization:
     """Tests for NpyLandmarkMatrixSaveCollector initialization."""
-    
+
     def test_default_initialization(self):
         """Test default initialization."""
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose"]]()
@@ -57,18 +63,22 @@ class TestNPYLMSCInitialization:
 
 class TestNPYLMSCFileOperations:
     """Tests for NPY file operations."""
-    
+
     def test_save_single_key_npy(
         self,
         temp_output_dir: Path,
-        sample_single_key_result: dict[Literal["pose"], NDArrayFloat]
+        sample_single_key_result: dict[Literal["pose"], NDArrayFloat],
     ):
         """Test saving single key to NPY file."""
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose"]]()
 
         collector._open_file(temp_output_dir)
         try:
-            collector._append_result(sample_single_key_result)
+            collector._append_result(
+                0,
+                _make_empty_headers(sample_single_key_result),
+                sample_single_key_result,
+            )
         finally:
             collector._close_file()
 
@@ -79,18 +89,20 @@ class TestNPYLMSCFileOperations:
         # Verify content
         data = np.load(npy_file)
         assert data.shape == (1, 10, 33, 3)  # (num_appends, frames, landmarks, coords)
-    
+
     def test_save_multiple_keys_npy(
         self,
         temp_output_dir: Path,
-        sample_multi_key_result: dict[Literal["pose", "left_hand"], NDArrayFloat]
+        sample_multi_key_result: dict[Literal["pose", "left_hand"], NDArrayFloat],
     ):
         """Test saving multiple keys to separate NPY files."""
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose", "left_hand"]]()
 
         collector._open_file(temp_output_dir)
         try:
-            collector._append_result(sample_multi_key_result)
+            collector._append_result(
+                0, _make_empty_headers(sample_multi_key_result), sample_multi_key_result
+            )
         finally:
             collector._close_file()
 
@@ -107,20 +119,32 @@ class TestNPYLMSCFileOperations:
         # Verify hand content
         hand_data = np.load(hand_file)
         assert hand_data.shape == (1, 5, 21, 3)
-    
+
     def test_multiple_append_calls(
         self,
         temp_output_dir: Path,
-        sample_single_key_result: dict[Literal["pose"], NDArrayFloat]
+        sample_single_key_result: dict[Literal["pose"], NDArrayFloat],
     ):
         """Test multiple append calls stack arrays."""
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose"]]()
 
         collector._open_file(temp_output_dir)
         try:
-            collector._append_result(sample_single_key_result)
-            collector._append_result(sample_single_key_result)  # Append again
-            collector._append_result(sample_single_key_result)  # And again
+            collector._append_result(
+                0,
+                _make_empty_headers(sample_single_key_result),
+                sample_single_key_result,
+            )
+            collector._append_result(
+                1,
+                _make_empty_headers(sample_single_key_result),
+                sample_single_key_result,
+            )  # Append again
+            collector._append_result(
+                2,
+                _make_empty_headers(sample_single_key_result),
+                sample_single_key_result,
+            )  # And again
         finally:
             collector._close_file()
 
@@ -132,23 +156,23 @@ class TestNPYLMSCFileOperations:
 
 class TestNPYLMSCErrorHandling:
     """Tests for error handling."""
-    
+
     def test_inconsistent_shapes_raises_error(self, temp_output_dir: Path):
         """Test that inconsistent shapes raise ValueError with helpful message."""
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose"]]()
-        
+
         result1: dict[Literal["pose"], NDArrayFloat] = {
             "pose": np.random.rand(10, 33, 3).astype(np.float32)
         }
         result2: dict[Literal["pose"], NDArrayFloat] = {
             "pose": np.random.rand(5, 33, 3).astype(np.float32)  # Different shape
         }
-        
+
         collector._open_file(temp_output_dir)
         try:
             with pytest.raises(ValueError, match="with shape.*at key 'pose'"):
-                collector._append_result(result1)
-                collector._append_result(result2)
+                collector._append_result(0, _make_empty_headers(result1), result1)
+                collector._append_result(0, _make_empty_headers(result2), result2)
                 collector._close_file()
         finally:
             # Ensure cleanup even if test fails
@@ -159,44 +183,44 @@ class TestNPYLMSCErrorHandling:
 
 class TestNPYLMSCEdgeCases:
     """Tests for edge cases."""
-    
+
     def test_empty_landmark_array(self, temp_output_dir: Path):
         """Test handling empty landmark arrays."""
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose"]]()
-        
+
         empty_result: dict[Literal["pose"], NDArrayFloat] = {
             "pose": np.array([], dtype=np.float32).reshape(0, 33, 3)
         }
-        
+
         collector._open_file(temp_output_dir)
         try:
-            collector._append_result(empty_result)
+            collector._append_result(0, _make_empty_headers(empty_result), empty_result)
         finally:
             collector._close_file()
-        
+
         npy_file = temp_output_dir / "landmarks" / "pose.npy"
         assert npy_file.exists()
-        
+
         data = np.load(npy_file)
         # Stacked empty array
         assert data.shape == (1, 0, 33, 3)
-    
+
     def test_no_appends_creates_empty_file(self, temp_output_dir: Path):
         """Test that no appends creates an empty NPY file."""
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose"]]()
-        
+
         # Open and close without appending
         collector._open_file(temp_output_dir)
         # Manually add empty buffer entry
         collector._buffer["pose"] = []
         collector._close_file()
-        
+
         npy_file = temp_output_dir / "landmarks" / "pose.npy"
         assert npy_file.exists()
-        
+
         data = np.load(npy_file)
         assert data.shape == (0,)  # Empty 1D array
-    
+
     def test_single_frame_landmark(self, temp_output_dir: Path):
         """Test handling single frame."""
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose"]]()
@@ -207,36 +231,36 @@ class TestNPYLMSCEdgeCases:
 
         collector._open_file(temp_output_dir)
         try:
-            collector._append_result(single_frame)
+            collector._append_result(0, _make_empty_headers(single_frame), single_frame)
         finally:
             collector._close_file()
 
         npy_file = temp_output_dir / "landmarks" / "pose.npy"
         data = np.load(npy_file)
         assert data.shape == (1, 1, 33, 3)
-    
+
     def test_nested_output_directory_creation(self, temp_output_dir: Path):
         """Test creating nested output directories."""
         nested_path = temp_output_dir / "a" / "b" / "c" / "test.npy"
         collector = NpyLandmarkMatrixSaveCollector[Literal["pose"]]()
-        
+
         result: dict[Literal["pose"], NDArrayFloat] = {
             "pose": np.random.rand(2, 33, 3).astype(np.float32)
         }
-        
+
         collector._open_file(nested_path.parent)
         try:
-            collector._append_result(result)
+            collector._append_result(0, _make_empty_headers(result), result)
         finally:
             collector._close_file()
-        
+
         npy_file = temp_output_dir / "a" / "b" / "c" / "landmarks" / "pose.npy"
         assert npy_file.exists()
 
 
 class TestNPYLMSCCreators:
     """Tests for creator functions."""
-    
+
     def test_npy_lmsc_creator(self):
         """Test npy_lmsc_creator function."""
         collector = npy_lmsc_creator(str)

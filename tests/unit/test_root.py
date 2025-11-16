@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-import pytest  # pyright: ignore[reportUnusedImport]
 from pathlib import Path
 
 from cslrtools2._root import PACKAGE_ROOT

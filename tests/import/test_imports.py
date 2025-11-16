@@ -101,7 +101,8 @@ class TestPluginImports:
     def test_import_mediapipe_plugin(self) -> None:
         """Test that the MediaPipe plugin can be imported (optional)."""
         try:
-            import cslrtools2.plugins.mediapipe as mediapipe  # type: ignore  # noqa: F401
+            # type: ignore  # noqa: F401
+            import cslrtools2.plugins.mediapipe as mediapipe
 
             assert mediapipe is not None
         except ImportError:

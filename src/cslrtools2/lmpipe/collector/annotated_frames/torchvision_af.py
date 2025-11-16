@@ -32,14 +32,16 @@ class TorchVisionAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollect
         """Initialize the TorchVision frame viewer.
 
         Args:
-            figsize (`tuple[int, int]`, optional): Figure size in inches. Defaults to (10, 8).
+            figsize (`tuple[int, int]`, optional): Figure size in inches.
+                Defaults to (10, 8).
         """
         try:
             import torch
             import matplotlib.pyplot as plt
         except ImportError as exc:
             raise RuntimeError(
-                "TorchVisionAnnotatedFramesShowCollector requires 'torch' and 'matplotlib' packages."
+                "TorchVisionAnnotatedFramesShowCollector requires 'torch' "
+                "and 'matplotlib' packages."
             ) from exc
         self._torch = torch
         self._plt = plt
@@ -53,23 +55,29 @@ class TorchVisionAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollect
             frame_tensor = result.annotated_frame
 
         self._plt.figure(figsize=self.figsize)
-        self._plt.imshow(frame_tensor.permute(1, 2, 0) if frame_tensor.ndim == 3 and frame_tensor.shape[0] in [1, 3] else frame_tensor)
+        self._plt.imshow(
+            frame_tensor.permute(1, 2, 0)
+            if frame_tensor.ndim == 3 and frame_tensor.shape[0] in [1, 3]
+            else frame_tensor
+        )
         self._plt.title(f"Frame {result.frame_id}")
-        self._plt.axis('off')
+        self._plt.axis("off")
         self._plt.show()
 
 
 def torchvision_af_show_collector_creator[K: str](
-    key_type: type[K]
-    ) -> AnnotatedFramesShowCollector[K]:
+    key_type: type[K],
+) -> AnnotatedFramesShowCollector[K]:
     """Create a TorchVisionAnnotatedFramesShowCollector instance.
 
     Args:
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`AnnotatedFramesShowCollector[K]`: TorchVision-based annotated frames viewer.
+        :class:`AnnotatedFramesShowCollector[K]`: TorchVision-based annotated
+        frames viewer.
     """
     return TorchVisionAnnotatedFramesShowCollector[K]()
+
 
 af_show_aliases["torchvision"] = torchvision_af_show_collector_creator

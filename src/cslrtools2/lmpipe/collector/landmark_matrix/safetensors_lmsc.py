@@ -21,7 +21,7 @@ from typing import Mapping
 import numpy as np
 from safetensors.numpy import save_file
 
-from ....typings import NDArrayFloat
+from ....typings import NDArrayFloat, NDArrayStr
 from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 
@@ -54,8 +54,13 @@ class SafetensorsLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector
         self._path = self._get_landmark_file_path(path, "landmarks.safetensors")
         self._buffer = {}
 
-    def _append_result(self, result: Mapping[K, NDArrayFloat]):
-        for key, value in result.items():
+    def _append_result(
+        self,
+        frame_id: int,
+        headers: Mapping[K, NDArrayStr],
+        landmarks: Mapping[K, NDArrayFloat],
+    ):
+        for key, value in landmarks.items():
             bucket = self._buffer.setdefault(str(key), [])
             bucket.append(np.asarray(value))
 
@@ -71,17 +76,23 @@ class SafetensorsLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector
         self._buffer = {}
 
 
-def safetensors_lmsc_creator[K: str](key_type: type[K]) -> SafetensorsLandmarkMatrixSaveCollector[K]:
+def safetensors_lmsc_creator[K: str](
+    key_type: type[K],
+) -> SafetensorsLandmarkMatrixSaveCollector[K]:
     """Create a Safetensors landmark matrix save collector.
 
     Args:
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`SafetensorsLandmarkMatrixSaveCollector[K]`: Container Safetensors landmark matrix saver.
+        :class:`SafetensorsLandmarkMatrixSaveCollector[K]`: Container
+            Safetensors landmark matrix saver.
     """
     return SafetensorsLandmarkMatrixSaveCollector[K]()
 
-lmsc_aliases.update({
-    ".safetensors": safetensors_lmsc_creator,
-})
+
+lmsc_aliases.update(
+    {
+        ".safetensors": safetensors_lmsc_creator,
+    }
+)

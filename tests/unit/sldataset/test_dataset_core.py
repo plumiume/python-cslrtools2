@@ -15,6 +15,7 @@ Test cases to implement:
 - [ ] Error handling (invalid path, corrupted data)
 - [ ] Edge cases (empty dataset, single item, large dataset)
 """
+
 from __future__ import annotations
 
 import pytest
@@ -51,7 +52,7 @@ def sample_target_data() -> np.ndarray:
 
 class TestSLDatasetCore:
     """Test suite for SLDataset core functionality."""
-    
+
     def test_placeholder(self):
         """Placeholder test - remove when real tests are added."""
         assert True

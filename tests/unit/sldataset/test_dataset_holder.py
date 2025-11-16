@@ -9,14 +9,13 @@ Test cases to implement:
 - [ ] Holder lazy loading
 - [ ] Error handling
 """
-from __future__ import annotations
 
-import pytest # pyright: ignore[reportUnusedImport]
+from __future__ import annotations
 
 
 class TestDatasetHolder:
     """Test suite for dataset holders."""
-    
+
     def test_placeholder(self):
         """Placeholder test - remove when real tests are added."""
         assert True

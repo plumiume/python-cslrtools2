@@ -21,10 +21,19 @@ from itertools import product
 
 import numpy as np
 
-from mediapipe.tasks.python.core.base_options import BaseOptions # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.vision.hand_landmarker import HandLandmarker, HandLandmarkerOptions # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.components.containers.category import Category # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.tasks.python.core.base_options import (
+    BaseOptions,
+)  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.tasks.python.vision.hand_landmarker import (
+    HandLandmarker,
+    HandLandmarkerOptions,
+)  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.tasks.python.components.containers.category import (
+    Category,
+)  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.tasks.python.components.containers.landmark import (
+    NormalizedLandmark,
+)  # pyright: ignore[reportMissingTypeStubs]
 from mediapipe import Image, ImageFormat
 
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
@@ -52,18 +61,15 @@ compatibility. New code should import directly from the constants module::
 
 
 class MediaPipeHandEstimator(
-    MediaPipeEstimator[MediaPipeHandKey],
-    HolisticPartEstimator[MediaPipeHandKey]
-    ):
-
+    MediaPipeEstimator[MediaPipeHandKey], HolisticPartEstimator[MediaPipeHandKey]
+):
     _setuped: bool = False
 
     def __init__(
-            self,
-            hand_args: MediaPipeHandArgs.T = MediaPipeHandArgs.T(),
-            category: MediaPipeHandCategory = "both"
-            ):
-
+        self,
+        hand_args: MediaPipeHandArgs.T = MediaPipeHandArgs.T(),
+        category: MediaPipeHandCategory = "both",
+    ):
         super().__init__(hand_args)
         self.hand_args = hand_args
         self.category = category
@@ -72,26 +78,22 @@ class MediaPipeHandEstimator(
 
         self.landmarker_options = HandLandmarkerOptions(
             base_options=BaseOptions(
-                model_asset_path=self.model_asset_path,
-                delegate=self.delegate
+                model_asset_path=self.model_asset_path, delegate=self.delegate
             ),
             num_hands=2,
             running_mode=self.running_mode,
             min_hand_detection_confidence=hand_args.min_hand_detection_confidence,
             min_tracking_confidence=hand_args.min_hand_tracking_confidence,
-            min_hand_presence_confidence=hand_args.min_hand_presence_confidence
+            min_hand_presence_confidence=hand_args.min_hand_presence_confidence,
         )
 
     def setup(self):
-
         if self._setuped:
             return
         self._setuped = True
 
         self._enable_suppress_stderr()
-        self.landmarker = HandLandmarker.create_from_options(
-            self.landmarker_options
-        )
+        self.landmarker = HandLandmarker.create_from_options(self.landmarker_options)
 
     def configure_estimator_name(self) -> MediaPipeHandKey:
         if self.category == "left":
@@ -111,7 +113,7 @@ class MediaPipeHandEstimator(
         if self.category == "both":
             return {
                 "mediapipe.left_hand": (len(MediaPipeHandNames), self.channels),
-                "mediapipe.right_hand": (len(MediaPipeHandNames), self.channels)
+                "mediapipe.right_hand": (len(MediaPipeHandNames), self.channels),
             }
         return (len(MediaPipeHandNames), self.channels)
 
@@ -121,38 +123,38 @@ class MediaPipeHandEstimator(
     def headers(self) -> NDArrayStr | Mapping[MediaPipeHandKey, NDArrayStr]:
         # item: "{landmark_name}__{axis}"
 
-        header_array = np.array([
-            f"{lm_name.name.lower()}__{axis}"
-            for lm_name, axis in product(
-                MediaPipeHandNames,
-                self.axis_names
-            )
-        ])
+        header_array = np.array(
+            [
+                f"{lm_name.name.lower()}__{axis}"
+                for lm_name, axis in product(MediaPipeHandNames, self.axis_names)
+            ]
+        )
 
         if self.category == "both":
-
             return {
                 "mediapipe.left_hand": header_array,
-                "mediapipe.right_hand": header_array
+                "mediapipe.right_hand": header_array,
             }
 
         return header_array
 
     @estimate
     def estimate(
-        self,
-        frame_src: MatLike,
-        frame_idx: int
-        ) -> NDArrayFloat | None | Mapping[MediaPipeHandKey, NDArrayFloat | None]:
+        self, frame_src: MatLike, frame_idx: int
+    ) -> NDArrayFloat | None | Mapping[MediaPipeHandKey, NDArrayFloat | None]:
+        mp_image = Image(image_format=ImageFormat.SRGB, data=frame_src)
 
-        mp_image = Image(
-            image_format=ImageFormat.SRGB,
-            data=frame_src
+        detection_result = self.landmarker.detect(
+            mp_image
+        )  # pyright: ignore[reportUnknownMemberType]
+        handedness: list[list[Category]] = (
+            detection_result.handedness
+            # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         )
-
-        detection_result = self.landmarker.detect(mp_image) # pyright: ignore[reportUnknownMemberType]
-        handedness: list[list[Category]] = detection_result.handedness # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
-        landmarks: list[list[NormalizedLandmark]] = detection_result.hand_landmarks # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        landmarks: list[list[NormalizedLandmark]] = (
+            detection_result.hand_landmarks
+            # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        )
 
         self._disable_suppress_stderr()
 
@@ -163,28 +165,24 @@ class MediaPipeHandEstimator(
         right_hand_landmarks: NDArrayFloat | None = None
 
         for ctgrs, lms in zip(handedness, landmarks):
-
             if not ctgrs:
                 continue
 
             ctgr_name = ctgrs[0].category_name
             if ctgr_name and ctgr_name.lower() == "left":
-                left_hand_landmarks = np.array([
-                    self._get_array_from_landmarks(lm)
-                    for lm in lms
-                ])
+                left_hand_landmarks = np.array(
+                    [self._get_array_from_landmarks(lm) for lm in lms]
+                )
 
             if ctgr_name and ctgr_name.lower() == "right":
-                right_hand_landmarks = np.array([
-                    self._get_array_from_landmarks(lm)
-                    for lm in lms
-                ])
+                right_hand_landmarks = np.array(
+                    [self._get_array_from_landmarks(lm) for lm in lms]
+                )
 
         if self.category == "both":
-
             return {
                 "mediapipe.left_hand": left_hand_landmarks,
-                "mediapipe.right_hand": right_hand_landmarks
+                "mediapipe.right_hand": right_hand_landmarks,
             }
 
         if self.category == "left":
@@ -198,8 +196,7 @@ class MediaPipeHandEstimator(
         self,
         frame_src: MatLike,
         frame_idx: int,
-        landmarks: Mapping[MediaPipeHandKey, NDArrayFloat]
-        ) -> MatLike:
-
+        landmarks: Mapping[MediaPipeHandKey, NDArrayFloat],
+    ) -> MatLike:
         # TODO: Implement hand annotation
         return frame_src

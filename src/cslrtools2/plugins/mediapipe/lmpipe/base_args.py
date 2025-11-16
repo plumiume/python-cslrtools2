@@ -18,6 +18,7 @@ from __future__ import annotations
 from typing import Literal
 from clipar import mixin
 
+
 class MediaPipeBaseArgs(mixin.ReprMixin):
     """Common configuration arguments for MediaPipe estimators.
 

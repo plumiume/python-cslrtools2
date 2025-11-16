@@ -180,7 +180,8 @@ Attributes:
 See Also:
     - LMPipe API: :mod:`cslrtools2.lmpipe`
     - SLDataset API: :mod:`cslrtools2.sldataset`
-    - CLI Documentation: :mod:`cslrtools2.lmpipe.app.cli`, :mod:`cslrtools2.sldataset.app.cli`
+    - CLI Documentation: :mod:`cslrtools2.lmpipe.app.cli`,
+      :mod:`cslrtools2.sldataset.app.cli`
 
 """
 
@@ -191,6 +192,7 @@ except ImportError:
     # Fallback during development or when _version.py doesn't exist yet
     try:
         from importlib.metadata import version
+
         __version__ = version("cslrtools2")
     except Exception:
         __version__ = "0.0.0+unknown"

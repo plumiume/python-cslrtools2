@@ -46,11 +46,15 @@ class DummyEstimator(Estimator[Literal["test"]]):
     def headers(self) -> Mapping[Literal["test"], NDArrayStr]:
         return {"test": np.array(["x", "y", "z"], dtype=str)}
 
-    def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["test"], NDArrayFloat]:
+    def estimate(
+        self, frame_src: MatLike | None, frame_idx: int
+    ) -> Mapping[Literal["test"], NDArrayFloat]:
         return {"test": np.array([[1.0, 2.0, 3.0]])}
 
     def annotate(self, frame_src: MatLike | None, frame_idx: int, landmarks) -> MatLike:
-        return frame_src if frame_src is not None else np.zeros((1, 1, 3), dtype=np.uint8)
+        return (
+            frame_src if frame_src is not None else np.zeros((1, 1, 3), dtype=np.uint8)
+        )
 
 
 @pytest.fixture
@@ -138,7 +142,9 @@ class TestLMPipeInterfaceInitialization:
         assert interface.collectors_or_factory is collectors
         assert isinstance(interface.collectors_or_factory, list)
 
-    def test_initialization_with_collectors_factory(self, dummy_estimator, mock_collector):
+    def test_initialization_with_collectors_factory(
+        self, dummy_estimator, mock_collector
+    ):
         """Test initialization with collector factory function."""
         factory = Mock(return_value=[mock_collector])
         interface = LMPipeInterface(dummy_estimator, collectors=factory)
@@ -156,9 +162,7 @@ class TestLMPipeInterfaceInitialization:
     def test_initialization_with_kwargs(self, dummy_estimator):
         """Test initialization with keyword arguments."""
         interface = LMPipeInterface(
-            dummy_estimator,
-            max_cpus=4,
-            executor_type="process"
+            dummy_estimator, max_cpus=4, executor_type="process"
         )
 
         assert interface.lmpipe_options["max_cpus"] == 4
@@ -167,16 +171,13 @@ class TestLMPipeInterfaceInitialization:
     def test_initialization_kwargs_override_options(self, dummy_estimator):
         """Test that kwargs override options dict."""
         options: LMPipeOptionsPartial = {"max_cpus": 4}
-        interface = LMPipeInterface(
-            dummy_estimator,
-            options=options,
-            max_cpus=8
-        )
+        interface = LMPipeInterface(dummy_estimator, options=options, max_cpus=8)
 
         assert interface.lmpipe_options["max_cpus"] == 8
 
     def test_initialization_with_custom_runner_type(self, dummy_estimator):
         """Test initialization with custom runner type."""
+
         class CustomRunner(LMPipeRunner):
             pass
 
@@ -213,8 +214,10 @@ class TestLMPipeInterfaceRunMethods:
 
         interface = LMPipeInterface(dummy_estimator, max_cpus=4)
 
-        with patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init, \
-             patch.object(LMPipeRunner, "run", return_value=None):
+        with (
+            patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init,
+            patch.object(LMPipeRunner, "run", return_value=None),
+        ):
             interface.run(src, dst, max_cpus=8)
 
             # Check that runner was initialized with updated options
@@ -222,7 +225,9 @@ class TestLMPipeInterfaceRunMethods:
             runner_options = call_args[1]
             assert runner_options["max_cpus"] == 8
 
-    def test_run_batch_creates_runner_and_calls_run_batch(self, dummy_estimator, tmp_path):
+    def test_run_batch_creates_runner_and_calls_run_batch(
+        self, dummy_estimator, tmp_path
+    ):
         """Test run_batch() creates runner and delegates to runner.run_batch()."""
         src = tmp_path / "input"
         src.mkdir()
@@ -238,7 +243,9 @@ class TestLMPipeInterfaceRunMethods:
             assert isinstance(call_args[0], RunSpec)
             assert call_args[0].src == src
 
-    def test_run_single_creates_runner_and_calls_run_single(self, dummy_estimator, tmp_path):
+    def test_run_single_creates_runner_and_calls_run_single(
+        self, dummy_estimator, tmp_path
+    ):
         """Test run_single() creates runner and delegates to runner.run_single()."""
         src = tmp_path / "input.mp4"
         src.touch()
@@ -253,7 +260,9 @@ class TestLMPipeInterfaceRunMethods:
             call_args = mock_run_single.call_args[0]
             assert isinstance(call_args[0], RunSpec)
 
-    def test_run_video_creates_runner_and_calls_run_video(self, dummy_estimator, tmp_path):
+    def test_run_video_creates_runner_and_calls_run_video(
+        self, dummy_estimator, tmp_path
+    ):
         """Test run_video() creates runner and delegates to runner.run_video()."""
         src = tmp_path / "input.mp4"
         src.touch()
@@ -302,7 +311,9 @@ class TestLMPipeInterfaceRunMethods:
             call_args = mock_run_img.call_args[0]
             assert isinstance(call_args[0], RunSpec)
 
-    def test_run_stream_creates_runner_and_calls_run_stream(self, dummy_estimator, tmp_path):
+    def test_run_stream_creates_runner_and_calls_run_stream(
+        self, dummy_estimator, tmp_path
+    ):
         """Test run_stream() creates runner and delegates to runner.run_stream()."""
         dst = tmp_path / "output"
 
@@ -372,13 +383,17 @@ class TestLMPipeInterfaceOptionsHandling:
         for method_name, args in methods_to_test:
             method = getattr(interface, method_name)
 
-            with patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init, \
-                 patch.object(LMPipeRunner, method_name, return_value=None):
+            with (
+                patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init,
+                patch.object(LMPipeRunner, method_name, return_value=None),
+            ):
                 method(*args, max_cpus=8)
 
                 # Verify runner was initialized with updated options
                 runner_options = mock_init.call_args[0][1]
-                assert runner_options["max_cpus"] == 8, f"Failed for method {method_name}"
+                assert runner_options["max_cpus"] == 8, (
+                    f"Failed for method {method_name}"
+                )
 
     def test_batch_method_updates_options(self, dummy_estimator, tmp_path):
         """Test that run_batch() properly updates options."""
@@ -388,8 +403,10 @@ class TestLMPipeInterfaceOptionsHandling:
 
         interface = LMPipeInterface(dummy_estimator, max_cpus=4)
 
-        with patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init, \
-             patch.object(LMPipeRunner, "run_batch", return_value=None):
+        with (
+            patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init,
+            patch.object(LMPipeRunner, "run_batch", return_value=None),
+        ):
             interface.run_batch(src, dst, executor_type="thread")
 
             runner_options = mock_init.call_args[0][1]
@@ -403,8 +420,10 @@ class TestLMPipeInterfaceOptionsHandling:
 
         interface = LMPipeInterface(dummy_estimator, max_cpus=4)
 
-        with patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init, \
-             patch.object(LMPipeRunner, "run_sequence_images", return_value=None):
+        with (
+            patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init,
+            patch.object(LMPipeRunner, "run_sequence_images", return_value=None),
+        ):
             interface.run_sequence_images(src, dst, max_cpus=16)
 
             runner_options = mock_init.call_args[0][1]
@@ -416,8 +435,10 @@ class TestLMPipeInterfaceOptionsHandling:
 
         interface = LMPipeInterface(dummy_estimator, cpu=1)
 
-        with patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init, \
-             patch.object(LMPipeRunner, "run_stream", return_value=None):
+        with (
+            patch.object(LMPipeRunner, "__init__", return_value=None) as mock_init,
+            patch.object(LMPipeRunner, "run_stream", return_value=None),
+        ):
             interface.run_stream(0, dst, cpu=2)
 
             runner_options = mock_init.call_args[0][1]
@@ -438,13 +459,17 @@ class TestLMPipeInterfaceCustomRunner:
 
         interface = LMPipeInterface(dummy_estimator, runner_type=CustomRunner)
 
-        with patch.object(CustomRunner, "__init__", return_value=None) as mock_init, \
-             patch.object(CustomRunner, "run", return_value=None):
+        with (
+            patch.object(CustomRunner, "__init__", return_value=None) as mock_init,
+            patch.object(CustomRunner, "run", return_value=None),
+        ):
             interface.run(src, dst)
 
             mock_init.assert_called_once()
 
-    def test_custom_runner_receives_interface_and_options(self, dummy_estimator, tmp_path):
+    def test_custom_runner_receives_interface_and_options(
+        self, dummy_estimator, tmp_path
+    ):
         """Test that custom runner receives correct interface and options."""
         src = tmp_path / "input.mp4"
         src.touch()
@@ -453,10 +478,14 @@ class TestLMPipeInterfaceCustomRunner:
         class CustomRunner(LMPipeRunner):
             pass
 
-        interface = LMPipeInterface(dummy_estimator, runner_type=CustomRunner, max_cpus=8)
+        interface = LMPipeInterface(
+            dummy_estimator, runner_type=CustomRunner, max_cpus=8
+        )
 
-        with patch.object(CustomRunner, "__init__", return_value=None) as mock_init, \
-             patch.object(CustomRunner, "run", return_value=None):
+        with (
+            patch.object(CustomRunner, "__init__", return_value=None) as mock_init,
+            patch.object(CustomRunner, "run", return_value=None),
+        ):
             interface.run(src, dst)
 
             call_args = mock_init.call_args[0]
@@ -480,7 +509,9 @@ class TestLMPipeInterfaceIntegration:
 
         assert interface.estimator is dummy_estimator
 
-    def test_multiple_run_calls_create_separate_runners(self, dummy_estimator, tmp_path):
+    def test_multiple_run_calls_create_separate_runners(
+        self, dummy_estimator, tmp_path
+    ):
         """Test that multiple run calls create separate runner instances."""
         src = tmp_path / "input.mp4"
         src.touch()
@@ -495,8 +526,10 @@ class TestLMPipeInterfaceIntegration:
             runner_instances.append(runner)
             return runner
 
-        with patch.object(interface, "runner_type", side_effect=track_runner), \
-             patch.object(LMPipeRunner, "run", return_value=None):
+        with (
+            patch.object(interface, "runner_type", side_effect=track_runner),
+            patch.object(LMPipeRunner, "run", return_value=None),
+        ):
             interface.run(src, dst)
             interface.run(src, dst)
 

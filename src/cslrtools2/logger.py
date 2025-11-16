@@ -54,13 +54,13 @@ root_logger = logging.getLogger("cslrtools2")
 # Standard formatter for production use
 standard_formatter = logging.Formatter(
     fmt="%(asctime)s [%(levelname)-8s] %(name)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 # Detailed formatter for debugging
 detailed_formatter = logging.Formatter(
     fmt="%(asctime)s [%(levelname)-8s] %(name)s (%(pathname)s:%(lineno)d): %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 

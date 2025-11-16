@@ -14,6 +14,7 @@ Test cases to implement:
 - [ ] Type validation
 - [ ] Error handling (missing keys, invalid types)
 """
+
 from __future__ import annotations
 
 import pytest
@@ -33,7 +34,7 @@ def sample_item_data() -> dict:
 
 class TestSLDatasetItem:
     """Test suite for SLDatasetItem."""
-    
+
     def test_placeholder(self):
         """Placeholder test - remove when real tests are added."""
         assert True

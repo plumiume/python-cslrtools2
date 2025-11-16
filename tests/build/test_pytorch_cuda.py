@@ -8,13 +8,16 @@
     # MediaPipe互換性テスト（オプション）
     python test_pytorch_cuda.py --test-mediapipe
 """
+
 from typing import Protocol, cast
 import sys
 import argparse
 
+
 class CUuuid(Protocol):
     @property
     def bytes(self) -> list[int]: ...
+
 
 class CudaDeviceProperties(Protocol):
     @property
@@ -57,7 +60,7 @@ def test_pytorch_cuda():
     """PyTorchとCUDAの動作確認"""
     try:
         import torch
-        import torchvision # pyright: ignore[reportMissingTypeStubs]
+        import torchvision  # pyright: ignore[reportMissingTypeStubs]
 
         print("=" * 70)
         print("PyTorch環境情報")
@@ -73,10 +76,14 @@ def test_pytorch_cuda():
             print(f"GPU Device Count: {torch.cuda.device_count()}")
             for i in range(torch.cuda.device_count()):
                 device_name = torch.cuda.get_device_name(i)
-                device_props = cast(CudaDeviceProperties, torch.cuda.get_device_properties(i)) # pyright: ignore[reportUnknownMemberType]
+                device_props = cast(
+                    CudaDeviceProperties, torch.cuda.get_device_properties(i)
+                )  # pyright: ignore[reportUnknownMemberType]
                 print(f"  Device {i}: {device_name}")
                 print(f"    Total Memory: {device_props.total_memory / 1024**3:.2f} GB")
-                print(f"    Compute Capability: {device_props.major}.{device_props.minor}")
+                print(
+                    f"    Compute Capability: {device_props.major}.{device_props.minor}"
+                )
 
             # GPUテンソル演算テスト
             print("\n" + "=" * 70)
@@ -109,6 +116,7 @@ def test_pytorch_cuda():
     except Exception as e:
         print(f"予期しないエラー: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -116,19 +124,22 @@ def test_pytorch_cuda():
 def test_mediapipe():
     """MediaPipeの動作確認（オプション）"""
     try:
-        import mediapipe # pyright: ignore[reportMissingTypeStubs]
-        import mediapipe.python.solutions.pose as mp_pose # pyright: ignore[reportMissingTypeStubs]
+        import mediapipe  # pyright: ignore[reportMissingTypeStubs]
+        # pyright: ignore[reportMissingTypeStubs]
+        import mediapipe.python.solutions.pose as mp_pose
 
         print("\n" + "=" * 70)
         print("MediaPipe環境情報")
         print("=" * 70)
-        print(f"MediaPipe Version: {mediapipe.__version__}") # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+        print(
+            "MediaPipe Version: "
+            # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+            f"{mediapipe.__version__}"
+        )
 
         # 簡単な初期化テスト
         pose = mp_pose.Pose(
-            static_image_mode=True,
-            model_complexity=0,
-            min_detection_confidence=0.5
+            static_image_mode=True, model_complexity=0, min_detection_confidence=0.5
         )
         print("  ✓ MediaPipe Pose初期化成功")
         pose.close()
@@ -143,19 +154,16 @@ def test_mediapipe():
     except Exception as e:
         print(f"MediaPipeエラー: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         return False
 
 
 def main():
     """メイン処理"""
-    parser = argparse.ArgumentParser(
-        description="PyTorch CUDA環境検証スクリプト"
-    )
+    parser = argparse.ArgumentParser(description="PyTorch CUDA環境検証スクリプト")
     parser.add_argument(
-        "--test-mediapipe",
-        action="store_true",
-        help="MediaPipe互換性テストを実行"
+        "--test-mediapipe", action="store_true", help="MediaPipe互換性テストを実行"
     )
     args = parser.parse_args()
 

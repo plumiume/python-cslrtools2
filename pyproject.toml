@@ -86,6 +86,7 @@ dev = [
     "sphinx-rtd-theme>=2.0.0",
     "sphinx-autodoc-typehints>=2.0.0",
     "pyright>=1.1.407",
+    "ruff>=0.14.5",
 ]
 mediapipe = [
     "mediapipe>=0.10.14",
@@ -98,4 +99,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 markers = [
     "mediapipe: tests that require MediaPipe to be installed",
+    "integration: integration tests that test multiple components together",
+    "requires_video: tests that require actual video files to be present",
+    "slow: tests that take a long time to run (> 5 seconds)",
 ]

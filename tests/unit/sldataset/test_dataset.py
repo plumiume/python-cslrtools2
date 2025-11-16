@@ -85,7 +85,7 @@ class TestSLDatasetItem:
         return SLDatasetItem(
             videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
             landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-            targets={"label": np.array([[1, 2, 3]])}
+            targets={"label": np.array([[1, 2, 3]])},
         )
 
     def test_initialization(self, sample_item):
@@ -146,7 +146,7 @@ class TestSLDatasetItem:
         videos_dir = item_dir / "videos"
         landmarks_dir = item_dir / "landmarks"
         targets_dir = item_dir / "targets"
-        
+
         videos_dir.mkdir(parents=True)
         landmarks_dir.mkdir(parents=True)
         targets_dir.mkdir(parents=True)
@@ -168,18 +168,9 @@ class TestSLDatasetItem:
         item_dir.mkdir()
 
         # Save as .npz container files
-        np.savez(
-            item_dir / "videos.npz",
-            rgb=np.random.rand(1, 10, 64, 64, 3)
-        )
-        np.savez(
-            item_dir / "landmarks.npz",
-            pose=np.random.rand(1, 10, 33, 3)
-        )
-        np.savez(
-            item_dir / "targets.npz",
-            label=np.array([[1, 2, 3]])
-        )
+        np.savez(item_dir / "videos.npz", rgb=np.random.rand(1, 10, 64, 64, 3))
+        np.savez(item_dir / "landmarks.npz", pose=np.random.rand(1, 10, 33, 3))
+        np.savez(item_dir / "targets.npz", label=np.array([[1, 2, 3]]))
 
         loaded_item = SLDatasetItem.from_file_system(item_dir)
 
@@ -197,10 +188,7 @@ class TestSLDatasetItem:
         np.save(category_dir / "invalid.npy", np.random.rand(10, 33, 3))
 
         result = SLDatasetItem._load_category_from_fs(
-            category_dir,
-            SLDatasetItem.is_landmark_key,
-            {".npy": np.load},
-            {}
+            category_dir, SLDatasetItem.is_landmark_key, {".npy": np.load}, {}
         )
 
         # Both should be loaded since type guard accepts all strings
@@ -216,27 +204,27 @@ class TestSLDatasetItem:
             category_dir,
             SLDatasetItem.is_landmark_key,
             {".npy": np.load},
-            {".npz": lambda p: dict(np.load(p))}
+            {".npz": lambda p: dict(np.load(p))},
         )
 
         # Should return empty dict if no container files exist either
         assert result == {}
 
-    def test_load_category_from_fs_loads_container_when_dir_missing(self, tmp_path):
-        """Test _load_category_from_fs() loads container file when directory doesn't exist."""
+    def test_load_category_from_fs_loads_container_when_dir_missing(
+        self, tmp_path
+    ):
+        """Test _load_category_from_fs() loads container file when directory
+        doesn't exist."""
         category_path = tmp_path / "landmarks"
 
         # Save as .npz container file
-        np.savez(
-            str(category_path) + ".npz",
-            pose=np.random.rand(10, 33, 3)
-        )
+        np.savez(str(category_path) + ".npz", pose=np.random.rand(10, 33, 3))
 
         result = SLDatasetItem._load_category_from_fs(
             category_path,
             SLDatasetItem.is_landmark_key,
             {".npy": np.load},
-            {".npz": lambda p: dict(np.load(p))}
+            {".npz": lambda p: dict(np.load(p))},
         )
 
         assert "pose" in result
@@ -249,8 +237,7 @@ class TestSLDatasetItem:
         group.create_array("left_hand", data=np.random.rand(10, 21, 3))
 
         result = SLDatasetItem._load_category_from_zarr(
-            SLDatasetItem.is_landmark_key,
-            group
+            SLDatasetItem.is_landmark_key, group
         )
 
         assert "pose" in result
@@ -268,15 +255,15 @@ class TestSLDataset:
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-                targets={"label": np.array([[i]])}
+                targets={"label": np.array([[i]])},
             )
             for i in range(5)
         ]
-        
+
         return SLDataset(
             metadata={"version": "1.0", "fps": 30},
             connections={("pose", "pose"): np.array([[0, 1], [1, 2]])},
-            items=items
+            items=items,
         )
 
     def test_initialization(self, sample_dataset):
@@ -292,7 +279,7 @@ class TestSLDataset:
     def test_getitem_returns_item(self, sample_dataset):
         """Test __getitem__() returns correct item."""
         item = sample_dataset[0]
-        
+
         assert "rgb" in item.videos
         assert "pose" in item.landmarks
         assert "label" in item.targets
@@ -301,7 +288,7 @@ class TestSLDataset:
         """Test __getitem__() with different indices."""
         item0 = sample_dataset[0]
         item4 = sample_dataset[4]
-        
+
         assert item0.targets["label"][0][0] == 0
         assert item4.targets["label"][0][0] == 4
 
@@ -338,11 +325,11 @@ class TestSLDataset:
         metadata_group = root.create_group("metadata")
         metadata_group.attrs["version"] = "1.0"
         metadata_group.attrs["fps"] = 30
-        
+
         connections_group = root.create_group("connections")
         connections_group.create_array("pose.pose", data=np.array([[0, 1]]))
-        
-        items_group = root.create_group("items")
+
+        root.create_group("items")
 
         loaded_dataset = SLDataset.from_zarr(root)
 
@@ -353,11 +340,11 @@ class TestSLDataset:
         """Test from_zarr() correctly parses connection keys."""
         root = zarr.group()
         root.create_group("metadata")
-        
+
         connections_group = root.create_group("connections")
         connections_group.create_array("pose.left_hand", data=np.array([[0, 1]]))
         connections_group.create_array("pose.right_hand", data=np.array([[2, 3]]))
-        
+
         root.create_group("items")
 
         loaded_dataset = SLDataset.from_zarr(root)
@@ -372,11 +359,11 @@ class TestSLDataset:
         """Test from_zarr() skips connections with non-landmark keys."""
         root = zarr.group()
         root.create_group("metadata")
-        
+
         connections_group = root.create_group("connections")
         # These should pass since SLKeyHolder accepts all strings
         connections_group.create_array("pose.left_hand", data=np.array([[0, 1]]))
-        
+
         root.create_group("items")
 
         loaded_dataset = SLDataset.from_zarr(root)
@@ -395,17 +382,17 @@ class TestIterableSLDataset:
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-                targets={"label": np.array([[i]])}
+                targets={"label": np.array([[i]])},
             )
             for i in range(3)
         ]
-        
-        dataset= IterableSLDataset(
+
+        dataset = IterableSLDataset(
             metadata={"version": "1.0"},
             connections={("pose", "pose"): np.array([[0, 1]])},
-            items=iter(items)
+            items=iter(items),
         )
-        
+
         return dataset
 
     def test_initialization(self, sample_iterable_dataset):
@@ -419,16 +406,12 @@ class TestIterableSLDataset:
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-                targets={"label": np.array([[i]])}
+                targets={"label": np.array([[i]])},
             )
             for i in range(3)
         ]
-        
-        dataset: Any = IterableSLDataset(
-            metadata={},
-            connections={},
-            items=iter(items)
-        )
+
+        dataset: Any = IterableSLDataset(metadata={}, connections={}, items=iter(items))
 
         collected_items = list(dataset)
         assert len(collected_items) == 3
@@ -439,14 +422,14 @@ class TestIterableSLDataset:
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-                targets={"label": np.array([[0]])}
+                targets={"label": np.array([[0]])},
             )
         ]
-        
+
         dataset: Any = IterableSLDataset(
             metadata={},
             connections={("pose", "pose"): np.array([[0, 1]])},
-            items=iter(items)
+            items=iter(items),
         )
 
         device = torch.device("cpu")
@@ -465,15 +448,15 @@ class TestSLDatasetBatch:
         dataset = SLDataset(
             metadata={"version": "1.0"},
             connections={("pose", "pose"): torch.tensor([[0, 1]])},
-            items=[]
+            items=[],
         )
-        
+
         tensor_item = SLDatasetItem(
             videos={"rgb": torch.rand(2, 10, 64, 64, 3)},
             landmarks={"pose": torch.rand(2, 10, 33, 3)},
-            targets={"label": torch.tensor([[1], [2]])}
+            targets={"label": torch.tensor([[1], [2]])},
         )
-        
+
         return SLDatasetBatch(dataset, tensor_item)
 
     def test_initialization(self, sample_batch):
@@ -495,18 +478,18 @@ class TestSLDatasetBatch:
         dataset = SLDataset(
             metadata={"version": "1.0"},
             connections={("pose", "pose"): torch.tensor([[0, 1]])},
-            items=[]
+            items=[],
         )
-        
+
         batch_items = [
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3)},
-                targets={"label": np.array([[i]])}
+                targets={"label": np.array([[i]])},
             )
             for i in range(3)
         ]
-        
+
         batch = SLDatasetBatch.from_batch(dataset, batch_items)
 
         assert batch.item.videos["rgb"].shape[0] == 3  # Batch size
@@ -518,18 +501,21 @@ class TestSLDatasetBatch:
         dataset = SLDataset(
             metadata={"version": "1.0"},
             connections={("pose", "pose"): torch.tensor([[0, 1]])},
-            items=[]
+            items=[],
         )
-        
+
         batch_items = [
             SLDatasetItem(
-                videos={"rgb": np.random.rand(1, 10, 64, 64, 3), "depth": np.random.rand(1, 10, 64, 64, 1)},
+                videos={
+                    "rgb": np.random.rand(1, 10, 64, 64, 3),
+                    "depth": np.random.rand(1, 10, 64, 64, 1),
+                },
                 landmarks={"pose": np.random.rand(1, 10, 33, 3)},
-                targets={"label": np.array([[i]])}
+                targets={"label": np.array([[i]])},
             )
             for i in range(2)
         ]
-        
+
         batch = SLDatasetBatch.from_batch(dataset, batch_items)
 
         assert "rgb" in batch.item.videos
@@ -545,15 +531,15 @@ class TestDatasetToZarr:
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-                targets={"label": np.array([[i]])}
+                targets={"label": np.array([[i]])},
             )
             for i in range(2)
         ]
-        
+
         dataset = SLDataset(
             metadata={"version": "1.0", "fps": 30},
             connections={("pose", "pose"): np.array([[0, 1]])},
-            items=items
+            items=items,
         )
 
         store_path = tmp_path / "dataset.zarr"
@@ -571,15 +557,15 @@ class TestDatasetToZarr:
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-                targets={"label": np.array([[i]])}
+                targets={"label": np.array([[i]])},
             )
             for i in range(2)
         ]
-        
+
         dataset: Any = IterableSLDataset(
             metadata={"version": "1.0"},
             connections={("pose", "pose"): np.array([[0, 1]])},
-            items=iter(items)
+            items=iter(items),
         )
 
         store_path = tmp_path / "dataset.zarr"
@@ -596,14 +582,14 @@ class TestDatasetToZarr:
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-                targets={"label": np.array([[0]])}
+                targets={"label": np.array([[0]])},
             )
         ]
-        
+
         dataset = SLDataset(
             metadata={"version": "1.0"},
             connections={("pose", "pose"): np.array([[0, 1]])},
-            items=items
+            items=items,
         )
 
         existing_group = zarr.group()
@@ -618,16 +604,12 @@ class TestDatasetToZarr:
             SLDatasetItem(
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
-                targets={"label": np.array([[i]])}
+                targets={"label": np.array([[i]])},
             )
             for i in range(5)
         ]
-        
-        dataset = SLDataset(
-            metadata={},
-            connections={},
-            items=items
-        )
+
+        dataset = SLDataset(metadata={}, connections={}, items=items)
 
         store_path = tmp_path / "dataset.zarr"
         group = dataset_to_zarr(dataset, str(store_path))

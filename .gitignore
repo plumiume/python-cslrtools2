@@ -22,6 +22,8 @@ log.txt
 # IDE and development tools
 .vscode/
 .dockerignore
+.pytest_cache/
+.ruff_cache/
 
 # Docker
 docker-compose.override.yaml
@@ -36,6 +38,7 @@ docker-compose.override.yaml
 /process_*.py
 /test_output/
 
+/tests/data/
 *_frame/
 *.mp4
 

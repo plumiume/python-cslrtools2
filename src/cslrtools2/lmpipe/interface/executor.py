@@ -17,7 +17,10 @@ from __future__ import annotations
 
 from typing import Callable
 from concurrent.futures import Executor, Future
-from loky import ProcessPoolExecutor as LokyExecutor # pyright: ignore[reportMissingTypeStubs]
+
+# pyright: ignore[reportMissingTypeStubs]
+from loky import ProcessPoolExecutor as LokyExecutor
+
 
 class DummyExecutor(Executor):
     """A dummy executor that executes tasks sequentially in the current thread.
@@ -31,27 +34,22 @@ class DummyExecutor(Executor):
     # and 2nd overload of ProcessPoolExecutor.__init__
 
     def __init__(
-        self,
-        max_workers: int | None = None,
-        *,
-        initializer: Callable[[], object]
-        ):
+        self, max_workers: int | None = None, *, initializer: Callable[[], object]
+    ):
         """Initialize the dummy executor.
 
         Args:
-            max_workers (`int | None`, optional): Ignored, kept for compatibility. Defaults to None.
+            max_workers (`int | None`, optional): Ignored, kept for
+                compatibility.
+                Defaults to None.
             initializer (`(() -> object)`): Function to call for initialization.
         """
 
         initializer()
 
     def submit[**P, T](
-        self,
-        fn: Callable[P, T],
-        /,
-        *args: P.args,
-        **kwargs: P.kwargs
-        ) -> Future[T]:
+        self, fn: Callable[P, T], /, *args: P.args, **kwargs: P.kwargs
+    ) -> Future[T]:
         """Submit a callable to be executed immediately.
 
         Args:
@@ -73,6 +71,7 @@ class DummyExecutor(Executor):
 
         return ftr
 
+
 class ProcessPoolExecutor(LokyExecutor):
     """A ProcessPoolExecutor that supports cancelling futures on shutdown.
 
@@ -81,12 +80,9 @@ class ProcessPoolExecutor(LokyExecutor):
     of ThreadPoolExecutor.
     """
 
-    def shutdown( # pyright: ignore[reportIncompatibleMethodOverride]
-        self,
-        wait: bool = True,
-        *,
-        cancel_futures: bool = False
-        ) -> None:
+    def shutdown(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, wait: bool = True, *, cancel_futures: bool = False
+    ) -> None:
         """Shut down the executor, optionally cancelling pending futures.
 
         Args:

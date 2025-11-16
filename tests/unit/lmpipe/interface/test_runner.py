@@ -49,13 +49,17 @@ class DummyEstimator(Estimator[Literal["test"]]):
     def headers(self) -> Mapping[Literal["test"], NDArrayStr]:
         return {"test": np.array(["x", "y", "z"], dtype=str)}
 
-    def estimate(self, frame_src: MatLike | None, frame_idx: int) -> Mapping[Literal["test"], NDArrayFloat]:
+    def estimate(
+        self, frame_src: MatLike | None, frame_idx: int
+    ) -> Mapping[Literal["test"], NDArrayFloat]:
         self._estimate_called = True
         return {"test": np.array([[1.0, 2.0, 3.0]])}
 
     def annotate(self, frame_src: MatLike | None, frame_idx: int, landmarks) -> MatLike:
         self._annotate_called = True
-        return frame_src if frame_src is not None else np.zeros((1, 1, 3), dtype=np.uint8)
+        return (
+            frame_src if frame_src is not None else np.zeros((1, 1, 3), dtype=np.uint8)
+        )
 
 
 @pytest.fixture
@@ -261,8 +265,10 @@ class TestVideoProcessing:
         mock_frames = [np.zeros((480, 640, 3), dtype=np.uint8)]
         mock_capture_to_frames.return_value = mock_frames
 
-        with patch.object(runner, "process_frames") as mock_process_frames, \
-             patch.object(runner, "_collect_results") as mock_collect:
+        with (
+            patch.object(runner, "process_frames") as mock_process_frames,
+            patch.object(runner, "_collect_results") as mock_collect,
+        ):
             mock_process_frames.return_value = []
             runner.run_video(runspec)
 
@@ -301,8 +307,10 @@ class TestVideoProcessing:
         mock_frames = [np.zeros((480, 640, 3), dtype=np.uint8)]
         mock_seq_imgs_to_frames.return_value = mock_frames
 
-        with patch.object(runner, "process_frames") as mock_process_frames, \
-             patch.object(runner, "_collect_results") as mock_collect:
+        with (
+            patch.object(runner, "process_frames") as mock_process_frames,
+            patch.object(runner, "_collect_results") as mock_collect,
+        ):
             mock_process_frames.return_value = []
             runner.run_sequence_images(runspec)
 
@@ -323,8 +331,10 @@ class TestVideoProcessing:
         mock_frame = np.zeros((480, 640, 3), dtype=np.uint8)
         mock_image_file_to_frame.return_value = mock_frame
 
-        with patch.object(runner, "process_frames") as mock_process_frames, \
-             patch.object(runner, "_collect_results") as mock_collect:
+        with (
+            patch.object(runner, "process_frames") as mock_process_frames,
+            patch.object(runner, "_collect_results") as mock_collect,
+        ):
             mock_process_frames.return_value = []
             runner.run_single_image(runspec)
 
@@ -348,8 +358,10 @@ class TestVideoProcessing:
         mock_frames = [np.zeros((480, 640, 3), dtype=np.uint8)]
         mock_capture_to_frames.return_value = mock_frames
 
-        with patch.object(runner, "process_frames") as mock_process_frames, \
-             patch.object(runner, "_collect_results") as mock_collect:
+        with (
+            patch.object(runner, "process_frames") as mock_process_frames,
+            patch.object(runner, "_collect_results") as mock_collect,
+        ):
             mock_process_frames.return_value = []
             runner.run_stream(runspec)
 
@@ -358,7 +370,9 @@ class TestVideoProcessing:
             mock_collect.assert_called_once()
 
     @patch("cslrtools2.lmpipe.interface.runner.cv2.VideoCapture")
-    def test_run_stream_raises_if_cannot_open(self, mock_VideoCapture, runner, tmp_path):
+    def test_run_stream_raises_if_cannot_open(
+        self, mock_VideoCapture, runner, tmp_path
+    ):
         """Test run_stream() raises ValueError if stream cannot be opened."""
         dst_file = tmp_path / "output"
         runspec = RunSpec(0, dst_file)
@@ -414,7 +428,9 @@ class TestFrameProcessing:
         assert isinstance(result, ProcessResult)
         assert result.frame_id == 5
         assert "test" in result.headers
-        assert np.array_equal(result.headers["test"], np.array(["x", "y", "z"], dtype=str))
+        assert np.array_equal(
+            result.headers["test"], np.array(["x", "y", "z"], dtype=str)
+        )
         assert "test" in result.landmarks
         assert np.array_equal(result.landmarks["test"], np.array([[1.0, 2.0, 3.0]]))
         assert result.annotated_frame is frame
@@ -426,11 +442,16 @@ class TestFrameProcessing:
             np.zeros((480, 640, 3), dtype=np.uint8),
         ]
 
-        with patch.object(runner, "_init_executor") as mock_init_executor, \
-             patch.object(runner, "_get_executor_resources") as mock_resources:
+        with (
+            patch.object(runner, "_init_executor") as mock_init_executor,
+            patch.object(runner, "_get_executor_resources") as mock_resources,
+        ):
             # Mock executor to use DummyExecutor (synchronous)
             from cslrtools2.lmpipe.interface.executor import DummyExecutor
-            mock_executor = DummyExecutor(initializer=runner._default_executor_initializer)
+
+            mock_executor = DummyExecutor(
+                initializer=runner._default_executor_initializer
+            )
             mock_init_executor.return_value.__enter__ = lambda s: mock_executor
             mock_init_executor.return_value.__exit__ = lambda s, *args: None
             mock_resources.return_value.__enter__ = lambda s: None
@@ -552,19 +573,21 @@ class TestExecutorConfiguration:
         """Test _init_executor() caches executor instances."""
         # Ensure executors dict is empty
         runner.executors = {}
-        
+
         with patch.object(runner, "configure_executor") as mock_configure:
             mock_executor = Mock()
             mock_configure.return_value = mock_executor
 
             # First call - should configure and cache
             result1 = runner._init_executor("batch")
-            
+
             # Second call - should return cached executor
             result2 = runner._init_executor("batch")
 
             # Should only configure once
-            mock_configure.assert_called_once_with("batch", runner._default_executor_initializer)
+            mock_configure.assert_called_once_with(
+                "batch", runner._default_executor_initializer
+            )
             assert result1 is result2
             # Both should be the configured executor
             assert runner.executors["batch"] is mock_executor
@@ -670,9 +693,13 @@ class TestUtilityMethods:
         dst_dir = tmp_path / "output"
         runspec = RunSpec(src_dir, dst_dir)
 
-        with patch.object(runner, "_apply_exist_rule", return_value=True), \
-             patch("cslrtools2.lmpipe.interface.runner.is_video_file") as mock_is_video, \
-             patch("cslrtools2.lmpipe.interface.runner.is_image_file", return_value=False):
+        with (
+            patch.object(runner, "_apply_exist_rule", return_value=True),
+            patch("cslrtools2.lmpipe.interface.runner.is_video_file") as mock_is_video,
+            patch(
+                "cslrtools2.lmpipe.interface.runner.is_image_file", return_value=False
+            ),
+        ):
             mock_is_video.side_effect = lambda p: p.suffix in [".mp4", ".avi"]
 
             runspecs = list(runner._get_runspecs(runspec))
@@ -691,10 +718,15 @@ class TestUtilityMethods:
         dst_dir = tmp_path / "output"
         runspec = RunSpec(src_dir, dst_dir)
 
-        with patch.object(runner, "_apply_exist_rule", return_value=True), \
-             patch("cslrtools2.lmpipe.interface.runner.is_image_file", return_value=True), \
-             patch("cslrtools2.lmpipe.interface.runner.is_video_file", return_value=False):
-
+        with (
+            patch.object(runner, "_apply_exist_rule", return_value=True),
+            patch(
+                "cslrtools2.lmpipe.interface.runner.is_image_file", return_value=True
+            ),
+            patch(
+                "cslrtools2.lmpipe.interface.runner.is_video_file", return_value=False
+            ),
+        ):
             runspecs = list(runner._get_runspecs(runspec))
 
             # Should create one runspec for the image directory
@@ -718,7 +750,9 @@ class TestUtilityMethods:
             # Should not find files in hidden directory
             assert len(runspecs) == 0
 
-    def test_apply_exist_rule_returns_true_if_any_collector_allows(self, runner, tmp_path):
+    def test_apply_exist_rule_returns_true_if_any_collector_allows(
+        self, runner, tmp_path
+    ):
         """Test _apply_exist_rule() returns True if any collector allows processing."""
         collector1 = Mock()
         collector1.apply_exist_rule.return_value = False
@@ -736,7 +770,9 @@ class TestUtilityMethods:
         collector1.apply_exist_rule.assert_called_once_with(runspec)
         collector2.apply_exist_rule.assert_called_once_with(runspec)
 
-    def test_apply_exist_rule_returns_false_if_all_collectors_reject(self, runner, tmp_path):
+    def test_apply_exist_rule_returns_false_if_all_collectors_reject(
+        self, runner, tmp_path
+    ):
         """Test _apply_exist_rule() returns False if all collectors reject."""
         collector1 = Mock()
         collector1.apply_exist_rule.return_value = False
@@ -844,12 +880,11 @@ class TestLocalRunnerMethod:
 
     def test_local_runner_method_stores_method_info(self, runner):
         """Test _local_runner_method stores method and runner info."""
+
         def test_method(self, arg1, arg2):
             return f"{arg1}+{arg2}"
 
-        wrapper = LMPipeRunner._local_runner_method(
-            test_method, runner, "val1", "val2"
-        )
+        wrapper = LMPipeRunner._local_runner_method(test_method, runner, "val1", "val2")
 
         assert wrapper.method is test_method
         assert wrapper.runner_type is type(runner)
@@ -896,3 +931,278 @@ class TestLocalRunnerMethod:
 
         with pytest.raises(ValueError, match="Runner ID mismatch"):
             wrapper()
+
+
+class TestLMPipeRunnerBatchProcessing:
+    """Tests for LMPipeRunner batch processing with mocked methods."""
+
+    def test_run_batch_calls_required_methods(self, runner, tmp_path):
+        """Test that run_batch calls all required methods in correct order."""
+        # Create test video files
+        video_dir = tmp_path / "videos"
+        video_dir.mkdir()
+        (video_dir / "test1.mp4").touch()
+        (video_dir / "test2.mp4").touch()
+
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+
+        runspec = RunSpec(video_dir, output_dir)
+
+        # Track method calls
+
+        # Mock all event methods
+        with (
+            patch.object(runner, "_init_executor") as mock_init_executor,
+            patch.object(runner, "_events_ctxmgr") as mock_events_ctx,
+            patch.object(runner, "_get_runspecs") as mock_get_runspecs,
+            patch.object(runner, "_submit_with_events") as mock_submit,
+            patch.object(runner, "on_determined_batch_task_count") as mock_determined,
+            patch.object(runner, "run_single"),
+        ):
+            # Setup mocks
+            mock_executor = MagicMock()
+            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
+            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+
+            mock_events_ctx.return_value.__enter__ = lambda self: None
+            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+
+            # Create mock runspecs for 2 tasks
+            task_runspec1 = RunSpec(video_dir / "test1.mp4", output_dir)
+            task_runspec2 = RunSpec(video_dir / "test2.mp4", output_dir)
+            mock_get_runspecs.return_value = [task_runspec1, task_runspec2]
+
+            # Setup future mock
+            mock_future = MagicMock(spec=Future)
+            mock_future.result.return_value = None
+            mock_submit.return_value = mock_future
+
+            # Execute
+            runner.run_batch(runspec)
+
+            # Verify _init_executor was called
+            mock_init_executor.assert_called_once_with("batch")
+
+            # Verify _events_ctxmgr was called with event handlers
+            mock_events_ctx.assert_called_once()
+
+            # Verify _get_runspecs was called
+            mock_get_runspecs.assert_called_once_with(runspec)
+
+            # Verify _submit_with_events was called for each task
+            assert mock_submit.call_count == 2
+
+            # Verify on_determined_batch_task_count was called
+            mock_determined.assert_called_once_with(runspec, 2)
+
+            # Verify futures were awaited
+            assert mock_future.result.call_count == 2
+
+    def test_run_batch_with_single_task(self, runner, tmp_path):
+        """Test run_batch with a single task."""
+        video_file = tmp_path / "test.mp4"
+        video_file.touch()
+
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+
+        runspec = RunSpec(video_file, output_dir)
+
+        with (
+            patch.object(runner, "_init_executor") as mock_init_executor,
+            patch.object(runner, "_events_ctxmgr") as mock_events_ctx,
+            patch.object(runner, "_get_runspecs") as mock_get_runspecs,
+            patch.object(runner, "_submit_with_events") as mock_submit,
+            patch.object(runner, "on_determined_batch_task_count") as mock_determined,
+        ):
+            # Setup mocks
+            mock_executor = MagicMock()
+            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
+            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+
+            mock_events_ctx.return_value.__enter__ = lambda self: None
+            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+
+            mock_get_runspecs.return_value = [runspec]
+
+            mock_future = MagicMock(spec=Future)
+            mock_future.result.return_value = None
+            mock_submit.return_value = mock_future
+
+            # Execute
+            runner.run_batch(runspec)
+
+            # Verify task count
+            mock_determined.assert_called_once_with(runspec, 1)
+
+            # Verify single task submitted
+            assert mock_submit.call_count == 1
+
+    def test_run_batch_handles_task_failure(self, runner, tmp_path):
+        """Test that run_batch handles task failures gracefully."""
+        video_dir = tmp_path / "videos"
+        video_dir.mkdir()
+        (video_dir / "test.mp4").touch()
+
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+
+        runspec = RunSpec(video_dir, output_dir)
+
+        with (
+            patch.object(runner, "_init_executor") as mock_init_executor,
+            patch.object(runner, "_events_ctxmgr") as mock_events_ctx,
+            patch.object(runner, "_get_runspecs") as mock_get_runspecs,
+            patch.object(runner, "_submit_with_events") as mock_submit,
+        ):
+            # Setup mocks
+            mock_executor = MagicMock()
+            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
+            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+
+            mock_events_ctx.return_value.__enter__ = lambda self: None
+            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+
+            mock_get_runspecs.return_value = [runspec]
+
+            # Setup future that raises exception
+            mock_future = MagicMock(spec=Future)
+            mock_future.result.side_effect = RuntimeError("Task failed")
+            mock_submit.return_value = mock_future
+
+            # Execute - should not raise exception
+            runner.run_batch(runspec)
+
+            # Verify future.result was called (exception was handled)
+            mock_future.result.assert_called_once()
+
+    def test_run_batch_with_no_tasks(self, runner, tmp_path):
+        """Test run_batch with empty task list."""
+        video_dir = tmp_path / "videos"
+        video_dir.mkdir()
+
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+
+        runspec = RunSpec(video_dir, output_dir)
+
+        with (
+            patch.object(runner, "_init_executor") as mock_init_executor,
+            patch.object(runner, "_events_ctxmgr") as mock_events_ctx,
+            patch.object(runner, "_get_runspecs") as mock_get_runspecs,
+            patch.object(runner, "on_determined_batch_task_count") as mock_determined,
+        ):
+            # Setup mocks
+            mock_executor = MagicMock()
+            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
+            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+
+            mock_events_ctx.return_value.__enter__ = lambda self: None
+            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+
+            # No tasks
+            mock_get_runspecs.return_value = []
+
+            # Execute
+            runner.run_batch(runspec)
+
+            # Verify task count is 0
+            mock_determined.assert_called_once_with(runspec, 0)
+
+    def test_run_batch_executor_context_management(self, runner, tmp_path):
+        """Test that run_batch properly manages executor context."""
+        video_file = tmp_path / "test.mp4"
+        video_file.touch()
+
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+
+        runspec = RunSpec(video_file, output_dir)
+
+        enter_called = False
+        exit_called = False
+
+        class MockContextManager:
+            def __enter__(self):
+                nonlocal enter_called
+                enter_called = True
+                return MagicMock()
+
+            def __exit__(self, *args):
+                nonlocal exit_called
+                exit_called = True
+                return None
+
+        with (
+            patch.object(runner, "_init_executor") as mock_init_executor,
+            patch.object(runner, "_events_ctxmgr") as mock_events_ctx,
+            patch.object(runner, "_get_runspecs") as mock_get_runspecs,
+            patch.object(runner, "_submit_with_events") as mock_submit,
+        ):
+            mock_init_executor.return_value = MockContextManager()
+
+            mock_events_ctx.return_value.__enter__ = lambda self: None
+            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+
+            mock_get_runspecs.return_value = [runspec]
+
+            mock_future = MagicMock(spec=Future)
+            mock_future.result.return_value = None
+            mock_submit.return_value = mock_future
+
+            # Execute
+            runner.run_batch(runspec)
+
+            # Verify context manager was used
+            assert enter_called, "Executor context manager __enter__ was not called"
+            assert exit_called, "Executor context manager __exit__ was not called"
+
+    def test_run_batch_events_context_management(self, runner, tmp_path):
+        """Test that run_batch properly manages events context."""
+        video_file = tmp_path / "test.mp4"
+        video_file.touch()
+
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+
+        runspec = RunSpec(video_file, output_dir)
+
+        event_enter_called = False
+        event_exit_called = False
+
+        class MockEventContextManager:
+            def __enter__(self):
+                nonlocal event_enter_called
+                event_enter_called = True
+                return None
+
+            def __exit__(self, *args):
+                nonlocal event_exit_called
+                event_exit_called = True
+                return None
+
+        with (
+            patch.object(runner, "_init_executor") as mock_init_executor,
+            patch.object(runner, "_events_ctxmgr") as mock_events_ctx,
+            patch.object(runner, "_get_runspecs") as mock_get_runspecs,
+            patch.object(runner, "_submit_with_events") as mock_submit,
+        ):
+            mock_executor = MagicMock()
+            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
+            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+
+            mock_events_ctx.return_value = MockEventContextManager()
+
+            mock_get_runspecs.return_value = [runspec]
+
+            mock_future = MagicMock(spec=Future)
+            mock_future.result.return_value = None
+            mock_submit.return_value = mock_future
+
+            # Execute
+            runner.run_batch(runspec)
+
+            # Verify events context was used
+            assert event_enter_called, "Events context manager __enter__ was not called"
+            assert event_exit_called, "Events context manager __exit__ was not called"

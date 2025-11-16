@@ -9,7 +9,7 @@ import pytest
 
 pytestmark = pytest.mark.skipif(
     pytest.importorskip("mediapipe", reason="MediaPipe not installed") is None,
-    reason="MediaPipe not installed"
+    reason="MediaPipe not installed",
 )
 
 
@@ -33,8 +33,8 @@ def test_pose_landmark_enum():
     """Test PoseLandmark enum values."""
     from cslrtools2.plugins.mediapipe.lmpipe.mp_constants import PoseLandmark
 
-    assert hasattr(PoseLandmark, 'NOSE')
-    assert hasattr(PoseLandmark, 'LEFT_WRIST')
+    assert hasattr(PoseLandmark, "NOSE")
+    assert hasattr(PoseLandmark, "LEFT_WRIST")
     assert len(PoseLandmark) == 33
 
 
@@ -43,8 +43,8 @@ def test_hand_landmark_enum():
     """Test HandLandmark enum values."""
     from cslrtools2.plugins.mediapipe.lmpipe.mp_constants import HandLandmark
 
-    assert hasattr(HandLandmark, 'WRIST')
-    assert hasattr(HandLandmark, 'THUMB_TIP')
+    assert hasattr(HandLandmark, "WRIST")
+    assert hasattr(HandLandmark, "THUMB_TIP")
     assert len(HandLandmark) == 21
 
 

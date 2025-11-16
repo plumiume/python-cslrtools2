@@ -140,7 +140,7 @@ class TestConvSizeClass:
 
         input_size = torch.tensor([224, 224], dtype=torch.int64)
         output1 = conv1(input_size)  # 112x112
-        output2 = conv2(output1)      # 56x56
+        output2 = conv2(output1)  # 56x56
 
         assert torch.equal(output1, torch.tensor([112, 112], dtype=torch.int64))
         assert torch.equal(output2, torch.tensor([56, 56], dtype=torch.int64))
@@ -218,7 +218,7 @@ class TestConvTransposeSize:
     def test_convtranspose_basic(self) -> None:
         """Test basic transposed convolution size calculation."""
         from cslrtools2.convsize import ConvTransposeSize
-        
+
         deconv_layer = nn.ConvTranspose2d(
             64, 3, kernel_size=3, stride=2, padding=1, output_padding=1
         )
@@ -234,7 +234,7 @@ class TestConvTransposeSize:
     def test_convtranspose_with_size_input(self) -> None:
         """Test ConvTransposeSize with torch.Size input."""
         from cslrtools2.convsize import ConvTransposeSize
-        
+
         deconv_layer = nn.ConvTranspose2d(
             64, 3, kernel_size=4, stride=2, padding=1, output_padding=0
         )
@@ -250,7 +250,7 @@ class TestConvTransposeSize:
     def test_convtranspose_callable(self) -> None:
         """Test ConvTransposeSize can be called as function."""
         from cslrtools2.convsize import ConvTransposeSize
-        
+
         deconv_layer = nn.ConvTranspose2d(
             128, 64, kernel_size=3, stride=2, padding=1, output_padding=1
         )
@@ -266,7 +266,7 @@ class TestConvTransposeSize:
     def test_convtranspose_sequential(self) -> None:
         """Test sequential transposed convolution calculations."""
         from cslrtools2.convsize import ConvTransposeSize
-        
+
         # Two upsampling layers
         deconv1_layer = nn.ConvTranspose2d(
             256, 128, kernel_size=3, stride=2, padding=1, output_padding=1
@@ -280,7 +280,7 @@ class TestConvTransposeSize:
 
         input_size = torch.tensor([28, 28], dtype=torch.int64)
         output1 = deconv1(input_size)  # 56x56
-        output2 = deconv2(output1)      # 112x112
+        output2 = deconv2(output1)  # 112x112
 
         assert torch.equal(output1, torch.tensor([56, 56], dtype=torch.int64))
         assert torch.equal(output2, torch.tensor([112, 112], dtype=torch.int64))
@@ -288,7 +288,7 @@ class TestConvTransposeSize:
     def test_convtranspose_type_error_for_invalid_input(self) -> None:
         """Test ConvTransposeSize raises TypeError for invalid input."""
         from cslrtools2.convsize import ConvTransposeSize
-        
+
         deconv_layer = nn.ConvTranspose2d(
             64, 3, kernel_size=3, stride=2, padding=1, output_padding=1
         )
@@ -304,7 +304,7 @@ class TestDeconvSizeFunction:
     def test_deconv_size_basic(self) -> None:
         """Test basic conv_transpose_size calculation."""
         from cslrtools2.convsize import conv_transpose_size
-        
+
         size = torch.tensor([112, 112], dtype=torch.int64)
         kernel_size = torch.tensor([3, 3], dtype=torch.int64)
         stride = torch.tensor([2, 2], dtype=torch.int64)
@@ -312,7 +312,9 @@ class TestDeconvSizeFunction:
         dilation = torch.tensor([1, 1], dtype=torch.int64)
         output_padding = torch.tensor([1, 1], dtype=torch.int64)
 
-        output = conv_transpose_size(size, kernel_size, stride, padding, dilation, output_padding)
+        output = conv_transpose_size(
+            size, kernel_size, stride, padding, dilation, output_padding
+        )
 
         # (112 - 1) * 2 - 2*1 + 1*(3-1) + 1 + 1 = 224
         expected = torch.tensor([224, 224], dtype=torch.int64)
@@ -321,7 +323,7 @@ class TestDeconvSizeFunction:
     def test_deconv_size_no_output_padding(self) -> None:
         """Test conv_transpose_size with zero output padding."""
         from cslrtools2.convsize import conv_transpose_size
-        
+
         size = torch.tensor([56, 56], dtype=torch.int64)
         kernel_size = torch.tensor([4, 4], dtype=torch.int64)
         stride = torch.tensor([2, 2], dtype=torch.int64)
@@ -329,7 +331,9 @@ class TestDeconvSizeFunction:
         dilation = torch.tensor([1, 1], dtype=torch.int64)
         output_padding = torch.tensor([0, 0], dtype=torch.int64)
 
-        output = conv_transpose_size(size, kernel_size, stride, padding, dilation, output_padding)
+        output = conv_transpose_size(
+            size, kernel_size, stride, padding, dilation, output_padding
+        )
 
         # (56 - 1) * 2 - 2*1 + 1*(4-1) + 0 + 1 = 110 + 2 - 4 + 3 + 1 = 110
         expected = torch.tensor([110, 110], dtype=torch.int64)

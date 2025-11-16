@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-import pytest  # pyright: ignore[reportUnusedImport]
 import logging
 # from unittest.mock import Mock
 
@@ -54,7 +53,7 @@ class TestFormatters:
             lineno=1,
             msg="test message",
             args=(),
-            exc_info=None
+            exc_info=None,
         )
         formatted = standard_formatter.format(record)
         assert "[INFO    ]" in formatted
@@ -74,7 +73,7 @@ class TestFormatters:
             lineno=42,
             msg="debug message",
             args=(),
-            exc_info=None
+            exc_info=None,
         )
         formatted = detailed_formatter.format(record)
         assert "test.py" in formatted
@@ -139,7 +138,7 @@ class TestConfigureLogger:
             logger,
             level=logging.WARNING,
             formatter=detailed_formatter,
-            handler=custom_handler
+            handler=custom_handler,
         )
 
         assert logger.level == logging.WARNING
