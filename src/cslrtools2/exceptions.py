@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """Custom exceptions for cslrtools2.
 
 This module defines the exception hierarchy for cslrtools2, providing
@@ -79,12 +82,14 @@ class CSLRToolsError(Exception):
         ... except CSLRToolsError as e:
         ...     print(f"cslrtools2 error: {e}")
     """
+
     pass
 
 
 # ============================================================================
 # Common Exceptions
 # ============================================================================
+
 
 class ConfigurationError(CSLRToolsError):
     """Raised when configuration is invalid or inconsistent.
@@ -99,6 +104,7 @@ class ConfigurationError(CSLRToolsError):
         ...     "Invalid estimator configuration: missing model_path"
         ... )
     """
+
     pass
 
 
@@ -115,6 +121,7 @@ class ValidationError(CSLRToolsError):
         ...     f"Expected positive integer, got {value}"
         ... )
     """
+
     pass
 
 
@@ -122,11 +129,13 @@ class ValidationError(CSLRToolsError):
 # LMPipe Exceptions
 # ============================================================================
 
+
 class LMPipeError(CSLRToolsError):
     """Base exception for landmark pipeline errors.
 
     All lmpipe-specific exceptions inherit from this class.
     """
+
     pass
 
 
@@ -143,6 +152,7 @@ class EstimatorError(LMPipeError):
         ...     "MediaPipe model initialization failed: invalid model file"
         ... )
     """
+
     pass
 
 
@@ -159,6 +169,7 @@ class CollectorError(LMPipeError):
         ...     f"Failed to write output to {path}: {reason}"
         ... )
     """
+
     pass
 
 
@@ -176,6 +187,7 @@ class VideoProcessingError(LMPipeError):
         ...     f"Ensure the file exists and is a valid video format."
         ... )
     """
+
     pass
 
 
@@ -194,6 +206,7 @@ class ModelDownloadError(LMPipeError):
         ...     f"Ensure you have internet connectivity."
         ... )
     """
+
     pass
 
 
@@ -201,11 +214,13 @@ class ModelDownloadError(LMPipeError):
 # SLDataset Exceptions
 # ============================================================================
 
+
 class SLDatasetError(CSLRToolsError):
     """Base exception for dataset errors.
 
     All sldataset-specific exceptions inherit from this class.
     """
+
     pass
 
 
@@ -222,6 +237,7 @@ class DataLoadError(SLDatasetError):
         ...     f"Failed to load array from {path}: {reason}"
         ... )
     """
+
     pass
 
 
@@ -239,6 +255,7 @@ class DataFormatError(SLDatasetError):
         ...     f"Ensure the file was saved with torch.save(tensor, path)."
         ... )
     """
+
     pass
 
 
@@ -256,4 +273,5 @@ class PluginError(SLDatasetError):
         ...     f"Expected a callable, got {type(processor).__name__}."
         ... )
     """
+
     pass

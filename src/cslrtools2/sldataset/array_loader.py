@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 # CsvLoader(PreKeyLoader)
 # JsonLoader(PreKeyLoader)
 # NpyLoader(PreKeyLoader)
@@ -34,6 +37,7 @@ import zarr
 from ..typings import PathLike, ArrayLike
 from ..exceptions import DataFormatError
 
+
 def _is_mapping[T: Mapping[Any, Any]](obj: object, type_: type[T]) -> TypeGuard[T]:
     """Check if object is an instance of a mapping type.
 
@@ -48,6 +52,7 @@ def _is_mapping[T: Mapping[Any, Any]](obj: object, type_: type[T]) -> TypeGuard[
     while (new_origin := get_origin(origin)) is not None:
         origin = new_origin
     return isinstance(obj, origin)
+
 
 class PreKeyLoader(ABC):
     """Abstract base class for loaders that load single arrays from files.
@@ -70,6 +75,7 @@ class PreKeyLoader(ABC):
             :class:`ArrayLike`: The loaded array.
         """
         ...
+
 
 class ContainerLoader(ABC):
     """Abstract base class for loaders that load multiple keyed arrays from files.
@@ -118,11 +124,9 @@ class CsvLoader(PreKeyLoader):
         """
         return [
             [float(value) for value in row]
-            for row in csv.reader(
-                open(path, "r", newline=""),
-                delimiter=self.delimiter
-            )
+            for row in csv.reader(open(path, "r", newline=""), delimiter=self.delimiter)
         ]
+
 
 class JsonLoader(PreKeyLoader):
     """JSON file loader for array data.
@@ -140,9 +144,8 @@ class JsonLoader(PreKeyLoader):
         Returns:
             :class:`ArrayLike`: The parsed JSON array.
         """
-        return json.load(
-            open(path, "r")
-        )
+        return json.load(open(path, "r"))
+
 
 class NpyLoader(PreKeyLoader):
     """NumPy NPY file loader for array data.
@@ -161,15 +164,17 @@ class NpyLoader(PreKeyLoader):
             :class:`ArrayLike`: The loaded NumPy array.
 
         Raises:
-            :exc:`DataFormatError`: If the file contains a mapping instead of a single array.
+            :exc:`DataFormatError`: If the file contains a mapping instead of
+            a single array.
         """
         result = np.load(path)
         if isinstance(result, Mapping):
             raise DataFormatError(
-                f"Expected a single array in NPY file at {path}, got a mapping. "
-                f"Use load_npy_multi() for multi-array files."
+                f"Expected a single array in NPY file at {path}, got a "
+                f"mapping. Use load_npy_multi() for multi-array files."
             )
         return result
+
 
 class NpzLoader(ContainerLoader):
     """NumPy NPZ archive loader for multiple keyed arrays.
@@ -198,6 +203,7 @@ class NpzLoader(ContainerLoader):
                 f"Ensure the file is a valid NumPy .npz archive."
             )
         return npz
+
 
 class TorchLoader(PreKeyLoader, ContainerLoader):
     """PyTorch file loader for tensors and tensor dictionaries.
@@ -242,10 +248,12 @@ class TorchLoader(PreKeyLoader, ContainerLoader):
         data = torch.load(path)
         if not _is_mapping(data, Mapping[str, ArrayLike]):
             raise DataFormatError(
-                f"Expected a dict of str to ArrayLike in Torch file at {path}, got {type(data)}. "
-                f"Use load_array() for single tensor files."
+                f"Expected a dict of str to ArrayLike in Torch file at "
+                f"{path}, got {type(data)}. Use load_array() for single "
+                f"tensor files."
             )
         return data
+
 
 class SafetensorsLoader(ContainerLoader):
     """SafeTensors file loader for secure tensor storage.
@@ -270,11 +278,13 @@ class SafetensorsLoader(ContainerLoader):
         data = safetensors.torch.load_file(path)
         if not _is_mapping(data, Mapping[str, ArrayLike]):
             raise DataFormatError(
-                f"Expected a dict of str to ArrayLike in Safetensors file at {path}, got {type(data)}. "
-                f"Ensure the file contains a valid safetensors mapping."
+                f"Expected a dict of str to ArrayLike in Safetensors file at "
+                f"{path}, got {type(data)}. Ensure the file contains a valid "
+                f"safetensors mapping."
             )
 
         return data
+
 
 class ZarrLoader(ContainerLoader):
     """Zarr group loader for chunked array storage.
@@ -294,10 +304,8 @@ class ZarrLoader(ContainerLoader):
                 Mapping from array names to :class:`zarr.Array` objects.
         """
         group = zarr.open_group(Path(path))
-        return {
-            key: array
-            for key, array in group.arrays()
-        }
+        return {key: array for key, array in group.arrays()}
+
 
 type PrekeyLoadFunc = Callable[[PathLike], ArrayLike]
 type ContainerLoadFunc = Callable[[PathLike], Mapping[str, ArrayLike]]

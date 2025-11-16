@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Mapping
 
 import torch
 
-from ....typings import NDArrayFloat
+from ....typings import NDArrayFloat, NDArrayStr
 from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 
@@ -25,20 +28,26 @@ class TorchLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
     """Write landmarks into PyTorch tensor files.
 
     Supports two modes:
-    - Container mode (per_key=False): Single ``landmarks.pt`` (or ``.pth``) file with all keys
-    - Per-key mode (per_key=True): Multiple ``{key}.pt`` (or ``.pth``) files in ``landmarks/`` directory
+    - Container mode (per_key=False): Single ``landmarks.pt`` (or ``.pth``)
+      file with all keys
+    - Per-key mode (per_key=True): Multiple ``{key}.pt`` (or ``.pth``) files
+      in ``landmarks/`` directory
     """
 
     def __init__(self, *, per_key: bool = False, extension: str = ".pt") -> None:
         """Initialize the PyTorch landmark matrix save collector.
 
         Args:
-            per_key (:class:`bool`, optional): If True, save each key to a separate file.
-                If False, save all keys to a single landmarks file. Defaults to False.
-            extension (:class:`str`, optional): File extension. Either ".pt" or ".pth". Defaults to ".pt".
+            per_key (:class:`bool`, optional): If True, save each key to a
+                separate file. If False, save all keys to a single landmarks
+                file. Defaults to False.
+            extension (:class:`str`, optional): File extension. Either ".pt"
+                or ".pth". Defaults to ".pt".
         """
         if extension not in (".pt", ".pth"):
-            raise ValueError(f"Invalid extension: {extension}. Must be '.pt' or '.pth'.")
+            raise ValueError(
+                f"Invalid extension: {extension}. Must be '.pt' or '.pth'."
+            )
         self.per_key = per_key
         self.extension = extension
         self.USE_LANDMARK_DIR = per_key  # Use directory for per-key mode
@@ -66,12 +75,19 @@ class TorchLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
             self._base_dir = self._prepare_landmark_dir(path)
             self._path = None
         else:
-            self._path = self._get_landmark_file_path(path, f"landmarks{self.extension}")
+            self._path = self._get_landmark_file_path(
+                path, f"landmarks{self.extension}"
+            )
             self._base_dir = None
         self._buffer = {}
 
-    def _append_result(self, result: Mapping[K, NDArrayFloat]):
-        for key, value in result.items():
+    def _append_result(
+        self,
+        frame_id: int,
+        headers: Mapping[K, NDArrayStr],
+        landmarks: Mapping[K, NDArrayFloat],
+    ):
+        for key, value in landmarks.items():
             bucket = self._buffer.setdefault(str(key), [])
             bucket.append(torch.tensor(value))
 
@@ -94,7 +110,9 @@ class TorchLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
             if not self._buffer:
                 torch.save({}, self._path)
             else:
-                tensors = {key: torch.stack(values) for key, values in self._buffer.items()}
+                tensors = {
+                    key: torch.stack(values) for key, values in self._buffer.items()
+                }
                 torch.save(tensors, self._path)
             self._path = None
         self._buffer = {}
@@ -107,9 +125,11 @@ def pt_lmsc_creator[K: str](key_type: type[K]) -> TorchLandmarkMatrixSaveCollect
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`TorchLandmarkMatrixSaveCollector[K]`: PyTorch landmark matrix saver with .pt extension.
+        :class:`TorchLandmarkMatrixSaveCollector[K]`: PyTorch landmark matrix
+            saver with .pt extension.
     """
     return TorchLandmarkMatrixSaveCollector[K]()
+
 
 def pth_lmsc_creator[K: str](key_type: type[K]) -> TorchLandmarkMatrixSaveCollector[K]:
     """Create a PyTorch .pth landmark matrix save collector.
@@ -118,11 +138,15 @@ def pth_lmsc_creator[K: str](key_type: type[K]) -> TorchLandmarkMatrixSaveCollec
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`TorchLandmarkMatrixSaveCollector[K]`: PyTorch landmark matrix saver with .pth extension.
+        :class:`TorchLandmarkMatrixSaveCollector[K]`: PyTorch landmark matrix
+            saver with .pth extension.
     """
     return TorchLandmarkMatrixSaveCollector[K](extension=".pth")
 
-lmsc_aliases.update({
-    ".pt": pt_lmsc_creator,
-    ".pth": pth_lmsc_creator,
-})
+
+lmsc_aliases.update(
+    {
+        ".pt": pt_lmsc_creator,
+        ".pth": pth_lmsc_creator,
+    }
+)

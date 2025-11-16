@@ -15,7 +15,8 @@
 """Backward compatibility module for MediaPipe connections.
 
 .. deprecated:: 0.1.0
-    This module has been renamed to :mod:`~cslrtools2.plugins.mediapipe.lmpipe.mp_constants`.
+    This module has been renamed to
+    :mod:`~cslrtools2.plugins.mediapipe.lmpipe.mp_constants`.
     Use the new module instead::
 
         # Old (deprecated)

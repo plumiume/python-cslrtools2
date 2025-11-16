@@ -14,6 +14,8 @@
 
 # pyright: reportUnnecessaryIsInstance=false
 
+from __future__ import annotations
+
 import numpy as np
 
 from ...estimator import ProcessResult
@@ -47,17 +49,19 @@ class PilAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollector[K]):
 
 
 def pil_af_show_collector_creator[K: str](
-    key_type: type[K]
-    ) -> AnnotatedFramesShowCollector[K]:
+    key_type: type[K],
+) -> AnnotatedFramesShowCollector[K]:
     """Create a PilAnnotatedFramesShowCollector instance.
 
     Args:
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`AnnotatedFramesShowCollector[K]`: PIL/Pillow-based annotated frames viewer.
+        :class:`AnnotatedFramesShowCollector[K]`: PIL/Pillow-based annotated
+        frames viewer.
     """
     return PilAnnotatedFramesShowCollector[K]()
+
 
 af_show_aliases["pil"] = pil_af_show_collector_creator
 af_show_aliases["pillow"] = pil_af_show_collector_creator

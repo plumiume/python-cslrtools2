@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 import numpy as np
 import torch
 import zarr
 
 from ..typings import ArrayLike
 from ..exceptions import DataLoadError
+
 
 def get_array(group: zarr.Group, path: str) -> zarr.Array:
     """Retrieve a Zarr array from a group by path.
@@ -34,12 +38,12 @@ def get_array(group: zarr.Group, path: str) -> zarr.Array:
     """
     array = group.get(path)
     if not isinstance(array, zarr.Array):
-        available_keys = list(group.keys()) if hasattr(group, 'keys') else []
+        available_keys = list(group.keys()) if hasattr(group, "keys") else []
         raise DataLoadError(
-            f"Array not found at path: {path}. "
-            f"Available keys: {available_keys}"
+            f"Array not found at path: {path}. Available keys: {available_keys}"
         )
     return array
+
 
 def get_group(group: zarr.Group, path: str) -> zarr.Group:
     """Retrieve a Zarr subgroup from a group by path.
@@ -56,12 +60,12 @@ def get_group(group: zarr.Group, path: str) -> zarr.Group:
     """
     subgroup = group.get(path)
     if not isinstance(subgroup, zarr.Group):
-        available_keys = list(group.keys()) if hasattr(group, 'keys') else []
+        available_keys = list(group.keys()) if hasattr(group, "keys") else []
         raise DataLoadError(
-            f"Group not found at path: {path}. "
-            f"Available keys: {available_keys}"
+            f"Group not found at path: {path}. Available keys: {available_keys}"
         )
     return subgroup
+
 
 def as_tensor(data: ArrayLike) -> torch.Tensor:
     """Convert array-like data to a PyTorch tensor.

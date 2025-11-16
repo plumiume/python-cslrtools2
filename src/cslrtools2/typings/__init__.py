@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Protocol
 from os import PathLike as _PathLike
 
@@ -22,12 +25,14 @@ if TYPE_CHECKING:
     # Lazy import for type checking
     import numpy as np
     from numpy._typing import (
-        _ArrayLikeInt_co, _ArrayLikeFloat_co, _ArrayLikeStr_co # pyright: ignore[reportPrivateUsage]
+        _ArrayLikeInt_co,
+        _ArrayLikeFloat_co,
+        _ArrayLikeStr_co,  # pyright: ignore[reportPrivateUsage]
     )
     from numpy.typing import (
         NDArray as _NDArray,
         ArrayLike as _ArrayLike,
-        DTypeLike as _DTypeLike
+        DTypeLike as _DTypeLike,
     )
     from cv2.typing import MatLike as _MatLike
 else:
@@ -37,6 +42,7 @@ else:
     _NDArray = object
     _DTypeLike = object
     _MatLike = object
+
 
 class SupportsArray[R: _ArrayLike](Protocol):
     """Protocol for objects that support conversion to arrays.
@@ -60,11 +66,11 @@ class SupportsArray[R: _ArrayLike](Protocol):
             >>> np.asarray(obj)
             array([1, 2, 3])
     """
+
     def __array__(
-        self,
-        dtype: _DTypeLike | None = None,
-        copy: bool | None = None
-        ) -> R: ...
+        self, dtype: _DTypeLike | None = None, copy: bool | None = None
+    ) -> R: ...
+
 
 # re-declare types for sphinx autodoc
 

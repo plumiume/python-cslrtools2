@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from typing import Literal, Mapping, cast
 from abc import abstractmethod
 from functools import cache
@@ -20,9 +23,16 @@ from itertools import product
 import numpy as np
 import cv2
 
-from mediapipe.tasks.python.core.base_options import BaseOptions # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.vision.pose_landmarker import PoseLandmarker, PoseLandmarkerOptions # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.tasks.python.core.base_options import (
+    BaseOptions,
+)  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.tasks.python.vision.pose_landmarker import (
+    PoseLandmarker,
+    PoseLandmarkerOptions,
+)  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.tasks.python.components.containers.landmark import (
+    NormalizedLandmark,
+)  # pyright: ignore[reportMissingTypeStubs]
 from mediapipe import Image, ImageFormat
 
 
@@ -62,9 +72,11 @@ class MediaPipePosePartROI(BaseROI):
 
     return_none: bool = False
     center_weight: float  # Must be defined in subclass
-    size_weight: float    # Must be defined in subclass
+    size_weight: float  # Must be defined in subclass
 
-    def _safe_init(self, landmarks: list[NDArrayFloat], height: int, width: int) -> bool:
+    def _safe_init(
+        self, landmarks: list[NDArrayFloat], height: int, width: int
+    ) -> bool:
         """Safe initialization with NaN checking and exception handling.
 
         Args:
@@ -84,7 +96,9 @@ class MediaPipePosePartROI(BaseROI):
 
         # 3. Calculate ROI parameters
         try:
-            roi_center_px, roi_angle, roi_size_px = self._calculate_roi_parameters(height, width)
+            roi_center_px, roi_angle, roi_size_px = self._calculate_roi_parameters(
+                height, width
+            )
         except (ValueError, ZeroDivisionError):
             self.return_none = True
             return False
@@ -94,23 +108,21 @@ class MediaPipePosePartROI(BaseROI):
 
         # 4. Calculate affine matrix
         self.affine_transform = cv2.getRotationMatrix2D(
-            center=roi_center_px,
-            angle=np.degrees(roi_angle),
-            scale=1
+            center=roi_center_px, angle=np.degrees(roi_angle), scale=1
         ) + cast(
             NDArrayFloat,
-            np.array([
-                [0.0, 0.0, roi_size_px[0] / 2 - roi_center_px[0]],
-                [0.0, 0.0, roi_size_px[1] / 2 - roi_center_px[1]]
-            ], dtype=np.float32)
+            np.array(
+                [
+                    [0.0, 0.0, roi_size_px[0] / 2 - roi_center_px[0]],
+                    [0.0, 0.0, roi_size_px[1] / 2 - roi_center_px[1]],
+                ],
+                dtype=np.float32,
+            ),
         )
 
-        self.inv_affine_transform = cv2.invertAffineTransform(
-            self.affine_transform
-        )
+        self.inv_affine_transform = cv2.invertAffineTransform(self.affine_transform)
 
         return True
-
 
     @abstractmethod
     def _calculate_roi_parameters(
@@ -131,7 +143,6 @@ class MediaPipePosePartROI(BaseROI):
         ...
 
     def apply_roi(self, frame_src: MatLike) -> MatLike | None:
-
         if self.return_none:
             return None
 
@@ -144,14 +155,11 @@ class MediaPipePosePartROI(BaseROI):
         return roi_frame
 
     def apply_world_coords[K: str](
-        self, local_coords: Mapping[K, NDArrayFloat] # key: Array(N, >=2)
-        ) -> Mapping[K, NDArrayFloat | None]:
-
+        self,
+        local_coords: Mapping[K, NDArrayFloat],  # key: Array(N, >=2)
+    ) -> Mapping[K, NDArrayFloat | None]:
         if self.return_none:
-            return {
-                klm: None
-                for klm in local_coords.keys()
-            }
+            return {klm: None for klm in local_coords.keys()}
 
         result: dict[K, NDArrayFloat] = {}
 
@@ -162,7 +170,6 @@ class MediaPipePosePartROI(BaseROI):
         bias = self.inv_affine_transform[:, 2]
 
         for klm, lm in local_coords.items():
-
             xy = lm[:, :2]
             ex = lm[:, 2:]
 
@@ -195,8 +202,8 @@ class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
         right_wrist: NDArrayFloat,
         right_elbow: NDArrayFloat,
         height: int,
-        width: int
-        ):
+        width: int,
+    ):
         """Initialize Both Hands ROI with pose landmarks.
 
         Args:
@@ -213,7 +220,9 @@ class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
         self.right_elbow = right_elbow
 
         # Use common initialization framework
-        self._safe_init([left_wrist, left_elbow, right_wrist, right_elbow], height, width)
+        self._safe_init(
+            [left_wrist, left_elbow, right_wrist, right_elbow], height, width
+        )
 
     def _calculate_roi_parameters(
         self, height: int, width: int
@@ -230,10 +239,18 @@ class MediaPipePoseBothHandsROI(MediaPipePosePartROI):
         long_side = max(height, width)
 
         # Convert normalized coordinates to pixel coordinates
-        left_wrist_px = np.array([self.left_wrist[0] * width, self.left_wrist[1] * height])
-        left_elbow_px = np.array([self.left_elbow[0] * width, self.left_elbow[1] * height])
-        right_wrist_px = np.array([self.right_wrist[0] * width, self.right_wrist[1] * height])
-        right_elbow_px = np.array([self.right_elbow[0] * width, self.right_elbow[1] * height])
+        left_wrist_px = np.array(
+            [self.left_wrist[0] * width, self.left_wrist[1] * height]
+        )
+        left_elbow_px = np.array(
+            [self.left_elbow[0] * width, self.left_elbow[1] * height]
+        )
+        right_wrist_px = np.array(
+            [self.right_wrist[0] * width, self.right_wrist[1] * height]
+        )
+        right_elbow_px = np.array(
+            [self.right_elbow[0] * width, self.right_elbow[1] * height]
+        )
 
         # Calculate hand sizes (for height)
         left_distance = np.linalg.norm(left_wrist_px - left_elbow_px)
@@ -266,12 +283,8 @@ class MediaPipePoseHandROI(MediaPipePosePartROI):
     pad_weight: float = 0.1
 
     def __init__(
-        self,
-        wrist: NDArrayFloat,
-        elbow: NDArrayFloat,
-        height: int,
-        width: int
-        ):
+        self, wrist: NDArrayFloat, elbow: NDArrayFloat, height: int, width: int
+    ):
         """Initialize Hand ROI with pose landmarks.
 
         Args:
@@ -328,7 +341,7 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
         right_ear: NDArrayFloat,
         nose: NDArrayFloat,
         height: int,
-        width: int
+        width: int,
     ):
         """Initialize Face ROI with pose landmarks.
 
@@ -375,15 +388,13 @@ class MediaPipePoseFaceROI(MediaPipePosePartROI):
 
         return ((center_px[0], center_px[1]), angle_rad, (size_px, size_px))
 
-class MediaPipePoseEstimator(
-    MediaPipeEstimator[MediaPipePoseKey],
-    HolisticPoseEstimator[MediaPipePoseKey]
-    ):
 
+class MediaPipePoseEstimator(
+    MediaPipeEstimator[MediaPipePoseKey], HolisticPoseEstimator[MediaPipePoseKey]
+):
     _setuped: bool = False
 
     def __init__(self, pose_args: MediaPipePoseArgs.T = MediaPipePoseArgs.T()):
-
         super().__init__(base_args=pose_args)
         self.pose_args = pose_args
 
@@ -391,30 +402,25 @@ class MediaPipePoseEstimator(
 
         self.landmarker_options = PoseLandmarkerOptions(
             base_options=BaseOptions(
-                model_asset_path=self.model_asset_path,
-                delegate=self.delegate
+                model_asset_path=self.model_asset_path, delegate=self.delegate
             ),
             num_poses=1,
             running_mode=self.running_mode,
             min_pose_detection_confidence=self.pose_args.min_pose_detection_confidence,
             min_tracking_confidence=self.pose_args.min_pose_tracking_confidence,
-            min_pose_presence_confidence=self.pose_args.min_pose_presence_confidence
+            min_pose_presence_confidence=self.pose_args.min_pose_presence_confidence,
         )
 
     def setup(self):
-
         if self._setuped:
             return
         self._setuped = True
 
         self._enable_suppress_stderr()
-        self.landmarker = PoseLandmarker.create_from_options(
-            self.landmarker_options
-        )
+        self.landmarker = PoseLandmarker.create_from_options(self.landmarker_options)
 
-    def configure_estimator_name(self) -> Literal['mediapipe.pose']:
+    def configure_estimator_name(self) -> Literal["mediapipe.pose"]:
         return MEDIA_PIPE_POSE_KEY
-
 
     @property
     @shape
@@ -427,89 +433,75 @@ class MediaPipePoseEstimator(
     @cache
     def headers(self) -> NDArrayStr:
         # item: "{landmark_name}__{axis}"
-        return np.array([
-            f"{lm_name.name.lower()}__{axis}"
-            for lm_name, axis in product(
-                MediaPipePoseNames,
-                self.axis_names
-            )
-        ])
-
-    @estimate
-    def estimate(
-        self,
-        frame_src: MatLike,
-        frame_idx: int
-        ) -> NDArrayFloat | None:
-
-        mp_image = Image(
-            image_format=ImageFormat.SRGB,
-            data=np.ascontiguousarray(frame_src)
+        return np.array(
+            [
+                f"{lm_name.name.lower()}__{axis}"
+                for lm_name, axis in product(MediaPipePoseNames, self.axis_names)
+            ]
         )
 
-        detection_result = self.landmarker.detect(mp_image) # pyright: ignore[reportUnknownMemberType]
-        landmarks: list[list[NormalizedLandmark]] = detection_result.pose_landmarks # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    @estimate
+    def estimate(self, frame_src: MatLike, frame_idx: int) -> NDArrayFloat | None:
+        mp_image = Image(
+            image_format=ImageFormat.SRGB, data=np.ascontiguousarray(frame_src)
+        )
+
+        # pyright: ignore[reportUnknownMemberType]
+        detection_result = self.landmarker.detect(mp_image)
+        landmarks: list[list[NormalizedLandmark]] = (
+            detection_result.pose_landmarks
+            # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        )
 
         self._disable_suppress_stderr()
 
         if not landmarks:
             return None
 
-        return np.array([
-            self._get_array_from_landmarks(lm)
-            for lm in landmarks[0]
-        ])
+        return np.array([self._get_array_from_landmarks(lm) for lm in landmarks[0]])
 
     @annotate
     def annotate(
         self,
         frame_src: MatLike,
         frame_idx: int,
-        landmarks: Mapping[MediaPipePoseKey, NDArrayFloat]
-        ) -> MatLike:
-
+        landmarks: Mapping[MediaPipePoseKey, NDArrayFloat],
+    ) -> MatLike:
         # TODO: implement annotation drawing
         return frame_src
-
 
     def configure_left_hand_roi(
         self,
         landmarks: Mapping[MediaPipePoseKey, NDArrayFloat],
-        height: int, width: int
-        ) -> MediaPipePoseHandROI:
-
+        height: int,
+        width: int,
+    ) -> MediaPipePoseHandROI:
         left_wrist = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.LEFT_WRIST]
         left_elbow = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.LEFT_ELBOW]
 
         return MediaPipePoseHandROI(
-            wrist=left_wrist,
-            elbow=left_elbow,
-            height=height,
-            width=width
+            wrist=left_wrist, elbow=left_elbow, height=height, width=width
         )
 
     def configure_right_hand_roi(
         self,
         landmarks: Mapping[MediaPipePoseKey, NDArrayFloat],
-        height: int, width: int
-        ) -> MediaPipePoseHandROI:
-
+        height: int,
+        width: int,
+    ) -> MediaPipePoseHandROI:
         right_wrist = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.RIGHT_WRIST]
         right_elbow = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.RIGHT_ELBOW]
 
         return MediaPipePoseHandROI(
-            wrist=right_wrist,
-            elbow=right_elbow,
-            height=height,
-            width=width
+            wrist=right_wrist, elbow=right_elbow, height=height, width=width
         )
 
     def configure_both_hands_roi(
         self,
         landmarks: Mapping[MediaPipePoseKey, NDArrayFloat],
-        height: int, width: int
-        ) -> MediaPipePoseBothHandsROI:
-
+        height: int,
+        width: int,
+    ) -> MediaPipePoseBothHandsROI:
         left_wrist = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.LEFT_WRIST]
         left_elbow = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.LEFT_ELBOW]
         right_wrist = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.RIGHT_WRIST]
@@ -521,15 +513,15 @@ class MediaPipePoseEstimator(
             right_wrist=right_wrist,
             right_elbow=right_elbow,
             height=height,
-            width=width
+            width=width,
         )
 
     def configure_face_roi(
         self,
         landmarks: Mapping[MediaPipePoseKey, NDArrayFloat],
-        height: int, width: int
-        ) -> MediaPipePoseFaceROI:
-
+        height: int,
+        width: int,
+    ) -> MediaPipePoseFaceROI:
         left_ear = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.LEFT_EAR]
         right_ear = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.RIGHT_EAR]
         nose = landmarks[MEDIA_PIPE_POSE_KEY][MediaPipePoseNames.NOSE]
@@ -539,5 +531,5 @@ class MediaPipePoseEstimator(
             right_ear=right_ear,
             nose=nose,
             height=height,
-            width=width
+            width=width,
         )

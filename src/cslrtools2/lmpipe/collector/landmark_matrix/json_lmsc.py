@@ -12,29 +12,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 import json
 from pathlib import Path
 from typing import Mapping
 
 import numpy as np
 
-from ....typings import NDArrayFloat
+from ....typings import NDArrayFloat, NDArrayStr
 from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 
 class JsonLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
-    """Write landmarks into per-key ``*.json`` or ``*.jsonc`` files inside ``landmarks``."""
+    """Write landmarks into per-key ``*.json`` or ``*.jsonc`` files inside
+    ``landmarks``."""
 
-    def __init__(self, *, indent: int | None = 2, encoding: str = "utf-8", extension: str = ".json") -> None:
+    def __init__(
+        self,
+        *,
+        indent: int | None = 2,
+        encoding: str = "utf-8",
+        extension: str = ".json",
+    ) -> None:
         """Initialize the JSON landmark matrix save collector.
 
         Args:
-            indent (:class:`int | None`, optional): JSON indentation level. Defaults to 2.
+            indent (:class:`int | None`, optional): JSON indentation level.
+                Defaults to 2.
             encoding (:class:`str`, optional): File encoding. Defaults to "utf-8".
-            extension (:class:`str`, optional): File extension. Either ".json" or ".jsonc". Defaults to ".json".
+            extension (:class:`str`, optional): File extension. Either ".json"
+                or ".jsonc". Defaults to ".json".
         """
         if extension not in (".json", ".jsonc"):
-            raise ValueError(f"Invalid extension: {extension}. Must be '.json' or '.jsonc'.")
+            raise ValueError(
+                f"Invalid extension: {extension}. Must be '.json' or '.jsonc'."
+            )
         self.indent = indent
         self.encoding = encoding
         self.extension = extension
@@ -60,8 +74,13 @@ class JsonLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
         self._base_dir = self._prepare_landmark_dir(path)
         self._buffers = {}
 
-    def _append_result(self, result: Mapping[K, NDArrayFloat]):
-        for raw_key, value in result.items():
+    def _append_result(
+        self,
+        frame_id: int,
+        headers: Mapping[K, NDArrayStr],
+        landmarks: Mapping[K, NDArrayFloat],
+    ):
+        for raw_key, value in landmarks.items():
             key = str(raw_key)
             buffer = self._buffers.setdefault(key, [])
             buffer.append(np.asarray(value).tolist())
@@ -84,9 +103,11 @@ def json_lmsc_creator[K: str](key_type: type[K]) -> JsonLandmarkMatrixSaveCollec
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`JsonLandmarkMatrixSaveCollector[K]`: JSON landmark matrix saver with .json extension.
+        :class:`JsonLandmarkMatrixSaveCollector[K]`: JSON landmark matrix saver
+            with .json extension.
     """
     return JsonLandmarkMatrixSaveCollector[K]()
+
 
 def jsonc_lmsc_creator[K: str](key_type: type[K]) -> JsonLandmarkMatrixSaveCollector[K]:
     """Create a JSONC landmark matrix save collector.
@@ -95,11 +116,15 @@ def jsonc_lmsc_creator[K: str](key_type: type[K]) -> JsonLandmarkMatrixSaveColle
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`JsonLandmarkMatrixSaveCollector[K]`: JSON landmark matrix saver with .jsonc extension.
+        :class:`JsonLandmarkMatrixSaveCollector[K]`: JSON landmark matrix saver
+            with .jsonc extension.
     """
     return JsonLandmarkMatrixSaveCollector[K](extension=".jsonc")
 
-lmsc_aliases.update({
-    ".json": json_lmsc_creator,
-    ".jsonc": jsonc_lmsc_creator,
-})
+
+lmsc_aliases.update(
+    {
+        ".json": json_lmsc_creator,
+        ".jsonc": jsonc_lmsc_creator,
+    }
+)

@@ -12,12 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from clipar import namespace, mixin
 from .plugins import loader
 
 plugins = loader()
 
+
 @namespace
-class CliArgs(mixin.ReprMixin, mixin.CommandMixin): pass
+class CliArgs(mixin.ReprMixin, mixin.CommandMixin):
+    pass
+
+
 for pl_info in plugins.values():
     CliArgs.add_wrapper(pl_info["name"], pl_info["nswrapper"])

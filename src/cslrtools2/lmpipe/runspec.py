@@ -24,6 +24,7 @@ __all__ = [
     "RunSpec",
 ]
 
+
 class RunSpec[S: Path | int]:
     """Specification of a processing run, including source and destination.
 
@@ -46,7 +47,9 @@ class RunSpec[S: Path | int]:
         "Destination path."
 
     @classmethod
-    def from_pathlikes(cls: type[RunSpec[Path]], src: PathLike, dst: PathLike) -> RunSpec[Path]:
+    def from_pathlikes(
+        cls: type[RunSpec[Path]], src: PathLike, dst: PathLike
+    ) -> RunSpec[Path]:
         """Create a RunSpec from path-like source and destination.
 
         Args:
@@ -54,7 +57,8 @@ class RunSpec[S: Path | int]:
             dst (:class:`PathLike`): Destination output directory path.
 
         Returns:
-            :class:`RunSpec`\\[:class:`pathlib.Path`\\]: The created :class:`RunSpec` instance.
+            :class:`RunSpec`\\[:class:`pathlib.Path`\\]: The created
+            :class:`RunSpec` instance.
 
         Raises:
             :exc:`VideoProcessingError`: If the source path does not exist.

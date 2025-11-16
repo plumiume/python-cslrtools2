@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Mapping
 
 import numpy as np
 
-from ....typings import NDArrayFloat
+from ....typings import NDArrayFloat, NDArrayStr
 from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 
@@ -50,8 +53,13 @@ class NpzLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
         self._path = self._get_landmark_file_path(path, "landmarks.npz")
         self._buffer = {}
 
-    def _append_result(self, result: Mapping[K, NDArrayFloat]):
-        for key, value in result.items():
+    def _append_result(
+        self,
+        frame_id: int,
+        headers: Mapping[K, NDArrayStr],
+        landmarks: Mapping[K, NDArrayFloat],
+    ):
+        for key, value in landmarks.items():
             bucket = self._buffer.setdefault(str(key), [])
             bucket.append(np.asarray(value))
 
@@ -74,10 +82,14 @@ def npz_lmsc_creator[K: str](key_type: type[K]) -> NpzLandmarkMatrixSaveCollecto
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`NpzLandmarkMatrixSaveCollector[K]`: Container NumPy .npz landmark matrix saver.
+        :class:`NpzLandmarkMatrixSaveCollector[K]`: Container NumPy .npz
+            landmark matrix saver.
     """
     return NpzLandmarkMatrixSaveCollector[K]()
 
-lmsc_aliases.update({
-    ".npz": npz_lmsc_creator,
-})
+
+lmsc_aliases.update(
+    {
+        ".npz": npz_lmsc_creator,
+    }
+)

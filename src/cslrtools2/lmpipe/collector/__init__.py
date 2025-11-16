@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """Collectors for landmark estimation pipeline results.
 
 This package provides various collectors that process and store results

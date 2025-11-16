@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """Utility helpers for LMPipe image and video handling.
 
 This module provides reusable helpers for the LMPipe pipeline, including
@@ -81,7 +84,7 @@ def is_images_dir(path: Path) -> bool:
     return all(
         is_image_file(child)
         for child in path.iterdir()
-        if child.is_file() and not child.name.startswith('.')
+        if child.is_file() and not child.name.startswith(".")
     )
 
 
@@ -171,14 +174,17 @@ def image_file_to_frame(src: Path) -> MatLike:
 def is_video_ext_from_mimetype(extension: str) -> bool:
     """Check if the given file extension is a video format using mimetypes.
 
-    This function uses Python's :mod:`mimetypes` module to determine if an extension
-    corresponds to a video MIME type (e.g., ``'video/mp4'``, ``'video/x-msvideo'``).
+    This function uses Python's :mod:`mimetypes` module to determine if an
+    extension corresponds to a video MIME type (e.g., ``'video/mp4'``,
+    ``'video/x-msvideo'``).
 
     Args:
-        extension (:obj:`str`): File extension including the dot (e.g., ``'.mp4'``, ``'.avi'``).
+        extension (:obj:`str`): File extension including the dot (e.g.,
+            ``'.mp4'``, ``'.avi'``).
 
     Returns:
-        :obj:`bool`: :obj:`True` if the extension is a video format, :obj:`False` otherwise.
+        :obj:`bool`: :obj:`True` if the extension is a video format,
+            :obj:`False` otherwise.
 
     Examples:
         >>> is_video_ext_from_mimetype('.mp4')
@@ -189,30 +195,33 @@ def is_video_ext_from_mimetype(extension: str) -> bool:
     import mimetypes
 
     # Ensure extension starts with a dot
-    if not extension.startswith('.'):
-        extension = f'.{extension}'
+    if not extension.startswith("."):
+        extension = f".{extension}"
 
     # Guess the MIME type from the extension
-    mime_type, _ = mimetypes.guess_type(f'dummy{extension}')
+    mime_type, _ = mimetypes.guess_type(f"dummy{extension}")
 
     # Check if the MIME type starts with 'video/'
     if mime_type is None:
         return False
 
-    return mime_type.startswith('video/')
+    return mime_type.startswith("video/")
 
 
 def is_image_ext_from_mimetype(extension: str) -> bool:
     """Check if the given file extension is an image format using mimetypes.
 
-    This function uses Python's :mod:`mimetypes` module to determine if an extension
-    corresponds to an image MIME type (e.g., ``'image/png'``, ``'image/jpeg'``).
+    This function uses Python's :mod:`mimetypes` module to determine if an
+    extension corresponds to an image MIME type (e.g., ``'image/png'``,
+    ``'image/jpeg'``).
 
     Args:
-        extension (:obj:`str`): File extension including the dot (e.g., ``'.png'``, ``'.jpg'``).
+        extension (:obj:`str`): File extension including the dot (e.g.,
+            ``'.png'``, ``'.jpg'``).
 
     Returns:
-        :obj:`bool`: :obj:`True` if the extension is an image format, :obj:`False` otherwise.
+        :obj:`bool`: :obj:`True` if the extension is an image format,
+            :obj:`False` otherwise.
 
     Examples:
         >>> is_image_ext_from_mimetype('.png')
@@ -223,14 +232,14 @@ def is_image_ext_from_mimetype(extension: str) -> bool:
     import mimetypes
 
     # Ensure extension starts with a dot
-    if not extension.startswith('.'):
-        extension = f'.{extension}'
+    if not extension.startswith("."):
+        extension = f".{extension}"
 
     # Guess the MIME type from the extension
-    mime_type, _ = mimetypes.guess_type(f'dummy{extension}')
+    mime_type, _ = mimetypes.guess_type(f"dummy{extension}")
 
     # Check if the MIME type starts with 'image/'
     if mime_type is None:
         return False
 
-    return mime_type.startswith('image/')
+    return mime_type.startswith("image/")

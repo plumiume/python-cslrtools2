@@ -33,7 +33,7 @@ Example:
     >>> interface.run('input.mp4', 'output/')
 """
 
-from typing import * # pyright: ignore[reportWildcardImportFromLibrary]
+from typing import Callable, Unpack
 
 from ...typings import PathLike
 from ..logger import lmpipe_logger
@@ -44,23 +44,26 @@ from ..runspec import RunSpec
 
 from .runner import LMPipeRunner
 
+
 def _update_lmpipe_options(
-    base: LMPipeOptions,
-    *updates: LMPipeOptions | LMPipeOptionsPartial
-    ) -> LMPipeOptions:
+    base: LMPipeOptions, *updates: LMPipeOptions | LMPipeOptionsPartial
+) -> LMPipeOptions:
     """Update LMPipe options by merging partial options into base options.
 
     Args:
         base (`LMPipeOptions`): Base options to start with.
-        *updates (`LMPipeOptions | LMPipeOptionsPartial`): Variable number of partial options to merge.
+        *updates (`LMPipeOptions | LMPipeOptionsPartial`): Variable number
+            of partial options to merge.
 
     Returns:
-        :class:`LMPipeOptions`: Updated options with all partial options merged.
+        :class:`LMPipeOptions`: Updated options with all partial options
+            merged.
     """
     ret = base.copy()
     for opt in updates:
         ret.update(opt)
     return ret
+
 
 class LMPipeInterface[K: str]:
     """Main interface for LMPipe computer vision processing pipeline.
@@ -100,8 +103,8 @@ class LMPipeInterface[K: str]:
         collectors: list[Collector[K]] | Callable[[], list[Collector[K]]] = [],
         options: LMPipeOptions | LMPipeOptionsPartial = {},
         runner_type: type[LMPipeRunner[K]] | None = None,
-        **kwargs: Unpack[LMPipeOptionsPartial]
-        ):
+        **kwargs: Unpack[LMPipeOptionsPartial],
+    ):
         """Initialize LMPipeInterface with estimator and options.
 
         Creates a new pipeline interface configured with the specified estimator,
@@ -111,15 +114,32 @@ class LMPipeInterface[K: str]:
         Args:
             estimator (:class:`~cslrtools2.lmpipe.estimator.Estimator`\\[:obj:`K`\\]):
                 The machine learning estimator to use for processing.
-            collectors (:obj:`list`\\[:class:`~cslrtools2.lmpipe.collector.Collector`\\[:obj:`K`\\]\\] | :class:`~typing.Callable`\\[\\[\\], :obj:`list`\\[:class:`~cslrtools2.lmpipe.collector.Collector`\\[:obj:`K`\\]\\]\\]):
-                Result collectors or a factory function to create them. Defaults to empty list.
-            options (:class:`~cslrtools2.lmpipe.options.LMPipeOptions` | :class:`~cslrtools2.lmpipe.options.LMPipeOptionsPartial`):
+            collectors (
+                :obj:`list`\\[:class:`~cslrtools2.lmpipe.collector.Collector`\\[:obj:`K`\\]\\]
+                | :class:`~typing.Callable`\\[\\[\\],
+                :obj:`list`\\[:class:`~cslrtools2.lmpipe.collector.Collector`\\[:obj:`K`\\]\\]\\]
+            ):
+                Result collectors or a factory function to create them.
+                Defaults to empty list.
+            options (
+                :class:`~cslrtools2.lmpipe.options.LMPipeOptions`
+                | :class:`~cslrtools2.lmpipe.options.LMPipeOptionsPartial`
+            ):
                 Configuration options dictionary. Defaults to empty dict.
-            runner_type (:obj:`type`\\[:class:`LMPipeRunner`\\[:obj:`K`\\]\\] | :obj:`None`):
-                Custom runner class for advanced use cases. Defaults to :obj:`None`.
-            **kwargs (:class:`~typing.Unpack`\\[:class:`~cslrtools2.lmpipe.options.LMPipeOptionsPartial`\\]):
+            runner_type (
+                :obj:`type`\\[:class:`LMPipeRunner`\\[:obj:`K`\\]\\]
+                | :obj:`None`
+            ):
+                Custom runner class for advanced use cases. Defaults to
+                :obj:`None`.
+            **kwargs (
+                :class:`~typing.Unpack`\\[
+                    :class:`~cslrtools2.lmpipe.options.LMPipeOptionsPartial`
+                \\]
+            ):
                 Additional configuration parameters to override defaults.
-                Common options include ``max_cpus``, ``executor_type``, ``executor_mode``.
+                Common options include ``max_cpus``, ``executor_type``,
+                ``executor_mode``.
 
         Example:
             Basic initialization with an estimator::
@@ -139,7 +159,9 @@ class LMPipeInterface[K: str]:
 
             With collectors::
 
-                from python_cslrtools2.lmpipe.collector import CsvLandmarkMatrixSaveCollector
+                from python_cslrtools2.lmpipe.collector import (
+                    CsvLandmarkMatrixSaveCollector,
+                )
 
                 interface = LMPipeInterface(
                     MyEstimator(),
@@ -150,9 +172,7 @@ class LMPipeInterface[K: str]:
         self.estimator = estimator
         "Core estimator implementation provided by the caller."
         self.lmpipe_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options,
-            kwargs
+            self.lmpipe_options, options, kwargs
         )
         "Effective interface configuration after overrides."
         self.collectors_or_factory = collectors
@@ -165,8 +185,9 @@ class LMPipeInterface[K: str]:
             f"options={self.lmpipe_options}"
         )
 
-
-    def run(self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]):
+    def run(
+        self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]
+    ):
         """Run processing pipeline with automatic input type detection.
 
         This is the primary entry point for processing. It automatically detects
@@ -176,7 +197,8 @@ class LMPipeInterface[K: str]:
         Args:
             src (`PathLike`): Source path (file or directory) to process.
             dst (`PathLike`): Destination path for output results.
-            **options (`Unpack[LMPipeOptionsPartial]`): Optional configuration parameters to override instance defaults.
+            **options (`Unpack[LMPipeOptionsPartial]`): Optional
+                configuration parameters to override instance defaults.
 
         Returns:
             Processing results from the appropriate runner method.
@@ -204,16 +226,15 @@ class LMPipeInterface[K: str]:
                     executor_mode='parallel'
                 )
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         lmpipe_logger.info(f"Starting run: src={src}, dst={dst}, mode=auto-detect")
         lmpipe_logger.debug(f"Run options: {updated_options}")
         return self.runner_type(self, updated_options).run(runspec)
 
-    def run_batch(self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]):
+    def run_batch(
+        self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]
+    ):
         """Run batch processing on multiple files in a directory.
 
         Processes all supported files in the source directory using parallel
@@ -223,7 +244,8 @@ class LMPipeInterface[K: str]:
         Args:
             src (`PathLike`): Source directory containing files to process.
             dst (`PathLike`): Destination directory for output results.
-            **options (`Unpack[LMPipeOptionsPartial]`): Optional configuration parameters to override instance defaults.
+            **options (`Unpack[LMPipeOptionsPartial]`): Optional
+                configuration parameters to override instance defaults.
 
         Example:
             Process all files in a directory::
@@ -240,16 +262,15 @@ class LMPipeInterface[K: str]:
                     executor_type='process'
                 )
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         lmpipe_logger.info(f"Starting batch processing: src={src}, dst={dst}")
         lmpipe_logger.debug(f"Batch options: {updated_options}")
         return self.runner_type(self, updated_options).run_batch(runspec)
 
-    def run_single(self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]):
+    def run_single(
+        self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]
+    ):
         """Run processing on a single file with automatic type detection.
 
         Automatically detects if the file is a video, image directory, or single image
@@ -259,7 +280,8 @@ class LMPipeInterface[K: str]:
         Args:
             src (`PathLike`): Source file path to process.
             dst (`PathLike`): Destination path for output results.
-            **options (`Unpack[LMPipeOptionsPartial]`): Optional configuration parameters to override instance defaults.
+            **options (`Unpack[LMPipeOptionsPartial]`): Optional
+                configuration parameters to override instance defaults.
 
         Raises:
             ValueError: If file type is not supported.
@@ -278,14 +300,13 @@ class LMPipeInterface[K: str]:
                 # Automatically detects and processes image sequence directory
                 interface.run_single('frames_dir/', 'output/')
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         return self.runner_type(self, updated_options).run_single(runspec)
 
-    def run_video(self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]):
+    def run_video(
+        self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]
+    ):
         """Run processing on a video file.
 
         Processes each frame of the video file sequentially or in parallel
@@ -295,7 +316,8 @@ class LMPipeInterface[K: str]:
         Args:
             src (`PathLike`): Source video file path.
             dst (`PathLike`): Destination path for output results.
-            **options (`Unpack[LMPipeOptionsPartial]`): Optional configuration parameters to override instance defaults.
+            **options (`Unpack[LMPipeOptionsPartial]`): Optional
+                configuration parameters to override instance defaults.
 
         Example:
             Process a video file::
@@ -312,14 +334,13 @@ class LMPipeInterface[K: str]:
                     max_cpus=4
                 )
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         return self.runner_type(self, updated_options).run_video(runspec)
 
-    def run_sequence_images(self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]):
+    def run_sequence_images(
+        self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]
+    ):
         """Run processing on a directory of image sequences.
 
         Processes image files in the directory as a sequence, maintaining
@@ -329,7 +350,8 @@ class LMPipeInterface[K: str]:
         Args:
             src (`PathLike`): Source directory containing image sequence.
             dst (`PathLike`): Destination path for output results.
-            **options (`Unpack[LMPipeOptionsPartial]`): Optional configuration parameters to override instance defaults.
+            **options (`Unpack[LMPipeOptionsPartial]`): Optional
+                configuration parameters to override instance defaults.
 
         Example:
             Process an image sequence::
@@ -342,14 +364,13 @@ class LMPipeInterface[K: str]:
                 # frames/ contains: frame_0001.png, frame_0002.png, ...
                 interface.run_sequence_images('frames/', 'results/')
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         return self.runner_type(self, updated_options).run_sequence_images(runspec)
 
-    def run_single_image(self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]):
+    def run_single_image(
+        self, src: PathLike, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]
+    ):
         """Run processing on a single image file.
 
         Processes a single image file using the configured estimator. This is
@@ -359,7 +380,8 @@ class LMPipeInterface[K: str]:
         Args:
             src (`PathLike`): Source image file path.
             dst (`PathLike`): Destination path for output results.
-            **options (`Unpack[LMPipeOptionsPartial]`): Optional configuration parameters to override instance defaults.
+            **options (`Unpack[LMPipeOptionsPartial]`): Optional
+                configuration parameters to override instance defaults.
 
         Example:
             Process a single image::
@@ -369,7 +391,9 @@ class LMPipeInterface[K: str]:
 
             With specific collectors::
 
-                from python_cslrtools2.lmpipe.collector import NpyLandmarkMatrixSaveCollector
+                from python_cslrtools2.lmpipe.collector import (
+                    NpyLandmarkMatrixSaveCollector,
+                )
 
                 interface = LMPipeInterface(
                     my_estimator,
@@ -377,14 +401,13 @@ class LMPipeInterface[K: str]:
                 )
                 interface.run_single_image('test.png', 'results/')
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         return self.runner_type(self, updated_options).run_single_image(runspec)
 
-    def run_stream(self, src: int, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]):
+    def run_stream(
+        self, src: int, dst: PathLike, **options: Unpack[LMPipeOptionsPartial]
+    ):
         """Run processing on a live video stream.
 
         Processes frames from a live video stream (e.g., webcam) in real-time.
@@ -394,7 +417,8 @@ class LMPipeInterface[K: str]:
         Args:
             src (`int`): Video stream index (e.g., 0 for default camera).
             dst (`PathLike`): Destination path for output results.
-            **options (`Unpack[LMPipeOptionsPartial]`): Optional configuration parameters to override instance defaults.
+            **options (`Unpack[LMPipeOptionsPartial]`): Optional
+                configuration parameters to override instance defaults.
 
         Raises:
             ValueError: If video stream cannot be opened.
@@ -411,7 +435,9 @@ class LMPipeInterface[K: str]:
 
             With real-time display::
 
-                from python_cslrtools2.lmpipe.collector import Cv2AnnotatedFramesShowCollector
+                from python_cslrtools2.lmpipe.collector import (
+                    Cv2AnnotatedFramesShowCollector,
+                )
 
                 interface = LMPipeInterface(
                     my_estimator,
@@ -419,12 +445,9 @@ class LMPipeInterface[K: str]:
                 )
                 interface.run_stream(0, 'stream_output/')
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_index(src, dst)
         return self.runner_type(self, updated_options).run_stream(runspec)
 
 
-__all__ = ['LMPipeInterface', 'LMPipeRunner']
+__all__ = ["LMPipeInterface", "LMPipeRunner"]

@@ -15,7 +15,16 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Mapping, Callable, Concatenate, TypedDict, overload, is_typeddict, get_origin
+from typing import (
+    Any,
+    Mapping,
+    Callable,
+    Concatenate,
+    TypedDict,
+    overload,
+    is_typeddict,
+    get_origin,
+)
 from typing_extensions import TypeIs
 from dataclasses import dataclass
 from functools import update_wrapper, cache
@@ -23,12 +32,9 @@ from itertools import product
 
 import numpy as np
 
-from ..typings import (
-    ArrayLikeFloat, NDArrayFloat,
-    ArrayLikeStr, NDArrayStr,
-    MatLike
-)
+from ..typings import ArrayLikeFloat, NDArrayFloat, ArrayLikeStr, NDArrayStr, MatLike
 from .options import LMPipeOptions, DEFAULT_LMPIPE_OPTIONS
+
 
 @dataclass
 class ProcessResult[K: str]:
@@ -39,12 +45,22 @@ class ProcessResult[K: str]:
 
     Attributes:
         frame_id (:obj:`int`): Sequential frame identifier.
-        headers (:class:`~typing.Mapping`\\[:obj:`K`, :class:`numpy.typing.NDArray`\\[:obj:`str`\\]\\]):
+        headers (
+            :class:`~typing.Mapping`\\[
+                :obj:`K`, :class:`numpy.typing.NDArray`\\[:obj:`str`\\]
+            \\]
+        ):
             Mapping from landmark keys to their string headers.
-        landmarks (:class:`~typing.Mapping`\\[:obj:`K`, :class:`numpy.typing.NDArray`\\[:obj:`float`\\]\\]):
+        landmarks (
+            :class:`~typing.Mapping`\\[
+                :obj:`K`, :class:`numpy.typing.NDArray`\\[:obj:`float`\\]
+            \\]
+        ):
             Mapping from landmark keys to their numeric coordinate arrays.
-        annotated_frame (:class:`MatLike`): Frame with visualization annotations.
+        annotated_frame (:class:`MatLike`): Frame with visualization
+            annotations.
     """
+
     frame_id: int
     headers: Mapping[K, NDArrayStr]
     landmarks: Mapping[K, NDArrayFloat]
@@ -55,33 +71,38 @@ class ProcessResult[K: str]:
 
 type EstimatorWithKey = Estimator[Any]
 
-class _DecoratorWithOptions[E: EstimatorWithKey, M: Mapping[str, object], **Pi, Ri, **Po, Ro]:
 
+class _DecoratorWithOptions[
+    E: EstimatorWithKey,
+    M: Mapping[str, object],
+    **Pi,
+    Ri,
+    **Po,
+    Ro,
+]:
     def __init__(
         self,
         decorator: Callable[
-            [Callable[Concatenate[E, Pi], Ri], M],
-            Callable[Concatenate[E, Po], Ro]
+            [Callable[Concatenate[E, Pi], Ri], M], Callable[Concatenate[E, Po], Ro]
         ],
-        options: M
-        ):
+        options: M,
+    ):
         self._decorator = decorator
         self._options = options
 
     def __call__(
-        self,
-        func: Callable[Concatenate[E, Pi], Ri]
-        ) -> Callable[Concatenate[E, Po], Ro]:
-
+        self, func: Callable[Concatenate[E, Pi], Ri]
+    ) -> Callable[Concatenate[E, Po], Ro]:
         return self._decorator(func, self._options)
+
 
 class KeyOptions[K: str](TypedDict, total=False):
     key: K
 
+
 def _typeddict_typeis[T: Mapping[str, object]](
     obj: object, type_: type[T]
-    ) -> TypeIs[T]:
-
+) -> TypeIs[T]:
     origin = type_
     while (new_origin := get_origin(origin)) is not None:
         origin = new_origin
@@ -89,13 +110,15 @@ def _typeddict_typeis[T: Mapping[str, object]](
     assert is_typeddict(origin), f"`{origin}` is not a TypedDict"
     return isinstance(obj, Mapping)
 
+
 def _get_key_from_options_or_estimator[K: str](
     estimater: Estimator[K],
     options: KeyOptions[K] | None,
-    ) -> K:
-    key_from_options: K | None = None if options is None else options.get('key')
+) -> K:
+    key_from_options: K | None = None if options is None else options.get("key")
     key_from_estimator: K = estimater.configure_estimator_name()
     return key_from_options or key_from_estimator
+
 
 ### shape decorator ###
 
@@ -108,13 +131,13 @@ def _get_key_from_options_or_estimator[K: str](
 # override1: with key options
 # override2: without key options
 
+
 @overload
 def shape[E: EstimatorWithKey, K: str](
-    func: Callable[
-        [E], Mapping[K, tuple[int, int]] | tuple[int, int]
-    ],
-    options: KeyOptions[K] | None = None, /
-    ) -> Callable[[E], Mapping[K, tuple[int, int]]]:
+    func: Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]],
+    options: KeyOptions[K] | None = None,
+    /,
+) -> Callable[[E], Mapping[K, tuple[int, int]]]:
     """Decorator overload definition for shape without key options.
 
     Wraps the :meth:`shape` method of :class:`Estimator` class
@@ -134,15 +157,14 @@ def shape[E: EstimatorWithKey, K: str](
             Decorated method.
     """
 
+
 @overload
 def shape[E: EstimatorWithKey, K: str](
     options: KeyOptions[K], /
-    ) -> Callable[
-        [Callable[
-            [E], Mapping[K, tuple[int, int]] | tuple[int, int]
-        ]],
-        Callable[[E], Mapping[K, tuple[int, int]]]
-    ]:
+) -> Callable[
+    [Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]]],
+    Callable[[E], Mapping[K, tuple[int, int]]],
+]:
     """Decorator overload definition for shape with key options.
 
     Wraps the :meth:`shape` method of :class:`Estimator` class
@@ -156,46 +178,45 @@ def shape[E: EstimatorWithKey, K: str](
             TypedDict containing key options.
 
     Returns:
-        :class:`Callable[[Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]]], Callable[[E], Mapping[K, tuple[int, int]]]]`:
+        :class:`Callable[[Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]]],
+        Callable[[E], Mapping[K, tuple[int, int]]]]`:
             Decorated method.
     """
+
 
 # implementation
 def shape[E: EstimatorWithKey, K: str](
     arg1: (
-        Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]]
-        | KeyOptions[K]
+        Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]] | KeyOptions[K]
     ),
-    arg2: KeyOptions[K] | None = None, /
-    ) -> (
-        Callable[[E], Mapping[K, tuple[int, int]]] |
-        Callable[
-            [Callable[
-                [E], Mapping[K, tuple[int, int]] | tuple[int, int]
-            ]],
-            Callable[[E], Mapping[K, tuple[int, int]]]
-        ]
-    ):
-
+    arg2: KeyOptions[K] | None = None,
+    /,
+) -> (
+    Callable[[E], Mapping[K, tuple[int, int]]]
+    | Callable[
+        [Callable[[E], Mapping[K, tuple[int, int]] | tuple[int, int]]],
+        Callable[[E], Mapping[K, tuple[int, int]]],
+    ]
+):
     if _typeddict_typeis(arg1, KeyOptions[K]):
         return _DecoratorWithOptions[
-            E, KeyOptions[K],
-            [], Mapping[K, tuple[int, int]] | tuple[int, int],
-            [], Mapping[K, tuple[int, int]]
+            E,
+            KeyOptions[K],
+            [],
+            Mapping[K, tuple[int, int]] | tuple[int, int],
+            [],
+            Mapping[K, tuple[int, int]],
         ](shape, arg1)
 
     if not callable(arg1):
-        raise TypeError('First argument must be a callable or KeyOptions TypedDict.')
+        raise TypeError("First argument must be a callable or KeyOptions TypedDict.")
 
     def wrapper(self: E, /) -> Mapping[K, tuple[int, int]]:
-
         result = arg1(self)
 
         converted: Mapping[K, tuple[int, int]]
         if isinstance(result, Mapping):
-            converted = {
-                k: v for k, v in result.items()
-            }
+            converted = {k: v for k, v in result.items()}
         else:
             key = _get_key_from_options_or_estimator(self, arg2)
             converted = {key: result}
@@ -204,6 +225,7 @@ def shape[E: EstimatorWithKey, K: str](
 
     update_wrapper(wrapper, arg1)
     return wrapper
+
 
 ### headers decorator ###
 
@@ -217,13 +239,13 @@ def shape[E: EstimatorWithKey, K: str](
 # override1: with key options
 # override2: without key options
 
+
 @overload
 def headers[E: EstimatorWithKey, K: str](
-    func: Callable[
-        [E], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None
-    ],
-    options: KeyOptions[K] | None = None, /
-    ) -> Callable[[E], Mapping[K, NDArrayStr]]:
+    func: Callable[[E], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None],
+    options: KeyOptions[K] | None = None,
+    /,
+) -> Callable[[E], Mapping[K, NDArrayStr]]:
     """Decorator overload definition for headers without key options.
 
     Wraps the :meth:`headers` method of :class:`Estimator` class
@@ -243,15 +265,14 @@ def headers[E: EstimatorWithKey, K: str](
             Decorated method.
     """
 
+
 @overload
 def headers[E: EstimatorWithKey, K: str](
     options: KeyOptions[K], /
-    ) -> Callable[
-        [Callable[
-            [E], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None
-        ]],
-        Callable[[E], Mapping[K, NDArrayStr]]
-    ]:
+) -> Callable[
+    [Callable[[E], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None]],
+    Callable[[E], Mapping[K, NDArrayStr]],
+]:
     """Decorator overload definition for headers with key options.
 
     Wraps the :meth:`headers` method of :class:`Estimator` class
@@ -265,36 +286,41 @@ def headers[E: EstimatorWithKey, K: str](
             TypedDict containing key options.
 
     Returns:
-        :class:`Callable[[Callable[[E], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None]], Callable[[E], Mapping[K, NDArrayStr]]]`:
-            Decorator that converts the return type of the decorated method.
+        :class:`Callable[[Callable[[E], Mapping[K, ArrayLikeStr | None]
+        | ArrayLikeStr | None]], Callable[[E], Mapping[K, NDArrayStr]]]`:
+            Decorator that converts the return type of the decorated
+            method.
     """
+
 
 def headers[E: EstimatorWithKey, K: str](
     arg1: (
         Callable[[E], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None]
         | KeyOptions[K]
     ),
-    arg2: KeyOptions[K] | None = None, /
-    ) -> (
-        Callable[[E], Mapping[K, NDArrayStr]] |
-        Callable[
-            [Callable[[E], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None]],
-            Callable[[E], Mapping[K, NDArrayStr]]
-        ]
-    ):
-
+    arg2: KeyOptions[K] | None = None,
+    /,
+) -> (
+    Callable[[E], Mapping[K, NDArrayStr]]
+    | Callable[
+        [Callable[[E], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None]],
+        Callable[[E], Mapping[K, NDArrayStr]],
+    ]
+):
     if _typeddict_typeis(arg1, KeyOptions[K]):
         return _DecoratorWithOptions[
-            E, KeyOptions[K],
-            [], Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None,
-            [], Mapping[K, NDArrayStr]
+            E,
+            KeyOptions[K],
+            [],
+            Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None,
+            [],
+            Mapping[K, NDArrayStr],
         ](headers, arg1)
 
     if not callable(arg1):
-        raise TypeError('First argument must be a callable or KeyOptions TypedDict.')
+        raise TypeError("First argument must be a callable or KeyOptions TypedDict.")
 
     def wrapper(self: E, /) -> Mapping[K, NDArrayStr]:
-
         result = arg1(self)
 
         mapping: Mapping[K, ArrayLikeStr | None]
@@ -306,19 +332,23 @@ def headers[E: EstimatorWithKey, K: str](
 
         return {
             k: (
-                np.asarray([
-                    str(coord) for coord in product(
-                        range(self.shape[k][0]),
-                        range(self.shape[k][1])
-                    )
-                ]).reshape(self.shape[k])
-                if v is None else np.asarray(v)
+                np.asarray(
+                    [
+                        str(coord)
+                        for coord in product(
+                            range(self.shape[k][0]), range(self.shape[k][1])
+                        )
+                    ]
+                ).reshape(self.shape[k])
+                if v is None
+                else np.asarray(v)
             )
             for k, v in mapping.items()
         }
 
     update_wrapper(wrapper, arg1)
     return wrapper
+
 
 ### estimate decorator ###
 
@@ -332,14 +362,15 @@ def headers[E: EstimatorWithKey, K: str](
 # override1: with key options
 # override2: without key options
 
+
 @overload
 def estimate[E: EstimatorWithKey, K: str](
     func: Callable[
-        [E, MatLike, int],
-        Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None
+        [E, MatLike, int], Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None
     ],
-    options: KeyOptions[K] | None = None, /
-    ) -> Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]:
+    options: KeyOptions[K] | None = None,
+    /,
+) -> Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]:
     """Decorator overload definition for estimate without key options.
 
     Wraps the :meth:`estimate` method of :class:`Estimator` class
@@ -349,7 +380,10 @@ def estimate[E: EstimatorWithKey, K: str](
     item type: :class:`ArrayLikeFloat` -> :class:`NDArrayFloat`
 
     Args:
-        func (`Callable[[E, MatLike, int], Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None]`):
+        func (
+            `Callable[[E, MatLike, int], Mapping[K, ArrayLikeFloat | None]
+            | ArrayLikeFloat | None]`
+        ):
             Method that performs estimation processing.
         options (`KeyOptions[K] | None`, optional):
             TypedDict containing key options. Defaults to None.
@@ -360,16 +394,18 @@ def estimate[E: EstimatorWithKey, K: str](
 
     """
 
+
 @overload
 def estimate[E: EstimatorWithKey, K: str](
     options: KeyOptions[K], /
-    ) -> Callable[
-        [Callable[
-            [E, MatLike, int],
-            Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None
-        ]],
-        Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]
-    ]:
+) -> Callable[
+    [
+        Callable[
+            [E, MatLike, int], Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None
+        ]
+    ],
+    Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]],
+]:
     """Decorator overload definition for estimate with key options.
 
     Wraps the :meth:`estimate` method of :class:`Estimator` class
@@ -383,52 +419,54 @@ def estimate[E: EstimatorWithKey, K: str](
             TypedDict containing key options.
 
     Returns:
-        :class:`Callable[[Callable[[E, MatLike, int], Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None]], Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]]`:
+        :class:`Callable[[Callable[[E, MatLike, int],
+        Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None]],
+        Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]]`:
             Decorated method.
     """
+
 
 # implementation
 def estimate[E: EstimatorWithKey, K: str](
     arg1: (
         Callable[
-            [E, MatLike, int],
-            Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None
+            [E, MatLike, int], Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None
         ]
         | KeyOptions[K]
     ),
-    arg2: KeyOptions[K] | None = None, /
-    ) -> (
-        Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]] |
-        Callable[
-            [Callable[
+    arg2: KeyOptions[K] | None = None,
+    /,
+) -> (
+    Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]
+    | Callable[
+        [
+            Callable[
                 [E, MatLike, int],
-                Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None
-            ]],
-            Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]]
-        ]
-    ):
-
+                Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None,
+            ]
+        ],
+        Callable[[E, MatLike | None, int], Mapping[K, NDArrayFloat]],
+    ]
+):
     if _typeddict_typeis(arg1, KeyOptions[K]):
         return _DecoratorWithOptions[
-            E, KeyOptions[K],
-            [MatLike, int], Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None,
-            [MatLike | None, int], Mapping[K, NDArrayFloat]
+            E,
+            KeyOptions[K],
+            [MatLike, int],
+            Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None,
+            [MatLike | None, int],
+            Mapping[K, NDArrayFloat],
         ](estimate, arg1)
 
     if not callable(arg1):
-        raise TypeError('First argument must be a callable or KeyOptions TypedDict.')
+        raise TypeError("First argument must be a callable or KeyOptions TypedDict.")
 
     def wrapper(
-        self: E,
-        frame_src: MatLike | None,
-        frame_idx: int
-        ) -> Mapping[K, NDArrayFloat]:
-
+        self: E, frame_src: MatLike | None, frame_idx: int
+    ) -> Mapping[K, NDArrayFloat]:
         if frame_src is None:
             return {
-                klm: np.asarray(
-                    self.configure_missing_array(klm)
-                )
+                klm: np.asarray(self.configure_missing_array(klm))
                 for klm in self.shape.keys()
             }
 
@@ -443,15 +481,16 @@ def estimate[E: EstimatorWithKey, K: str](
 
         return {
             k: (
-                np.asarray(
-                    self.configure_missing_array(k)
-                ) if v is None else np.asarray(v)
+                np.asarray(self.configure_missing_array(k))
+                if v is None
+                else np.asarray(v)
             )
             for k, v in mapping.items()
         }
 
     update_wrapper(wrapper, arg1)
     return wrapper
+
 
 ### annotate decorator ###
 
@@ -467,18 +506,13 @@ def estimate[E: EstimatorWithKey, K: str](
 # override1: without key options
 # override2: with key options
 
+
 @overload
 def annotate[E: EstimatorWithKey, K: str](
-    func: Callable[
-        [E, MatLike, int, Mapping[K, NDArrayFloat]],
-        MatLike | None
-    ],
-    options: KeyOptions[K] | None = None, /
-    ) -> Callable[
-        [E, MatLike, int, Mapping[K, NDArrayFloat]],
-        MatLike
-    ]:
-
+    func: Callable[[E, MatLike, int, Mapping[K, NDArrayFloat]], MatLike | None],
+    options: KeyOptions[K] | None = None,
+    /,
+) -> Callable[[E, MatLike, int, Mapping[K, NDArrayFloat]], MatLike]:
     """Decorator overload definition for annotate without key options.
 
     Wraps the :meth:`annotate` method of :class:`Estimator` class.
@@ -486,7 +520,8 @@ def annotate[E: EstimatorWithKey, K: str](
 
     Types:
         InternalMethod:
-            (:class:`E@annotate`, :class:`MatLike`, :class:`int`, :class:`Mapping[K, NDArrayFloat]`)
+            (:class:`E@annotate`, :class:`MatLike`, :class:`int`,
+            :class:`Mapping[K, NDArrayFloat]`)
             -> :class:`MatLike` | :code:`None`
 
     Args:
@@ -496,24 +531,20 @@ def annotate[E: EstimatorWithKey, K: str](
             TypedDict containing key options
 
     Returns:
-        :code:`((self, frame_src: MatLike, frame_idx: int, landmarks: Mapping[K, NDArrayFloat]) -> MatLike)`:
+        :code:`((self, frame_src: MatLike, frame_idx: int,
+        landmarks: Mapping[K, NDArrayFloat]) -> MatLike)`:
             Decorated method
 
     """
 
+
 @overload
 def annotate[E: EstimatorWithKey, K: str](
     options: KeyOptions[K], /
-    ) -> Callable[
-        [Callable[
-            [E, MatLike, int, Mapping[K, NDArrayFloat]],
-            MatLike | None
-        ]],
-        Callable[
-            [E, MatLike, int, Mapping[K, NDArrayFloat]],
-            MatLike
-        ]
-    ]:
+) -> Callable[
+    [Callable[[E, MatLike, int, Mapping[K, NDArrayFloat]], MatLike | None]],
+    Callable[[E, MatLike, int, Mapping[K, NDArrayFloat]], MatLike],
+]:
     """Decorator overload definition for annotate with key options.
 
     Wraps the :meth:`annotate` method of :class:`Estimator` class.
@@ -523,55 +554,42 @@ def annotate[E: EstimatorWithKey, K: str](
         options (`KeyOptions[K]`):
             TypedDict containing key options
     Returns:
-        :code:`((self, frame_src: MatLike, frame_idx: int, landmarks: Mapping[K, NDArrayFloat]) -> MatLike)`:
+        :code:`((self, frame_src: MatLike, frame_idx: int,
+        landmarks: Mapping[K, NDArrayFloat]) -> MatLike)`:
             Decorated method
     """
 
+
 def annotate[E: EstimatorWithKey, K: str](
     arg1: (
-        Callable[
-            [E, MatLike, int, Mapping[K, NDArrayFloat]],
-            MatLike | None
-        ]
+        Callable[[E, MatLike, int, Mapping[K, NDArrayFloat]], MatLike | None]
         | KeyOptions[K]
     ),
-    arg2: KeyOptions[K] | None = None, /
-    ) -> (
-        Callable[
-            [E, MatLike, int, Mapping[K, NDArrayFloat]],
-            MatLike
-        ] |
-        Callable[
-            [Callable[
-                [E, MatLike, int, Mapping[K, NDArrayFloat]],
-                MatLike | None
-            ]],
-            Callable[
-                [E, MatLike, int, Mapping[K, NDArrayFloat]],
-                MatLike
-            ]
-        ]
-    ):
-
+    arg2: KeyOptions[K] | None = None,
+    /,
+) -> (
+    Callable[[E, MatLike, int, Mapping[K, NDArrayFloat]], MatLike]
+    | Callable[
+        [Callable[[E, MatLike, int, Mapping[K, NDArrayFloat]], MatLike | None]],
+        Callable[[E, MatLike, int, Mapping[K, NDArrayFloat]], MatLike],
+    ]
+):
     if _typeddict_typeis(arg1, KeyOptions[K]):
         return _DecoratorWithOptions[
-            E, KeyOptions[K],
+            E,
+            KeyOptions[K],
             [MatLike, int, Mapping[K, NDArrayFloat]],
             MatLike | None,
             [MatLike, int, Mapping[K, NDArrayFloat]],
-            MatLike
+            MatLike,
         ](annotate, arg1)
 
     if not callable(arg1):
-        raise TypeError('First argument must be a callable or KeyOptions TypedDict.')
+        raise TypeError("First argument must be a callable or KeyOptions TypedDict.")
 
     def wrapper(
-        self: E,
-        frame_src: MatLike,
-        frame_idx: int,
-        landmarks: Mapping[K, NDArrayFloat]
-        ) -> MatLike:
-
+        self: E, frame_src: MatLike, frame_idx: int, landmarks: Mapping[K, NDArrayFloat]
+    ) -> MatLike:
         result = arg1(self, frame_src, frame_idx, landmarks)
 
         if result is None:
@@ -584,6 +602,7 @@ def annotate[E: EstimatorWithKey, K: str](
 
 
 ########################## Estimator Class Definition ##########################
+
 
 class Estimator[K: str](ABC):
     """Abstract base class for landmark estimation models.
@@ -606,9 +625,7 @@ class Estimator[K: str](ABC):
     """
 
     missing_value: float = np.nan
-    'Default missing value used in missing arrays.'
-
-
+    "Default missing value used in missing arrays."
 
     ### Core (Abstract) Methods ###
 
@@ -624,7 +641,9 @@ class Estimator[K: str](ABC):
         and ``C`` is the coordinate dimension (e.g., ``2`` for ``(x, y)`` coordinates).
 
         Returns:
-            :class:`~typing.Mapping`\\[:obj:`K`, :obj:`tuple`\\[:obj:`int`, :obj:`int`\\]\\]:
+            :class:`~typing.Mapping`\\[
+                :obj:`K`, :obj:`tuple`\\[:obj:`int`, :obj:`int`\\]
+            \\]:
                 Shape of the estimation result array mapped by key :obj:`K`.
 
         Note:
@@ -639,7 +658,7 @@ class Estimator[K: str](ABC):
     @estimate
     def estimate(
         self, frame_src: MatLike, frame_idx: int
-        ) -> Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None:
+    ) -> Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None:
         """Abstract method that estimates landmarks from frames.
 
         Args:
@@ -647,15 +666,20 @@ class Estimator[K: str](ABC):
             frame_idx (:obj:`int`): Index of the current frame.
 
         Returns:
-            :class:`~typing.Mapping`\\[:obj:`K`, :class:`ArrayLikeFloat` | :obj:`None`\\]:
+            :class:`~typing.Mapping`\\[
+                :obj:`K`, :class:`ArrayLikeFloat` | :obj:`None`
+            \\]:
                 Estimated landmarks mapped by key :obj:`K`.
 
         Note:
             Override Guidelines:
 
-            - If the estimator has no output or wants to use a dummy array, return :obj:`None`.
-            - If the estimator has a single output, return an :class:`ArrayLikeFloat`.
-            - If the estimator has multiple outputs, return a mapping from each
+            - If the estimator has no output or wants to use a dummy array,
+              return :obj:`None`.
+            - If the estimator has a single output, return an
+              :class:`ArrayLikeFloat`.
+            - If the estimator has multiple outputs, return a mapping from
+              each
               key :obj:`K` to its corresponding :class:`ArrayLikeFloat`.
         """
 
@@ -666,27 +690,27 @@ class Estimator[K: str](ABC):
     @cache
     # overrideable method
     def headers(self) -> Mapping[K, ArrayLikeStr] | ArrayLikeStr | None:
-        """Returns array of header names corresponding to each element of estimation result.
+        """Returns array of header names corresponding to each element of
+        estimation result.
 
         Returns:
             :class:`Mapping[K, ArrayLikeStr]`:
                 Array of header names matching the shape of estimation results
 
         Override Guidelines:
-            - If the estimator has no single output or want to use default headers, return `None`.
+            - If the estimator has no single output or want to use default headers,
+              return `None`.
             - If the estimator has a single output, return an :class:`ArrayLikeStr`.
-            - If the estimator has multiple outputs, return a mapping from each key K to its corresponding :class:`ArrayLikeStr`.
+            - If the estimator has multiple outputs, return a mapping from each key K
+              to its corresponding :class:`ArrayLikeStr`.
         """
         return None
 
     @annotate
     # overrideable method
     def annotate(
-        self,
-        frame_src: MatLike,
-        frame_idx: int,
-        landmarks: Mapping[K, NDArrayFloat]
-        ) -> MatLike | None:
+        self, frame_src: MatLike, frame_idx: int, landmarks: Mapping[K, NDArrayFloat]
+    ) -> MatLike | None:
         """Returns annotated frame with landmarks drawn on it.
 
         Args:
@@ -716,7 +740,8 @@ class Estimator[K: str](ABC):
         """Setup method called before processing begins.
 
         Override Guidelines:
-            - Override this method to perform any necessary setup or initialization before processing starts.
+            - Override this method to perform any necessary setup or
+              initialization before processing starts.
         """
         pass
 
@@ -731,7 +756,8 @@ class Estimator[K: str](ABC):
                 The key used to identify the estimator.
 
         Override Guidelines:
-            - This method must be overridden in subclasses to provide the appropriate key K.
+            - This method must be overridden in subclasses to provide the
+              appropriate key K.
         """
         ...
 
