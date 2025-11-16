@@ -20,7 +20,7 @@ from typing import Mapping
 
 import numpy as np
 
-from ....typings import NDArrayFloat
+from ....typings import NDArrayFloat, NDArrayStr
 from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 
@@ -51,8 +51,13 @@ class NpyLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
         self._base_dir = self._prepare_landmark_dir(path)
         self._buffer = {}
 
-    def _append_result(self, result: Mapping[K, NDArrayFloat]):
-        for raw_key, value in result.items():
+    def _append_result(
+        self,
+        frame_id: int,
+        headers: Mapping[K, NDArrayStr],
+        landmarks: Mapping[K, NDArrayFloat],
+    ):
+        for raw_key, value in landmarks.items():
             key = str(raw_key)
             bucket = self._buffer.setdefault(key, [])
             bucket.append(np.asarray(value))
@@ -70,9 +75,7 @@ class NpyLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
                     for a in arrays:
                         s = shapes.get(a.shape, 0)
                         shapes[a.shape] = s + 1
-                    raise ValueError(
-                        f"with shape {shapes} at key '{key}'"
-                    ) from e
+                    raise ValueError(f"with shape {shapes} at key '{key}'") from e
             else:
                 np.save(file_path, np.empty((0,), dtype=float))
         self._base_dir = None
@@ -86,10 +89,14 @@ def npy_lmsc_creator[K: str](key_type: type[K]) -> NpyLandmarkMatrixSaveCollecto
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`NpyLandmarkMatrixSaveCollector[K]`: Per-key NumPy .npy landmark matrix saver.
+        :class:`NpyLandmarkMatrixSaveCollector[K]`: Per-key NumPy .npy landmark
+            matrix saver.
     """
     return NpyLandmarkMatrixSaveCollector[K]()
 
-lmsc_aliases.update({
-    ".npy": npy_lmsc_creator,
-})
+
+lmsc_aliases.update(
+    {
+        ".npy": npy_lmsc_creator,
+    }
+)

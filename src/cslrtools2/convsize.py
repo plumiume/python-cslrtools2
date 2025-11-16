@@ -16,21 +16,15 @@
 
 from __future__ import annotations
 
-from typing import (
-    TypeVar, Generic, overload,
-    Sequence
-)
+from typing import TypeVar, Generic, overload, Sequence
 import torch
 import torch.nn as nn
 from torch import Tensor, Size
 
+
 def conv_size(
-    size: Tensor,
-    kernel_size: Tensor,
-    stride: Tensor,
-    padding: Tensor,
-    dilation: Tensor
-    ) -> Tensor:
+    size: Tensor, kernel_size: Tensor, stride: Tensor, padding: Tensor, dilation: Tensor
+) -> Tensor:
     """Calculate the output size of a convolution operation.
 
     Computes the spatial dimensions of the output feature map for a
@@ -54,7 +48,10 @@ def conv_size(
         by :class:`torch.nn.Conv2d` and :class:`torch.nn.Conv3d`:
 
         .. math::
-            \\text{output} = \\left\\lfloor \\frac{\\text{input} + 2 \\times \\text{padding} - \\text{dilation} \\times (\\text{kernel} - 1) - 1}{\\text{stride}} \\right\\rfloor + 1
+            \\text{output} = \\left\\lfloor \\frac{\\text{input}
+            + 2 \\times \\text{padding} - \\text{dilation}
+            \\times (\\text{kernel} - 1) - 1}{\\text{stride}}
+            \\right\\rfloor + 1
 
     Example:
         Calculate output size for a 2D convolution::
@@ -81,10 +78,13 @@ def conv_size(
             torch.Size([1, 64, 112, 112])
     """
 
-    return torch.floor_divide(
-        size + 2 * padding - dilation * (kernel_size - 1) - 1,
-        stride
-    ) + 1
+    return (
+        torch.floor_divide(
+            size + 2 * padding - dilation * (kernel_size - 1) - 1, stride
+        )
+        + 1
+    )
+
 
 def conv_transpose_size(
     size: Tensor,
@@ -92,8 +92,8 @@ def conv_transpose_size(
     stride: Tensor,
     padding: Tensor,
     output_padding: Tensor,
-    dilation: Tensor
-    ) -> Tensor:
+    dilation: Tensor,
+) -> Tensor:
     """Calculate the output size of a transposed convolution operation.
 
     Computes the spatial dimensions of the output feature map for a
@@ -119,7 +119,9 @@ def conv_transpose_size(
         used by :class:`torch.nn.ConvTranspose2d` and :class:`torch.nn.ConvTranspose3d`:
 
         .. math::
-            \\text{output} = (\\text{input} - 1) \\times \\text{stride} - 2 \\times \\text{padding} + \\text{dilation} \\times (\\text{kernel} - 1) + \\text{output\\_padding} + 1
+            \\text{output} = (\\text{input} - 1) \\times \\text{stride}
+            - 2 \\times \\text{padding} + \\text{dilation}
+            \\times (\\text{kernel} - 1) + \\text{output\\_padding} + 1
 
     Example:
         Calculate output size for a 2D transposed convolution::
@@ -154,11 +156,17 @@ def conv_transpose_size(
         (size - 1) * stride
         - 2 * padding
         + dilation * (kernel_size - 1)
-        + output_padding + 1
+        + output_padding
+        + 1
     )
 
-_ConvNd = TypeVar('_ConvNd', bound=nn.Conv1d | nn.Conv2d | nn.Conv3d)
-_ConvTransposeNd = TypeVar('_ConvTransposeNd', bound=nn.ConvTranspose1d | nn.ConvTranspose2d | nn.ConvTranspose3d)
+
+_ConvNd = TypeVar("_ConvNd", bound=nn.Conv1d | nn.Conv2d | nn.Conv3d)
+_ConvTransposeNd = TypeVar(
+    "_ConvTransposeNd",
+    bound=nn.ConvTranspose1d | nn.ConvTranspose2d | nn.ConvTranspose3d,
+)
+
 
 class ConvSize(nn.Module, Generic[_ConvNd]):
     """Calculate the output size of a convolutional layer.
@@ -192,34 +200,33 @@ class ConvSize(nn.Module, Generic[_ConvNd]):
     """
 
     def __init__(self, conv: _ConvNd):
-        super().__init__() # pyright: ignore[reportUnknownMemberType]
-        self.kernel_size = nn.Parameter(torch.tensor(conv.kernel_size), requires_grad=False)
+        super().__init__()  # pyright: ignore[reportUnknownMemberType]
+        self.kernel_size = nn.Parameter(
+            torch.tensor(conv.kernel_size), requires_grad=False
+        )
         self.stride = nn.Parameter(torch.tensor(conv.stride), requires_grad=False)
         self.padding = nn.Parameter(torch.tensor(conv.padding), requires_grad=False)
         self.dilation = nn.Parameter(torch.tensor(conv.dilation), requires_grad=False)
 
     @overload
     def forward(
-        self,
-        size: Tensor,
-        dim: int | Sequence[int] | slice = slice(None)
-        ) -> Tensor: ...
+        self, size: Tensor, dim: int | Sequence[int] | slice = slice(None)
+    ) -> Tensor: ...
 
     @overload
     def forward(
-        self,
-        shape: Size,
-        dim: int | Sequence[int] | slice = slice(None)
-        ) -> Size: ...
+        self, shape: Size, dim: int | Sequence[int] | slice = slice(None)
+    ) -> Size: ...
 
-    def forward( # pyright: ignore[reportInconsistentOverload]
-        # Reason: Cannot express "arg is Tensor XOR arg is Size" constraint in Python type system.
-        # Overloads guarantee correct usage, runtime isinstance checks handle validation.
+    def forward(  # pyright: ignore[reportInconsistentOverload]
+        # Reason: Cannot express "arg is Tensor XOR arg is Size"
+        # constraint in Python type system.
+        # Overloads guarantee correct usage, runtime isinstance checks
+        # handle validation.
         self,
         arg: Tensor | Size,
-        dim: int | Sequence[int] | slice = slice(None)
-        ) -> Tensor | Size:
-
+        dim: int | Sequence[int] | slice = slice(None),
+    ) -> Tensor | Size:
         if isinstance(arg, Tensor):
             return self._forward_tensor(arg, dim)
         elif isinstance(arg, Size):
@@ -228,23 +235,17 @@ class ConvSize(nn.Module, Generic[_ConvNd]):
             raise TypeError(f"Expected Tensor or Size, got {type(arg).__name__}")
 
     def _forward_tensor(
-        self,
-        size: Tensor,
-        dim: int | Sequence[int] | slice = slice(None)
-        ) -> Tensor:
+        self, size: Tensor, dim: int | Sequence[int] | slice = slice(None)
+    ) -> Tensor:
         return conv_size(
             size,
             self.kernel_size[dim],
             self.stride[dim],
             self.padding[dim],
-            self.dilation[dim]
+            self.dilation[dim],
         )
 
-    def _forward_size(
-        self,
-        shape: Size
-        ) -> Size:
-
+    def _forward_size(self, shape: Size) -> Size:
         change_ndim = len(self.kernel_size)
         change_shape = shape[-change_ndim:]
         unchange_shape = shape[:-change_ndim]
@@ -255,10 +256,11 @@ class ConvSize(nn.Module, Generic[_ConvNd]):
                 self.kernel_size,
                 self.stride,
                 self.padding,
-                self.dilation
+                self.dilation,
             ).tolist()
         )
         return Size(unchange_shape + changed_shape)
+
 
 class ConvTransposeSize(nn.Module, Generic[_ConvTransposeNd]):
     """Calculate the output size of a transposed convolutional layer.
@@ -297,35 +299,36 @@ class ConvTransposeSize(nn.Module, Generic[_ConvTransposeNd]):
     """
 
     def __init__(self, conv: _ConvTransposeNd):
-        super().__init__() # pyright: ignore[reportUnknownMemberType]
-        self.kernel_size = nn.Parameter(torch.tensor(conv.kernel_size), requires_grad=False)
+        super().__init__()  # pyright: ignore[reportUnknownMemberType]
+        self.kernel_size = nn.Parameter(
+            torch.tensor(conv.kernel_size), requires_grad=False
+        )
         self.stride = nn.Parameter(torch.tensor(conv.stride), requires_grad=False)
         self.padding = nn.Parameter(torch.tensor(conv.padding), requires_grad=False)
-        self.output_padding = nn.Parameter(torch.tensor(conv.output_padding), requires_grad=False)
+        self.output_padding = nn.Parameter(
+            torch.tensor(conv.output_padding), requires_grad=False
+        )
         self.dilation = nn.Parameter(torch.tensor(conv.dilation), requires_grad=False)
 
     @overload
     def forward(
-        self,
-        size: Tensor,
-        dim: int | Sequence[int] | slice = slice(None)
-        ) -> Tensor: ...
+        self, size: Tensor, dim: int | Sequence[int] | slice = slice(None)
+    ) -> Tensor: ...
 
     @overload
     def forward(
-        self,
-        shape: Size,
-        dim: int | Sequence[int] | slice = slice(None)
-        ) -> Size: ...
+        self, shape: Size, dim: int | Sequence[int] | slice = slice(None)
+    ) -> Size: ...
 
-    def forward( # pyright: ignore[reportInconsistentOverload]
-        # Reason: Cannot express "arg is Tensor XOR arg is Size" constraint in Python type system.
-        # Overloads guarantee correct usage, runtime isinstance checks handle validation.
+    def forward(  # pyright: ignore[reportInconsistentOverload]
+        # Reason: Cannot express "arg is Tensor XOR arg is Size"
+        # constraint in Python type system.
+        # Overloads guarantee correct usage, runtime isinstance checks
+        # handle validation.
         self,
         arg: Tensor | Size,
-        dim: int | Sequence[int] | slice = slice(None)
-        ) -> Tensor | Size:
-
+        dim: int | Sequence[int] | slice = slice(None),
+    ) -> Tensor | Size:
         if isinstance(arg, Tensor):
             return self._forward_tensor(arg, dim)
         elif isinstance(arg, Size):
@@ -334,24 +337,18 @@ class ConvTransposeSize(nn.Module, Generic[_ConvTransposeNd]):
             raise TypeError(f"Expected Tensor or Size, got {type(arg).__name__}")
 
     def _forward_tensor(
-        self,
-        size: Tensor,
-        dim: int | Sequence[int] | slice = slice(None)
-        ) -> Tensor:
+        self, size: Tensor, dim: int | Sequence[int] | slice = slice(None)
+    ) -> Tensor:
         return conv_transpose_size(
             size,
             self.kernel_size[dim],
             self.stride[dim],
             self.padding[dim],
             self.output_padding[dim],
-            self.dilation[dim]
+            self.dilation[dim],
         )
 
-    def _forward_size(
-        self,
-        shape: Size
-        ) -> Size:
-
+    def _forward_size(self, shape: Size) -> Size:
         change_ndim = len(self.kernel_size)
         change_shape = shape[-change_ndim:]
         unchange_shape = shape[:-change_ndim]
@@ -363,7 +360,7 @@ class ConvTransposeSize(nn.Module, Generic[_ConvTransposeNd]):
                 self.stride,
                 self.padding,
                 self.output_padding,
-                self.dilation
+                self.dilation,
             ).tolist()
         )
         return Size(unchange_shape + changed_shape)

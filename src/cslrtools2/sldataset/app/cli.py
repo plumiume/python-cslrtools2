@@ -31,6 +31,7 @@ from ...exceptions import ConfigurationError
 from ..logger import sldataset_logger
 from .args import CliArgs, plugins
 
+
 def main():
     """Main entry point for the sldataset CLI.
 
@@ -51,14 +52,18 @@ def main():
 
     if pl_info is None:
         available_commands = ", ".join(plugins.keys())
-        sldataset_logger.error(f"Unknown command '{args.command}'. Available commands: {available_commands}")
+        sldataset_logger.error(
+            f"Unknown command '{args.command}'. Available commands: "
+            f"{available_commands}"
+        )
         raise ConfigurationError(
-            f"Unknown command: {args.command}. "
-            f"Available commands: {available_commands}"
+            f"Unknown command: {args.command}. Available commands: "
+            f"{available_commands}"
         )
 
     sldataset_logger.debug(f"Executing plugin processor for command: {args.command}")
     pl_info["processor"](args)
+
 
 if __name__ == "__main__":
     main()

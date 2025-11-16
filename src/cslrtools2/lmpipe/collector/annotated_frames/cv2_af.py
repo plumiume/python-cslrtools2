@@ -20,8 +20,10 @@ from pathlib import Path
 from ...estimator import ProcessResult
 from ...utils import is_video_ext_from_mimetype
 from .base import (
-    AnnotatedFramesSaveCollector, af_save_aliases,
-    AnnotatedFramesShowCollector, af_show_aliases
+    AnnotatedFramesSaveCollector,
+    af_save_aliases,
+    AnnotatedFramesShowCollector,
+    af_show_aliases,
 )
 
 
@@ -29,8 +31,10 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
     """Save annotated frames using OpenCV (cv2) backend.
 
     Supports two modes:
-    - Image sequence mode: Saves frames as image files (PNG, JPG, etc.) in ``annotated_frames/`` directory
-    - Video mode: Saves frames as a video file (MP4, AVI, etc.) as ``annotated_frames{extension}``
+    - Image sequence mode: Saves frames as image files (PNG, JPG, etc.) in
+      ``annotated_frames/`` directory
+    - Video mode: Saves frames as a video file (MP4, AVI, etc.) as
+      ``annotated_frames{extension}``
     """
 
     def __init__(
@@ -55,11 +59,14 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
                 Required for video output. Defaults to None.
             fps (`int | None`, optional): Video frames per second.
                 Required for video output. Defaults to None.
-            fourcc (`str | None`, optional): Video codec FourCC code (e.g., 'mp4v', 'XVID', 'MJPG').
-                Only used for video output. Auto-selected based on extension if None. Defaults to None.
+            fourcc (`str | None`, optional): Video codec FourCC code
+                (e.g., 'mp4v', 'XVID', 'MJPG').
+                Only used for video output. Auto-selected based on extension
+                if None. Defaults to None.
 
         Raises:
-            ValueError: If extension is a video format but height, width, or fps is not provided.
+            ValueError: If extension is a video format but height, width,
+                or fps is not provided.
         """
         try:
             import cv2
@@ -77,7 +84,8 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
         if self._is_video_mode:
             if height is None or width is None or fps is None:
                 raise ValueError(
-                    f"Video mode (extension={extension}) requires height, width, and fps to be specified. "
+                    f"Video mode (extension={extension}) requires "
+                    f"height, width, and fps to be specified. "
                     f"Got: height={height}, width={width}, fps={fps}"
                 )
 
@@ -113,26 +121,36 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
             :class:`int`: FourCC code as integer.
         """
         if self.fourcc is not None:
-            return self._cv2.VideoWriter.fourcc(*self.fourcc)  # pyright: ignore[reportAttributeAccessIssue]
+            # pyright: ignore[reportAttributeAccessIssue]
+            return self._cv2.VideoWriter.fourcc(*self.fourcc)
 
         # Auto-select codec based on extension
         ext_lower = self.extension.lower()
         if ext_lower == ".mp4":
-            return self._cv2.VideoWriter.fourcc(*"mp4v")  # pyright: ignore[reportAttributeAccessIssue]
+            # pyright: ignore[reportAttributeAccessIssue]
+            return self._cv2.VideoWriter.fourcc(*"mp4v")
         elif ext_lower == ".avi":
-            return self._cv2.VideoWriter.fourcc(*"XVID")  # pyright: ignore[reportAttributeAccessIssue]
+            # pyright: ignore[reportAttributeAccessIssue]
+            return self._cv2.VideoWriter.fourcc(*"XVID")
         elif ext_lower == ".mov":
-            return self._cv2.VideoWriter.fourcc(*"mp4v")  # pyright: ignore[reportAttributeAccessIssue]
+            # pyright: ignore[reportAttributeAccessIssue]
+            return self._cv2.VideoWriter.fourcc(*"mp4v")
         elif ext_lower == ".mkv":
-            return self._cv2.VideoWriter.fourcc(*"X264")  # pyright: ignore[reportAttributeAccessIssue]
+            # pyright: ignore[reportAttributeAccessIssue]
+            return self._cv2.VideoWriter.fourcc(*"X264")
         else:
             # Default fallback
-            return self._cv2.VideoWriter.fourcc(*"mp4v")  # pyright: ignore[reportAttributeAccessIssue]
+            # pyright: ignore[reportAttributeAccessIssue]
+            return self._cv2.VideoWriter.fourcc(*"mp4v")
 
     def _open_file(self, path: Path):
         if self._is_video_mode:
             # Video mode: create video writer statically
-            assert self.width is not None and self.height is not None and self.fps is not None
+            assert (
+                self.width is not None
+                and self.height is not None
+                and self.fps is not None
+            )
 
             self._video_path = path / f"annotated_frames{self.extension}"
             self._video_path.parent.mkdir(parents=True, exist_ok=True)
@@ -140,10 +158,7 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
             # Create VideoWriter with specified parameters
             fourcc_code = self._get_fourcc_code()
             self._video_writer = self._cv2.VideoWriter(
-                str(self._video_path),
-                fourcc_code,
-                self.fps,
-                (self.width, self.height)
+                str(self._video_path), fourcc_code, self.fps, (self.width, self.height)
             )
         else:
             # Image sequence mode: prepare directory
@@ -159,7 +174,9 @@ class Cv2AnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
             # Image sequence mode: save individual frames
             if self._frames_dir is None:
                 return
-            frame_path = self._frames_dir / f"frame_{result.frame_id:06d}{self.extension}"
+            frame_path = (
+                self._frames_dir / f"frame_{result.frame_id:06d}{self.extension}"
+            )
             self._cv2.imwrite(str(frame_path), result.annotated_frame)
 
     def _close_file(self):
@@ -180,12 +197,16 @@ class Cv2AnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollector[K]):
     Shows frames in an interactive window using cv2.imshow().
     """
 
-    def __init__(self, *, window_name: str = "Annotated Frame", wait_key: int = 1) -> None:
+    def __init__(
+        self, *, window_name: str = "Annotated Frame", wait_key: int = 1
+    ) -> None:
         """Initialize the OpenCV frame viewer.
 
         Args:
-            window_name (`str`, optional): Name of the display window. Defaults to "Annotated Frame".
-            wait_key (`int`, optional): Milliseconds to wait between frames. Defaults to 1.
+            window_name (`str`, optional): Name of the display window.
+                Defaults to "Annotated Frame".
+            wait_key (`int`, optional): Milliseconds to wait between frames.
+                Defaults to 1.
         """
         try:
             import cv2
@@ -209,9 +230,8 @@ class Cv2AnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollector[K]):
 
 
 def cv2_af_save_collector_creator[K: str](
-    file_ext: str,
-    key_type: type[K]
-    ) -> AnnotatedFramesSaveCollector[K]:
+    file_ext: str, key_type: type[K]
+) -> AnnotatedFramesSaveCollector[K]:
     """Create a Cv2AnnotatedFramesSaveCollector instance.
 
     Args:
@@ -221,13 +241,12 @@ def cv2_af_save_collector_creator[K: str](
     Returns:
         :class:`AnnotatedFramesSaveCollector[K]`: OpenCV-based annotated frames saver.
     """
-    return Cv2AnnotatedFramesSaveCollector[K](
-        extension=file_ext
-    )
+    return Cv2AnnotatedFramesSaveCollector[K](extension=file_ext)
+
 
 def cv2_af_show_collector_creator[K: str](
-    key_type: type[K]
-    ) -> AnnotatedFramesShowCollector[K]:
+    key_type: type[K],
+) -> AnnotatedFramesShowCollector[K]:
     """Create a Cv2AnnotatedFramesShowCollector instance.
 
     Args:
@@ -237,6 +256,7 @@ def cv2_af_show_collector_creator[K: str](
         :class:`AnnotatedFramesShowCollector[K]`: OpenCV-based annotated frames viewer.
     """
     return Cv2AnnotatedFramesShowCollector[K]()
+
 
 # Register backend name aliases
 af_save_aliases["cv2"] = cv2_af_save_collector_creator

@@ -20,13 +20,14 @@ representing individual samples in a sign language dataset.
 
 from __future__ import annotations
 
-from typing import * # pyright: ignore[reportWildcardImportFromLibrary]
+from typing import TYPE_CHECKING, Any, Callable, Mapping, Never, TypeGuard
 from pathlib import Path
 
 import numpy as np
 import torch
 from torch import Tensor
 import zarr
+
 if TYPE_CHECKING:
     from zarr.api.synchronous import StoreLike
 else:
@@ -36,28 +37,26 @@ from ...typings import ArrayLike, PathLike
 from ..logger import sldataset_logger
 from ..utils import as_tensor, get_group, get_array
 from ..array_loader import (
-    prekey_loaders, PrekeyLoadFunc,
-    container_loaders, ContainerLoadFunc
+    prekey_loaders,
+    PrekeyLoadFunc,
+    container_loaders,
+    ContainerLoadFunc,
 )
 from .holder import SLKeyHolder
 
 
 ######## Type Aliases ########
 
-type DefaultSLDatasetItem[
-    Kvid: str, Klm: str, Ktgt: str
-] = SLDatasetItem[Kvid, Any, Klm, Any, Ktgt, Any]
+type DefaultSLDatasetItem[Kvid: str, Klm: str, Ktgt: str] = SLDatasetItem[
+    Kvid, Any, Klm, Any, Ktgt, Any
+]
 
-type TensorSLDatasetItem[
-    Kvid: str, Klm: str, Ktgt: str
-] = SLDatasetItem[Kvid, Tensor, Klm, Tensor, Ktgt, Tensor]
+type TensorSLDatasetItem[Kvid: str, Klm: str, Ktgt: str] = SLDatasetItem[
+    Kvid, Tensor, Klm, Tensor, Ktgt, Tensor
+]
 
-type ZarrSLDatasetItem[
-    Kvid: str, Klm: str, Ktgt: str
-] = SLDatasetItem[
-    Kvid, zarr.Array,
-    Klm, zarr.Array,
-    Ktgt, zarr.Array
+type ZarrSLDatasetItem[Kvid: str, Klm: str, Ktgt: str] = SLDatasetItem[
+    Kvid, zarr.Array, Klm, zarr.Array, Ktgt, zarr.Array
 ]
 
 
@@ -69,11 +68,15 @@ type ZarrSLDatasetItem[
 
 ######## Item Class ########
 
+
 class SLDatasetItem[
-    Kvid: str, Vvid: ArrayLike,
-    Klm: str, Vlm: ArrayLike,
-    Ktgt: str, Vtgt: ArrayLike
-    ](SLKeyHolder[Never, Kvid, Klm, Ktgt]):
+    Kvid: str,
+    Vvid: ArrayLike,
+    Klm: str,
+    Vlm: ArrayLike,
+    Ktgt: str,
+    Vtgt: ArrayLike,
+](SLKeyHolder[Never, Kvid, Klm, Ktgt]):
     """Single item from a sign language dataset.
 
     Contains video data, landmark coordinates, and target labels for
@@ -102,11 +105,10 @@ class SLDatasetItem[
 
     def __init__(
         self,
-        videos: Mapping[Kvid, Vvid], # (Kvid, [N, T, H, W, C])
-        landmarks: Mapping[Klm, Vlm], # (Klm, [N, T, V, A])
-        targets: Mapping[Ktgt, Vtgt], # (Ktgt, [N, S])
-        ): # N = 1 or Batch size
-
+        videos: Mapping[Kvid, Vvid],  # (Kvid, [N, T, H, W, C])
+        landmarks: Mapping[Klm, Vlm],  # (Klm, [N, T, V, A])
+        targets: Mapping[Ktgt, Vtgt],  # (Ktgt, [N, S])
+    ):  # N = 1 or Batch size
         self.videos = videos
         self.landmarks = landmarks
         self.targets = targets
@@ -131,18 +133,9 @@ class SLDatasetItem[
         """
 
         return SLDatasetItem(
-            videos={
-                k: as_tensor(v).to(device)
-                for k, v in self.videos.items()
-            },
-            landmarks={
-                k: as_tensor(v).to(device)
-                for k, v in self.landmarks.items()
-            },
-            targets={
-                k: as_tensor(v).to(device)
-                for k, v in self.targets.items()
-            }
+            videos={k: as_tensor(v).to(device) for k, v in self.videos.items()},
+            landmarks={k: as_tensor(v).to(device) for k, v in self.landmarks.items()},
+            targets={k: as_tensor(v).to(device) for k, v in self.targets.items()},
         )
 
     def to_zarr(self, store_or_group: StoreLike | zarr.Group) -> zarr.Group:
@@ -162,21 +155,15 @@ class SLDatasetItem[
 
         video_group = item_group.create_group("videos")
         for kvid, vvid in self.videos.items():
-            video_group.create_array(
-                kvid, data=np.asarray(vvid)
-            )
+            video_group.create_array(kvid, data=np.asarray(vvid))
 
         landmark_group = item_group.create_group("landmarks")
         for klm, vlm in self.landmarks.items():
-            landmark_group.create_array(
-                klm, data=np.asarray(vlm)
-            )
+            landmark_group.create_array(klm, data=np.asarray(vlm))
 
         target_group = item_group.create_group("targets")
         for ktgt, vtgt in self.targets.items():
-            target_group.create_array(
-                ktgt, data=np.asarray(vtgt)
-            )
+            target_group.create_array(ktgt, data=np.asarray(vtgt))
 
         return item_group
 
@@ -185,8 +172,8 @@ class SLDatasetItem[
         cls,
         path: PathLike,
         extra_prekey_load_funcs: Mapping[str, PrekeyLoadFunc] = {},
-        extra_container_load_funcs: Mapping[str, ContainerLoadFunc] = {}
-        ) -> DefaultSLDatasetItem[Kvid, Klm, Ktgt]:
+        extra_container_load_funcs: Mapping[str, ContainerLoadFunc] = {},
+    ) -> DefaultSLDatasetItem[Kvid, Klm, Ktgt]:
         """Load item from file system.
 
         Args:
@@ -200,39 +187,23 @@ class SLDatasetItem[
 
         path = Path(path)
 
-        prekey_load_funcs = {
-            **prekey_loaders,
-            **extra_prekey_load_funcs
-        }
-        container_load_funcs = {
-            **container_loaders,
-            **extra_container_load_funcs
-        }
+        prekey_load_funcs = {**prekey_loaders, **extra_prekey_load_funcs}
+        container_load_funcs = {**container_loaders, **extra_container_load_funcs}
 
         videos = cls._load_category_from_fs(
-            path / "videos",
-            cls.is_video_key,
-            prekey_load_funcs,
-            container_load_funcs
+            path / "videos", cls.is_video_key, prekey_load_funcs, container_load_funcs
         )
         landmarks = cls._load_category_from_fs(
             path / "landmarks",
             cls.is_landmark_key,
             prekey_load_funcs,
-            container_load_funcs
+            container_load_funcs,
         )
         targets = cls._load_category_from_fs(
-            path / "targets",
-            cls.is_target_key,
-            prekey_load_funcs,
-            container_load_funcs
+            path / "targets", cls.is_target_key, prekey_load_funcs, container_load_funcs
         )
 
-        return SLDatasetItem(
-            videos=videos,
-            landmarks=landmarks,
-            targets=targets
-        )
+        return SLDatasetItem(videos=videos, landmarks=landmarks, targets=targets)
 
     @classmethod
     def _load_category_from_fs[K: str](
@@ -240,8 +211,8 @@ class SLDatasetItem[
         path_without_suffix: Path,
         is_key_func: Callable[[object], TypeGuard[K]],
         prekey_load_funcs: Mapping[str, PrekeyLoadFunc],
-        container_load_funcs: Mapping[str, ContainerLoadFunc]
-        ) -> Mapping[K, ArrayLike]:
+        container_load_funcs: Mapping[str, ContainerLoadFunc],
+    ) -> Mapping[K, ArrayLike]:
         """Load category data from file system.
 
         Supports both per-key files (one file per key) and container files
@@ -273,17 +244,13 @@ class SLDatasetItem[
                     continue
                 mapping = container_load_funcs[ext](path_with_suffix)
                 result.update(
-                    (karr, varr)
-                    for karr, varr in mapping.items()
-                    if is_key_func(karr)
+                    (karr, varr) for karr, varr in mapping.items() if is_key_func(karr)
                 )
 
         return result
 
     @classmethod
-    def from_zarr(
-        cls, group: zarr.Group
-    ) -> ZarrSLDatasetItem[Kvid, Klm, Ktgt]:
+    def from_zarr(cls, group: zarr.Group) -> ZarrSLDatasetItem[Kvid, Klm, Ktgt]:
         """Load item from Zarr group.
 
         Args:
@@ -294,30 +261,23 @@ class SLDatasetItem[
         """
 
         videos = cls._load_category_from_zarr(
-            cls.is_video_key,
-            get_group(group, "videos")
+            cls.is_video_key, get_group(group, "videos")
         )
         landmarks = cls._load_category_from_zarr(
-            cls.is_landmark_key,
-            get_group(group, "landmarks")
+            cls.is_landmark_key, get_group(group, "landmarks")
         )
         targets = cls._load_category_from_zarr(
-            cls.is_target_key,
-            get_group(group, "targets")
+            cls.is_target_key, get_group(group, "targets")
         )
 
-        return SLDatasetItem(
-            videos=videos,
-            landmarks=landmarks,
-            targets=targets
-        )
+        return SLDatasetItem(videos=videos, landmarks=landmarks, targets=targets)
 
     @classmethod
     def _load_category_from_zarr[K: str](
         cls,
         is_key_func: Callable[[object], TypeGuard[K]],
         group: zarr.Group,
-        ) -> Mapping[K, zarr.Array]:
+    ) -> Mapping[K, zarr.Array]:
         """Load category data from Zarr group."""
 
         return {

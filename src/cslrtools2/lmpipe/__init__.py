@@ -37,9 +37,10 @@ with parallel processing and progress tracking.
 Key Concept
 -----------
 **Pipeline Architecture**:
-    LMPipe follows the Pipeline pattern where data flows through these stages::
+    LMPipe follows the Pipeline pattern where data flows through these
+    stages::
 
-        Video File(s) → Frame Extraction → Landmark Detection → Data Collection → Output File(s)
+        Video File(s) → Frame Extraction → Landmark Detection → Data Collection → Output File(s)  # noqa: E501
                       ↑                    ↑                     ↑
                       RunSpec              Estimator            Collector
 
@@ -143,8 +144,8 @@ Architecture
     Plugins are registered via entry points in ``pyproject.toml``::
 
         [project.entry-points."cslrtools2.lmpipe.plugins"]
-        "mediapipe.holistic" = "cslrtools2.plugins.mediapipe.lmpipe.holistic_args:holistic_info"
-        "mediapipe.pose" = "cslrtools2.plugins.mediapipe.lmpipe.pose_args:pose_info"
+        "mediapipe.holistic" = "cslrtools2.plugins.mediapipe.lmpipe.holistic_args:holistic_info"  # noqa: E501
+        "mediapipe.pose" = "cslrtools2.plugins.mediapipe.lmpipe.pose_args:pose_info"  # noqa: E501
         # ... more plugins
 
 **Execution Modes**:

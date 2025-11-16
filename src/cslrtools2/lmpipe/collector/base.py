@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -44,7 +43,7 @@ class Collector[K: str](ABC):
     """
 
     @abstractmethod
-    def configure_from_options(self, options: "LMPipeOptions") -> None:
+    def configure_from_options(self, options: LMPipeOptions) -> None:
         """Configure collector from LMPipe options.
 
         This method is called after collector instantiation to set up
@@ -57,14 +56,20 @@ class Collector[K: str](ABC):
         ...
 
     @abstractmethod
-    def collect_results(self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]):
+    def collect_results(
+        self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]
+    ):
         """Collect and process the results from the estimator.
 
         Args:
-            runspec (:class:`~cslrtools2.lmpipe.runspec.RunSpec`\\[:obj:`~typing.Any`\\]):
+            runspec (:class:`~cslrtools2.lmpipe.runspec.RunSpec`\\[
+                :obj:`~typing.Any`\\]):
                 The run specification for the current task.
-            results (:class:`~typing.Iterable`\\[:class:`~cslrtools2.lmpipe.estimator.ProcessResult`\\[:obj:`K`\\]\\]):
-                An iterable of :class:`~cslrtools2.lmpipe.estimator.ProcessResult`
+            results (:class:`~typing.Iterable`\\[
+                :class:`~cslrtools2.lmpipe.estimator.ProcessResult`\\[
+                :obj:`K`\\]\\]):
+                An iterable of
+                :class:`~cslrtools2.lmpipe.estimator.ProcessResult`
                 objects to be collected.
         """
         ...
@@ -77,6 +82,7 @@ class Collector[K: str](ABC):
             runspec (`RunSpec[Any]`): The run specification for the current task.
 
         Returns:
-            :class:`bool`: :code:`True` to continue processing, :code:`False` to skip the task.
+            :class:`bool`: :code:`True` to continue processing, :code:`False`
+                to skip the task.
         """
         return True
