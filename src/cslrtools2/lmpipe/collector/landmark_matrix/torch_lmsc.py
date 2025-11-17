@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from pathlib import Path
 from typing import Mapping
 
@@ -9,7 +23,7 @@ from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 class TorchLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
     """Write landmarks into PyTorch tensor files.
-    
+
     Supports two modes:
     - Container mode (per_key=False): Single ``landmarks.pt`` (or ``.pth``) file with all keys
     - Per-key mode (per_key=True): Multiple ``{key}.pt`` (or ``.pth``) files in ``landmarks/`` directory
@@ -17,7 +31,7 @@ class TorchLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
     def __init__(self, *, per_key: bool = False, extension: str = ".pt") -> None:
         """Initialize the PyTorch landmark matrix save collector.
-        
+
         Args:
             per_key (:class:`bool`, optional): If True, save each key to a separate file.
                 If False, save all keys to a single landmarks file. Defaults to False.
@@ -88,10 +102,10 @@ class TorchLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
 def pt_lmsc_creator[K: str](key_type: type[K]) -> TorchLandmarkMatrixSaveCollector[K]:
     """Create a PyTorch .pt landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`TorchLandmarkMatrixSaveCollector[K]`: PyTorch landmark matrix saver with .pt extension.
     """
@@ -99,10 +113,10 @@ def pt_lmsc_creator[K: str](key_type: type[K]) -> TorchLandmarkMatrixSaveCollect
 
 def pth_lmsc_creator[K: str](key_type: type[K]) -> TorchLandmarkMatrixSaveCollector[K]:
     """Create a PyTorch .pth landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`TorchLandmarkMatrixSaveCollector[K]`: PyTorch landmark matrix saver with .pth extension.
     """

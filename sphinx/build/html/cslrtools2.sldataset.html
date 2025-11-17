@@ -1,0 +1,1228 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cslrtools2.sldataset package &mdash; cslrtools2 0.1.dev54+gb18e68278.d20251115 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=9bb56542"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cslrtools2.typings package" href="cslrtools2.typings.html" />
+    <link rel="prev" title="cslrtools2.plugins package" href="cslrtools2.plugins.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            cslrtools2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cslrtools2</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cslrtools2.html">cslrtools2 package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cslrtools2.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.plugins.html">cslrtools2.plugins package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cslrtools2.sldataset package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cslrtools2.typings.html">cslrtools2.typings package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.html#module-cslrtools2.convsize">cslrtools2.convsize module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.html#module-cslrtools2">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="cslrtools2.html">cslrtools2 package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cslrtools2.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.plugins.html">cslrtools2.plugins package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cslrtools2.sldataset package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cslrtools2.sldataset.array_loader">cslrtools2.sldataset.array_loader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cslrtools2.sldataset.dataset">cslrtools2.sldataset.dataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cslrtools2.sldataset.utils">cslrtools2.sldataset.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cslrtools2.sldataset">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cslrtools2.typings.html">cslrtools2.typings package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.html#module-cslrtools2.convsize">cslrtools2.convsize module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cslrtools2.html#module-cslrtools2">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/ikegami-yukino/python-cslrtools2">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/cslrtools2/">PyPI Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">cslrtools2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">cslrtools2</a></li>
+          <li class="breadcrumb-item"><a href="cslrtools2.html">cslrtools2 package</a></li>
+      <li class="breadcrumb-item active">cslrtools2.sldataset package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cslrtools2.sldataset.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cslrtools2-sldataset-package">
+<h1>cslrtools2.sldataset package<a class="headerlink" href="#cslrtools2-sldataset-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cslrtools2.sldataset.array_loader">
+<span id="cslrtools2-sldataset-array-loader-module"></span><h2>cslrtools2.sldataset.array_loader module<a class="headerlink" href="#module-cslrtools2.sldataset.array_loader" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.PreKeyLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">PreKeyLoader</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#PreKeyLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.PreKeyLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for loaders that load single arrays from files.</p>
+<p>Pre-key loaders handle file formats where each file contains a single array
+associated with a key (derived from the filename).</p>
+<p class="rubric">Examples</p>
+<p>Formats: CSV, JSON (single array), NPY</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.PreKeyLoader.load_array">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#PreKeyLoader.load_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.PreKeyLoader.load_array" title="Link to this definition"></a></dt>
+<dd><p>Load a single array from the specified file path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the file to load.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.ContainerLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">ContainerLoader</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#ContainerLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.ContainerLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for loaders that load multiple keyed arrays from files.</p>
+<p>Container loaders handle file formats where a single file contains multiple
+arrays, each associated with a string key.</p>
+<p class="rubric">Examples</p>
+<p>Formats: NPZ, PyTorch (pt/pth), SafeTensors, Zarr</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.ContainerLoader.load_mapping">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#ContainerLoader.load_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.ContainerLoader.load_mapping" title="Link to this definition"></a></dt>
+<dd><p>Load a mapping of keyed arrays from the specified file path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the container file to load.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping from keys to arrays.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.CsvLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">CsvLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">','</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#CsvLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.CsvLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.array_loader.PreKeyLoader" title="cslrtools2.sldataset.array_loader.PreKeyLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PreKeyLoader</span></code></a></p>
+<p>CSV file loader for array data.</p>
+<p>Loads numeric data from CSV files, converting each row to a list of floats.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.CsvLoader.delimiter">
+<span class="sig-name descname"><span class="pre">delimiter</span></span><a class="headerlink" href="#cslrtools2.sldataset.array_loader.CsvLoader.delimiter" title="Link to this definition"></a></dt>
+<dd><p>Column delimiter character. Defaults to <code class="docutils literal notranslate"><span class="pre">','</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.CsvLoader.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">','</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#CsvLoader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.CsvLoader.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.CsvLoader.load_array">
+<span class="sig-name descname"><span class="pre">load_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#CsvLoader.load_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.CsvLoader.load_array" title="Link to this definition"></a></dt>
+<dd><p>Load CSV file as a 2D array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the CSV file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D list of float values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.JsonLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">JsonLoader</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#JsonLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.JsonLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.array_loader.PreKeyLoader" title="cslrtools2.sldataset.array_loader.PreKeyLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PreKeyLoader</span></code></a></p>
+<p>JSON file loader for array data.</p>
+<p>Loads array data from JSON files. The JSON file should contain a single
+array or nested array structure.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.JsonLoader.load_array">
+<span class="sig-name descname"><span class="pre">load_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#JsonLoader.load_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.JsonLoader.load_array" title="Link to this definition"></a></dt>
+<dd><p>Load JSON file as an array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the JSON file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The parsed JSON array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.NpyLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">NpyLoader</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#NpyLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.NpyLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.array_loader.PreKeyLoader" title="cslrtools2.sldataset.array_loader.PreKeyLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PreKeyLoader</span></code></a></p>
+<p>NumPy NPY file loader for array data.</p>
+<p>Loads NumPy arrays from NPY files. Only supports single arrays,
+not NPZ archives.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.NpyLoader.load_array">
+<span class="sig-name descname"><span class="pre">load_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#NpyLoader.load_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.NpyLoader.load_array" title="Link to this definition"></a></dt>
+<dd><p>Load NPY file as a NumPy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the NPY file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded NumPy array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>DataFormatError</strong> – If the file contains a mapping instead of a single array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.NpzLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">NpzLoader</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#NpzLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.NpzLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.array_loader.ContainerLoader" title="cslrtools2.sldataset.array_loader.ContainerLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContainerLoader</span></code></a></p>
+<p>NumPy NPZ archive loader for multiple keyed arrays.</p>
+<p>Loads multiple NumPy arrays from NPZ archive files, where each array
+is associated with a string key.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.NpzLoader.load_mapping">
+<span class="sig-name descname"><span class="pre">load_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#NpzLoader.load_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.NpzLoader.load_mapping" title="Link to this definition"></a></dt>
+<dd><p>Load NPZ archive as a mapping of arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the NPZ file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping from array names to NumPy arrays.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code>]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>DataFormatError</strong> – If the file is not a valid NPZ archive.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.TorchLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">TorchLoader</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#TorchLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.TorchLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.array_loader.PreKeyLoader" title="cslrtools2.sldataset.array_loader.PreKeyLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PreKeyLoader</span></code></a>, <a class="reference internal" href="#cslrtools2.sldataset.array_loader.ContainerLoader" title="cslrtools2.sldataset.array_loader.ContainerLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContainerLoader</span></code></a></p>
+<p>PyTorch file loader for tensors and tensor dictionaries.</p>
+<p>Supports loading both single tensors (PreKeyLoader) and dictionaries
+of tensors (ContainerLoader) from PyTorch .pt/.pth files.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.TorchLoader.load_array">
+<span class="sig-name descname"><span class="pre">load_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#TorchLoader.load_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.TorchLoader.load_array" title="Link to this definition"></a></dt>
+<dd><p>Load PyTorch file as a single tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the PyTorch file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>DataFormatError</strong> – If the file does not contain a single tensor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.TorchLoader.load_mapping">
+<span class="sig-name descname"><span class="pre">load_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#TorchLoader.load_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.TorchLoader.load_mapping" title="Link to this definition"></a></dt>
+<dd><p>Load PyTorch file as a mapping of tensors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the PyTorch file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping from keys to tensors.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code>]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>DataFormatError</strong> – If the file does not contain a valid mapping.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.SafetensorsLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">SafetensorsLoader</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#SafetensorsLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.SafetensorsLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.array_loader.ContainerLoader" title="cslrtools2.sldataset.array_loader.ContainerLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContainerLoader</span></code></a></p>
+<p>SafeTensors file loader for secure tensor storage.</p>
+<p>Loads tensors from SafeTensors format files, which provide safe
+and efficient tensor serialization.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.SafetensorsLoader.load_mapping">
+<span class="sig-name descname"><span class="pre">load_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#SafetensorsLoader.load_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.SafetensorsLoader.load_mapping" title="Link to this definition"></a></dt>
+<dd><p>Load SafeTensors file as a mapping of tensors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the SafeTensors file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping from keys to tensors.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code>]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>DataFormatError</strong> – If the file does not contain a valid mapping.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.ZarrLoader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.array_loader.</span></span><span class="sig-name descname"><span class="pre">ZarrLoader</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#ZarrLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.ZarrLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.array_loader.ContainerLoader" title="cslrtools2.sldataset.array_loader.ContainerLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContainerLoader</span></code></a></p>
+<p>Zarr group loader for chunked array storage.</p>
+<p>Loads arrays from Zarr groups, which support efficient chunked
+storage and compression for large datasets.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.array_loader.ZarrLoader.load_mapping">
+<span class="sig-name descname"><span class="pre">load_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/array_loader.html#ZarrLoader.load_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.array_loader.ZarrLoader.load_mapping" title="Link to this definition"></a></dt>
+<dd><p>Load Zarr group as a mapping of arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code>) – Path to the Zarr group directory.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping from array names to <code class="xref py py-class docutils literal notranslate"><span class="pre">zarr.Array</span></code> objects.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cslrtools2.sldataset.dataset">
+<span id="cslrtools2-sldataset-dataset-module"></span><h2>cslrtools2.sldataset.dataset module<a class="headerlink" href="#module-cslrtools2.sldataset.dataset" title="Link to this heading"></a></h2>
+<p>Sign Language Dataset management module.</p>
+<p>This module provides core dataset classes and utilities for managing
+sign language datasets with efficient storage and PyTorch integration.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLKeyHolder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.dataset.</span></span><span class="sig-name descname"><span class="pre">SLKeyHolder</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/holder.html#SLKeyHolder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLKeyHolder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a></p>
+<p>Type guards for sign language dataset keys.</p>
+<p>Provides runtime type checking for the different key types used in
+sign language datasets (metadata, video, landmark, target).</p>
+<dl class="simple">
+<dt>Type Parameters:</dt><dd><p>Kmeta: String type for metadata keys.
+Kvid: String type for video data keys.
+Klm: String type for landmark data keys.
+Ktgt: String type for target/label keys.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLKeyHolder.is_landmark_key">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_landmark_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/holder.html#SLKeyHolder.is_landmark_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLKeyHolder.is_landmark_key" title="Link to this definition"></a></dt>
+<dd><p>Check if object is a valid landmark key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a>) – Object to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if obj is a valid landmark key.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLKeyHolder.is_metadata_key">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_metadata_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/holder.html#SLKeyHolder.is_metadata_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLKeyHolder.is_metadata_key" title="Link to this definition"></a></dt>
+<dd><p>Check if object is a valid metadata key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a>) – Object to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if obj is a valid metadata key.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLKeyHolder.is_target_key">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_target_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/holder.html#SLKeyHolder.is_target_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLKeyHolder.is_target_key" title="Link to this definition"></a></dt>
+<dd><p>Check if object is a valid target key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a>) – Object to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if obj is a valid target key.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLKeyHolder.is_video_key">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_video_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/holder.html#SLKeyHolder.is_video_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLKeyHolder.is_video_key" title="Link to this definition"></a></dt>
+<dd><p>Check if object is a valid video key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a>) – Object to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if obj is a valid video key.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.dataset.</span></span><span class="sig-name descname"><span class="pre">SLDatasetItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">videos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landmarks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/item.html#SLDatasetItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.dataset.SLKeyHolder" title="cslrtools2.sldataset.dataset.holder.SLKeyHolder"><code class="xref py py-class docutils literal notranslate"><span class="pre">SLKeyHolder</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Never" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Never</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Kvid</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Klm</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Ktgt</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a></p>
+<p>Single item from a sign language dataset.</p>
+<p>Contains video data, landmark coordinates, and target labels for
+one sample in the dataset. Supports conversion to different devices
+for PyTorch training.</p>
+<dl class="simple">
+<dt>Type Parameters:</dt><dd><p>Kvid: String type for video data keys.
+Vvid: Array-like type for video data values.
+Klm: String type for landmark data keys.
+Vlm: Array-like type for landmark data values.
+Ktgt: String type for target/label keys.
+Vtgt: Array-like type for target/label values.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem.videos">
+<span class="sig-name descname"><span class="pre">videos</span></span><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem.videos" title="Link to this definition"></a></dt>
+<dd><p>Video data mapping. Each value has shape <code class="docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">T,</span> <span class="pre">H,</span> <span class="pre">W,</span> <span class="pre">C]</span></code>
+where N is batch size, T is time, H is height, W is width, C is channels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Kvid</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Vvid</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem.landmarks">
+<span class="sig-name descname"><span class="pre">landmarks</span></span><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem.landmarks" title="Link to this definition"></a></dt>
+<dd><p>Landmark data mapping. Each value has shape <code class="docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">T,</span> <span class="pre">V,</span> <span class="pre">A]</span></code>
+where N is batch size, T is time, V is vertices, A is attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Klm</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Vlm</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem.targets">
+<span class="sig-name descname"><span class="pre">targets</span></span><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem.targets" title="Link to this definition"></a></dt>
+<dd><p>Target/label data mapping. Each value has shape <code class="docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">S]</span></code>
+where N is batch size, S is sequence length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Ktgt</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Vtgt</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">videos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landmarks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/item.html#SLDatasetItem.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem.from_file_system">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_prekey_load_funcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_container_load_funcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/item.html#SLDatasetItem.from_file_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem.from_file_system" title="Link to this definition"></a></dt>
+<dd><p>Load item from file system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type">PathLike</span>) – Path to the item directory.</p></li>
+<li><p><strong>extra_prekey_load_funcs</strong> (<span class="sphinx_autodoc_typehints-type">Mapping[str, PrekeyLoadFunc]</span>) – Additional per-key file loaders.</p></li>
+<li><p><strong>extra_container_load_funcs</strong> (<span class="sphinx_autodoc_typehints-type">Mapping[str, ContainerLoadFunc]</span>) – Additional container file loaders.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type">DefaultSLDatasetItem[Kvid, Klm, Ktgt]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Loaded dataset item.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem.from_zarr">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_zarr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/item.html#SLDatasetItem.from_zarr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem.from_zarr" title="Link to this definition"></a></dt>
+<dd><p>Load item from Zarr group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>group</strong> (<span class="sphinx_autodoc_typehints-type">zarr.Group</span>) – Zarr group containing the item data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type">ZarrSLDatasetItem[Kvid, Klm, Ktgt]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Loaded dataset item with Zarr arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem.to">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/item.html#SLDatasetItem.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem.to" title="Link to this definition"></a></dt>
+<dd><p>Move all data to the specified device.</p>
+<p>Converts all video, landmark, and target data to <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a>
+and moves them to the specified <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.device</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>device</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.device</span></code></a>) – Target device (e.g., <code class="docutils literal notranslate"><span class="pre">'cuda'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cpu'</span></code>).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New dataset item with all data on the specified device.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorSLDatasetItem</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Kvid</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Klm</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Ktgt</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetItem.to_zarr">
+<span class="sig-name descname"><span class="pre">to_zarr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store_or_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/item.html#SLDatasetItem.to_zarr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetItem.to_zarr" title="Link to this definition"></a></dt>
+<dd><p>Save item to Zarr storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>store_or_group</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Store</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StorePath</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">FSMap</span></code> | <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">Group</span></code></span>) – Zarr store path or group object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Group</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Zarr group containing the saved item.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.Dataset">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.dataset.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#Dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.Dataset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.IterableDataset">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.dataset.</span></span><span class="sig-name descname"><span class="pre">IterableDataset</span></span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#IterableDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.IterableDataset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetBatch">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.dataset.</span></span><span class="sig-name descname"><span class="pre">SLDatasetBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#SLDatasetBatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetBatch" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.dataset.SLKeyHolder" title="cslrtools2.sldataset.dataset.holder.SLKeyHolder"><code class="xref py py-class docutils literal notranslate"><span class="pre">SLKeyHolder</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetBatch.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#SLDatasetBatch.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetBatch.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetBatch.from_batch">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#SLDatasetBatch.from_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetBatch.from_batch" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type">Self</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDatasetBatch.to">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#SLDatasetBatch.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDatasetBatch.to" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDataset">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.dataset.</span></span><span class="sig-name descname"><span class="pre">SLDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#SLDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDataset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.dataset.SLKeyHolder" title="cslrtools2.sldataset.dataset.holder.SLKeyHolder"><code class="xref py py-class docutils literal notranslate"><span class="pre">SLKeyHolder</span></code></a>, <a class="reference internal" href="#cslrtools2.sldataset.dataset.Dataset" title="cslrtools2.sldataset.dataset.core.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultSLDatasetItem</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDataset.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#SLDataset.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDataset.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDataset.from_zarr">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_zarr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#SLDataset.from_zarr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDataset.from_zarr" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type">SLDataset[Kmeta, Kvid, Klm, Ktgt, zarr.Array]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.SLDataset.to_partially">
+<span class="sig-name descname"><span class="pre">to_partially</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#SLDataset.to_partially"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.SLDataset.to_partially" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type">SLDataset[Kmeta, Kvid, Klm, Ktgt, Tensor]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.IterableSLDataset">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.dataset.</span></span><span class="sig-name descname"><span class="pre">IterableSLDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#IterableSLDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.IterableSLDataset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cslrtools2.sldataset.dataset.SLKeyHolder" title="cslrtools2.sldataset.dataset.holder.SLKeyHolder"><code class="xref py py-class docutils literal notranslate"><span class="pre">SLKeyHolder</span></code></a>, <a class="reference internal" href="#cslrtools2.sldataset.dataset.IterableDataset" title="cslrtools2.sldataset.dataset.core.IterableDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultSLDatasetItem</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.IterableSLDataset.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#IterableSLDataset.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.IterableSLDataset.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.IterableSLDataset.to_partially">
+<span class="sig-name descname"><span class="pre">to_partially</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#IterableSLDataset.to_partially"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.IterableSLDataset.to_partially" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type">IterableSLDataset[Kmeta, Kvid, Klm, Ktgt, Tensor]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.dataset.dataset_to_zarr">
+<span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.dataset.</span></span><span class="sig-name descname"><span class="pre">dataset_to_zarr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_or_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/dataset/core.html#dataset_to_zarr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.dataset.dataset_to_zarr" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Group</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-cslrtools2.sldataset.utils">
+<span id="cslrtools2-sldataset-utils-module"></span><h2>cslrtools2.sldataset.utils module<a class="headerlink" href="#module-cslrtools2.sldataset.utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.utils.get_array">
+<span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.utils.</span></span><span class="sig-name descname"><span class="pre">get_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/utils.html#get_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.utils.get_array" title="Link to this definition"></a></dt>
+<dd><p>Retrieve a Zarr array from a group by path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">zarr.Group</span></code>) – The Zarr group to search in.</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The path to the array within the group.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Zarr array at the specified path.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">zarr.Array</span></code></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>DataLoadError</strong> – If no array is found at the specified path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.utils.get_group">
+<span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.utils.</span></span><span class="sig-name descname"><span class="pre">get_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/utils.html#get_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.utils.get_group" title="Link to this definition"></a></dt>
+<dd><p>Retrieve a Zarr subgroup from a group by path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">zarr.Group</span></code>) – The parent Zarr group to search in.</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The path to the subgroup within the parent group.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Zarr subgroup at the specified path.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">zarr.Group</span></code></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>DataLoadError</strong> – If no group is found at the specified path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cslrtools2.sldataset.utils.as_tensor">
+<span class="sig-prename descclassname"><span class="pre">cslrtools2.sldataset.utils.</span></span><span class="sig-name descname"><span class="pre">as_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cslrtools2/sldataset/utils.html#as_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cslrtools2.sldataset.utils.as_tensor" title="Link to this definition"></a></dt>
+<dd><p>Convert array-like data to a PyTorch tensor.</p>
+<p>Handles conversion from various array types including <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a>,
+<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>, and other array-like objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayLike</span></code>) – Array-like data to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The converted tensor. If input is already a</dt><dd><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a>, returns it directly without copying.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-cslrtools2.sldataset">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cslrtools2.sldataset" title="Link to this heading"></a></h2>
+<p>SLDataset: Sign Language Dataset Management and Loading Utilities.</p>
+<p><strong>Software Type</strong>: Data Access Layer / Data Management Module
+<strong>Pattern</strong>: Repository Pattern, Data Transfer Object (DTO)
+<strong>Dependencies</strong>: PyTorch, Zarr, NumPy</p>
+<section id="what-this-module-does">
+<h3>What This Module Does<a class="headerlink" href="#what-this-module-does" title="Link to this heading"></a></h3>
+<p>SLDataset (Sign Language Dataset) is a <strong>data abstraction layer</strong> that provides
+a unified interface for managing and loading sign language datasets. It solves
+the problem of efficiently storing and accessing large-scale video datasets with
+associated landmark annotations and labels.</p>
+<p>Think of it as a <strong>database system</strong> specifically designed for sign language data,
+where:
+- <strong>Tables</strong> = Zarr groups (metadata, connections, items)
+- <strong>Rows</strong> = Individual sign language samples
+- <strong>Columns</strong> = Videos, landmarks, targets (labels/glosses)</p>
+</section>
+<section id="key-concept">
+<h3>Key Concept<a class="headerlink" href="#key-concept" title="Link to this heading"></a></h3>
+<dl>
+<dt><strong>Unified Schema</strong>:</dt><dd><p>All sign language datasets, regardless of their original format, are converted
+to a standardized schema:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Dataset Root (Zarr Group)
+├── metadata/           # Dataset-level information (name, version, etc.)
+├── connections/        # Landmark connectivity graphs
+└── items/              # Individual samples
+    ├── [0]/
+    │   ├── videos/     # Video data for sample 0
+    │   │   └── {video_key}: video data
+    │   ├── landmarks/  # Landmark data
+    │   │   └── {landmark_key}: landmark arrays
+    │   └── targets/    # Labels/glosses
+    │       └── {target_key}: target data
+    ├── [1]/
+    └── ...
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>This design enables:
+- <strong>Efficient storage</strong>: Compressed, chunked arrays (Zarr)
+- <strong>Random access</strong>: Load individual samples without reading entire dataset
+- <strong>PyTorch compatibility</strong>: Direct integration with DataLoader
+- <strong>Flexibility</strong>: Support custom metadata keys for different datasets</p>
+</section>
+<section id="core-components">
+<h3>Core Components<a class="headerlink" href="#core-components" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>SLDatasetItem</strong> (<code class="docutils literal notranslate"><span class="pre">dataset.py</span></code>)</p>
+<dl class="simple">
+<dt>What it is:</dt><dd><p>Data Transfer Object (DTO) representing a single sign language sample.
+Contains videos, landmarks, and target labels for one sign instance.</p>
+</dd>
+</dl>
+<p>Software pattern: Value Object / Data Transfer Object (DTO)</p>
+<dl class="simple">
+<dt>Generic type parameters:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Kvid</span></code>: Video key type (e.g., “rgb”, “depth”)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Vvid</span></code>: Video value type (e.g., Tensor, Array)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Klm</span></code>: Landmark key type (e.g., “pose”, “left_hand”)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Vlm</span></code>: Landmark value type (e.g., Tensor, NDArray)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ktgt</span></code>: Target key type (e.g., “gloss”, “label”)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Vtgt</span></code>: Target value type (e.g., Tensor, int)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDatasetItem</span>
+
+<span class="n">item</span> <span class="o">=</span> <span class="n">SLDatasetItem</span><span class="p">(</span>
+    <span class="n">videos</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;rgb&quot;</span><span class="p">:</span> <span class="n">video_tensor</span><span class="p">},</span>
+    <span class="n">landmarks</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;pose&quot;</span><span class="p">:</span> <span class="n">pose_array</span><span class="p">,</span> <span class="s2">&quot;left_hand&quot;</span><span class="p">:</span> <span class="n">hand_array</span><span class="p">},</span>
+    <span class="n">targets</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;gloss&quot;</span><span class="p">:</span> <span class="n">gloss_id</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>SLDataset</strong> (<code class="docutils literal notranslate"><span class="pre">dataset.py</span></code>)</p>
+<dl class="simple">
+<dt>What it is:</dt><dd><p>PyTorch-compatible Dataset class for sign language data. Implements
+the Repository pattern for data access.</p>
+</dd>
+</dl>
+<p>Software pattern: Repository Pattern / PyTorch Dataset</p>
+<dl class="simple">
+<dt>Key features:</dt><dd><ul class="simple">
+<li><p>Random access: <code class="docutils literal notranslate"><span class="pre">dataset[index]</span></code> → <code class="docutils literal notranslate"><span class="pre">SLDatasetItem</span></code></p></li>
+<li><p>Metadata storage: Dataset-level information</p></li>
+<li><p>Connection graphs: Landmark connectivity for visualization</p></li>
+<li><p>Zarr backend: Efficient storage and loading</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+
+<span class="c1"># Load from Zarr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">zarr</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;dataset.zarr&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">SLDataset</span><span class="o">.</span><span class="n">from_zarr</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+<span class="c1"># Use with PyTorch</span>
+<span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
+    <span class="n">videos</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">videos</span>
+    <span class="n">landmarks</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">landmarks</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">targets</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>IterableSLDataset</strong> (<code class="docutils literal notranslate"><span class="pre">dataset.py</span></code>)</p>
+<dl class="simple">
+<dt>What it is:</dt><dd><p>PyTorch IterableDataset variant for streaming large datasets that don’t
+fit in memory. Useful for very large sign language corpora.</p>
+</dd>
+</dl>
+<p>Software pattern: Iterator Pattern / Stream Processing</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">IterableSLDataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">IterableSLDataset</span><span class="o">.</span><span class="n">from_zarr</span><span class="p">(</span><span class="n">zarr_root</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+    <span class="n">process</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Array Loaders</strong> (<code class="docutils literal notranslate"><span class="pre">array_loader.py</span></code>)</p>
+<dl class="simple">
+<dt>What it is:</dt><dd><p>Factory system for loading various array formats (NPY, NPZ, Zarr,
+SafeTensors, PyTorch). Implements the Strategy pattern.</p>
+</dd>
+</dl>
+<p>Software pattern: Factory Pattern / Strategy Pattern</p>
+<dl class="simple">
+<dt>Supported formats:</dt><dd><ul class="simple">
+<li><p>NPY: NumPy single array (<code class="docutils literal notranslate"><span class="pre">.npy</span></code>)</p></li>
+<li><p>NPZ: NumPy compressed archive (<code class="docutils literal notranslate"><span class="pre">.npz</span></code>)</p></li>
+<li><p>Zarr: Chunked, compressed arrays (<code class="docutils literal notranslate"><span class="pre">.zarr</span></code>)</p></li>
+<li><p>SafeTensors: Fast tensor serialization (<code class="docutils literal notranslate"><span class="pre">.safetensors</span></code>)</p></li>
+<li><p>PyTorch: PyTorch tensor files (<code class="docutils literal notranslate"><span class="pre">.pt</span></code>, <code class="docutils literal notranslate"><span class="pre">.pth</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset.array_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_array</span>
+
+<span class="c1"># Automatically detects format</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">load_array</span><span class="p">(</span><span class="s2">&quot;landmarks.npy&quot;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">load_array</span><span class="p">(</span><span class="s2">&quot;features.safetensors&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Plugins</strong> (<code class="docutils literal notranslate"><span class="pre">../plugins/</span></code>)</p>
+<dl class="simple">
+<dt>What it is:</dt><dd><p>Dataset-specific adapters for popular sign language datasets.
+Converts original formats to the unified SLDataset schema.</p>
+</dd>
+</dl>
+<p>Software pattern: Adapter Pattern / Plugin Architecture</p>
+<dl class="simple">
+<dt>Available plugins:</dt><dd><ul class="simple">
+<li><p>FluentSigners50: Adapter for FluentSigners-50 dataset</p></li>
+<li><p>(More can be added via plugin system)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plugin automatically handles dataset-specific structure</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.plugins.fluentsigners50.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_fluentsigners50</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_fluentsigners50</span><span class="p">(</span><span class="s2">&quot;path/to/fs50&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="use-cases">
+<h3>Use Cases<a class="headerlink" href="#use-cases" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Loading Preprocessed Datasets</strong>:</p>
+<p>After using LMPipe to extract landmarks, load them for training:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="n">zarr</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;preprocessed_dataset.zarr&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">SLDataset</span><span class="o">.</span><span class="n">from_zarr</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2"> samples&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>PyTorch Training Loop</strong>:</p>
+<p>Integrate with PyTorch for model training:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">SLDataset</span><span class="o">.</span><span class="n">from_zarr</span><span class="p">(</span><span class="n">zarr</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;data.zarr&quot;</span><span class="p">))</span>
+<span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
+        <span class="n">landmarks</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">landmarks</span><span class="p">[</span><span class="s2">&quot;pose&quot;</span><span class="p">]</span>  <span class="c1"># Shape: [B, T, N, 3]</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="s2">&quot;gloss&quot;</span><span class="p">]</span>
+        <span class="c1"># Training logic...</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Dataset Conversion</strong>:</p>
+<p>Convert from file system to Zarr format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDatasetItem</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="n">zarr</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;output.zarr&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+<span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">sample_path</span> <span class="ow">in</span> <span class="n">dataset_paths</span><span class="p">:</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">SLDatasetItem</span><span class="o">.</span><span class="n">from_file_system</span><span class="p">(</span><span class="n">sample_path</span><span class="p">)</span>
+    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<span class="c1"># Save to Zarr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">SLDataset</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">},</span> <span class="n">connections</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">},</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">)</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">to_zarr</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Custom Collate Function</strong>:</p>
+<p>Handle variable-length sequences:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">collate_to_padded_batch</span>
+
+<span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">collate_fn</span><span class="o">=</span><span class="n">collate_to_padded_batch</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="architecture">
+<h3>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h3>
+<dl>
+<dt><strong>Storage Backend</strong>:</dt><dd><p>Uses Zarr for efficient array storage:
+- <strong>Chunked</strong>: Only load needed portions of data
+- <strong>Compressed</strong>: Reduce disk space (typically 5-10x compression)
+- <strong>Cloud-ready</strong>: Can store on S3, GCS, or local filesystem</p>
+</dd>
+<dt><strong>Type Safety</strong>:</dt><dd><p>Fully typed with generic type parameters for compile-time safety:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SLDataset</span><span class="p">[</span>
+    <span class="n">Kmeta</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>        <span class="c1"># Metadata keys</span>
+    <span class="n">Kvid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>         <span class="c1"># Video keys</span>
+    <span class="n">Klm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>          <span class="c1"># Landmark keys</span>
+    <span class="n">Ktgt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>         <span class="c1"># Target keys</span>
+    <span class="n">V</span><span class="p">:</span> <span class="n">Tensor</span> <span class="o">|</span> <span class="n">Array</span>  <span class="c1"># Value type</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Plugin System</strong>:</dt><dd><p>Extensible architecture for adding new dataset formats:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">project</span><span class="o">.</span><span class="n">entry</span><span class="o">-</span><span class="n">points</span><span class="o">.</span><span class="s2">&quot;cslrtools2.sldataset.plugins&quot;</span><span class="p">]</span>
+<span class="s2">&quot;fluentsigners50&quot;</span> <span class="o">=</span> <span class="s2">&quot;cslrtools2.plugins.fluentsigners50.sldataset:plugin_info&quot;</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</section>
+<section id="performance">
+<h3>Performance<a class="headerlink" href="#performance" title="Link to this heading"></a></h3>
+<p>Storage efficiency:
+- <strong>Zarr compression</strong>: 5-10x smaller than uncompressed NPY
+- <strong>Random access</strong>: &lt;10ms per sample (SSD)
+- <strong>Parallel loading</strong>: PyTorch DataLoader num_workers support</p>
+<p>Memory usage:
+- <strong>Lazy loading</strong>: Only load requested samples
+- <strong>Chunked arrays</strong>: Partial array loading for large samples</p>
+</section>
+<section id="command-line-interface">
+<h3>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">sldataset2</span></code> command provides dataset management tools:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># List dataset contents</span>
+<span class="n">sldataset2</span> <span class="n">info</span> <span class="n">dataset</span><span class="o">.</span><span class="n">zarr</span>
+
+<span class="c1"># Convert format</span>
+<span class="n">sldataset2</span> <span class="n">convert</span> <span class="o">--</span><span class="kn">from</span><span class="w"> </span><span class="nn">npy</span> <span class="o">--</span><span class="n">to</span> <span class="n">zarr</span> <span class="nb">input</span><span class="o">/</span> <span class="n">output</span><span class="o">.</span><span class="n">zarr</span>
+
+<span class="c1"># Validate dataset</span>
+<span class="n">sldataset2</span> <span class="n">validate</span> <span class="n">dataset</span><span class="o">.</span><span class="n">zarr</span>
+</pre></div>
+</div>
+<p>For CLI details, see <code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.sldataset.app.cli</span></code>.</p>
+</section>
+<section id="software-engineering-patterns-used">
+<h3>Software Engineering Patterns Used<a class="headerlink" href="#software-engineering-patterns-used" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Repository Pattern</strong>: SLDataset abstracts data access</p></li>
+<li><p><strong>Data Transfer Object (DTO)</strong>: SLDatasetItem encapsulates sample data</p></li>
+<li><p><strong>Factory Pattern</strong>: Array loaders for different formats</p></li>
+<li><p><strong>Strategy Pattern</strong>: Pluggable storage backends</p></li>
+<li><p><strong>Adapter Pattern</strong>: Dataset-specific plugins</p></li>
+<li><p><strong>Iterator Pattern</strong>: IterableSLDataset for streaming</p></li>
+<li><p><strong>Template Method</strong>: Base classes for custom datasets</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Core:</dt><dd><ul class="simple">
+<li><p>torch (PyTorch Dataset compatibility)</p></li>
+<li><p>zarr (efficient array storage)</p></li>
+<li><p>numpy (array operations)</p></li>
+</ul>
+</dd>
+<dt>Optional:</dt><dd><ul class="simple">
+<li><p>safetensors (SafeTensors format)</p></li>
+<li><p>Various dataset-specific dependencies (via plugins)</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="see-also">
+<h3>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Dataset API: <a class="reference internal" href="#module-cslrtools2.sldataset.dataset" title="cslrtools2.sldataset.dataset"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.sldataset.dataset</span></code></a></p></li>
+<li><p>Array Loaders: <a class="reference internal" href="#module-cslrtools2.sldataset.array_loader" title="cslrtools2.sldataset.array_loader"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.sldataset.array_loader</span></code></a></p></li>
+<li><p>Utilities: <a class="reference internal" href="#module-cslrtools2.sldataset.utils" title="cslrtools2.sldataset.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.sldataset.utils</span></code></a></p></li>
+<li><p>CLI: <code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.sldataset.app.cli</span></code></p></li>
+<li><p>FluentSigners50 Plugin: <code class="xref py py-mod docutils literal notranslate"><span class="pre">cslrtools2.plugins.fluentsigners50.sldataset</span></code></p></li>
+</ul>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>
+<p>Basic dataset loading:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="n">zarr</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;my_dataset.zarr&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">SLDataset</span><span class="o">.</span><span class="n">from_zarr</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">metadata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Access a sample</span>
+<span class="n">item</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Videos: </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">videos</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Landmarks: </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">landmarks</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Targets: </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>PyTorch integration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">SLDataset</span><span class="o">.</span><span class="n">from_zarr</span><span class="p">(</span><span class="n">zarr</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;data.zarr&quot;</span><span class="p">))</span>
+<span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
+    <span class="c1"># Process batch</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Creating a custom dataset:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cslrtools2.sldataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">SLDataset</span><span class="p">,</span> <span class="n">SLDatasetItem</span>
+
+<span class="n">items</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">SLDatasetItem</span><span class="p">(</span>
+        <span class="n">videos</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;rgb&quot;</span><span class="p">:</span> <span class="n">video_data</span><span class="p">},</span>
+        <span class="n">landmarks</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;pose&quot;</span><span class="p">:</span> <span class="n">landmarks</span><span class="p">},</span>
+        <span class="n">targets</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">label</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">video_data</span><span class="p">,</span> <span class="n">landmarks</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">my_data</span>
+<span class="p">]</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">SLDataset</span><span class="p">(</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;MyDataset&quot;</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">},</span>
+    <span class="n">connections</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">items</span><span class="o">=</span><span class="n">items</span>
+<span class="p">)</span>
+
+<span class="c1"># Save to Zarr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">zarr</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;my_dataset.zarr&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">to_zarr</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cslrtools2.plugins.html" class="btn btn-neutral float-left" title="cslrtools2.plugins package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cslrtools2.typings.html" class="btn btn-neutral float-right" title="cslrtools2.typings package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, plumiume.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

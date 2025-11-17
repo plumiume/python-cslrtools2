@@ -1,6 +1,22 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import Any, Callable, TypedDict, TypeGuard, Protocol, runtime_checkable
 import importlib.metadata
 from clipar.entities import NamespaceWrapper
+
+from ...exceptions import PluginError
 
 def _is_tuple(obj: object) -> TypeGuard[tuple[Any, ...]]:
     return isinstance(obj, tuple)
@@ -38,26 +54,30 @@ def loader() -> dict[str, PluginInfo[Any]]:
         info = ep.load()
 
         if not _is_tuple(info):
-            raise TypeError(
-                f"Plugin entry point {ep.name} does not return a tuple"
+            raise PluginError(
+                f"Plugin entry point {ep.name} does not return a tuple. "
+                f"Plugin must return (NamespaceWrapper, processor_callable)."
             )
         if len(info) != 2:
-            raise ValueError(
-                f"Plugin entry point {ep.name} does not return a tuple of length 2"
+            raise PluginError(
+                f"Plugin entry point {ep.name} does not return a tuple of length 2. "
+                f"Expected (NamespaceWrapper, processor_callable), got {len(info)} elements."
             )
-    
+
         nswrapper, processor = info
 
         if not _is_nswrapper(nswrapper):
-            raise TypeError(
-                f"First element of plugin entry point {ep.name} is not a NamespaceWrapper"
+            raise PluginError(
+                f"First element of plugin entry point {ep.name} is not a NamespaceWrapper. "
+                f"Got {type(nswrapper)}."
             )
-        
+
         if not _is_processor(processor):
-            raise TypeError(
-                f"Second element of plugin entry point {ep.name} is not a processor callable"
+            raise PluginError(
+                f"Second element of plugin entry point {ep.name} is not a processor callable. "
+                f"Expected a Callable[[T], None], got {type(processor)}."
             )
-        
+
         plugins[ep.name] = PluginInfo(
             name=ep.name,
             nswrapper=nswrapper,

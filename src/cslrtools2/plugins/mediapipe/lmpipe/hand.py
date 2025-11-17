@@ -1,5 +1,18 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import Mapping
-from enum import IntEnum
 from functools import cache
 from itertools import product
 
@@ -12,34 +25,27 @@ from mediapipe.tasks.python.components.containers.landmark import NormalizedLand
 from mediapipe import Image, ImageFormat
 
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
+from ....exceptions import ValidationError
 from ....lmpipe.estimator import shape, headers, estimate, annotate
 from ....lmpipe.app.holistic.estimator import HolisticPartEstimator
 from .base import MediaPipeEstimator, get_mediapipe_model
 from .hand_args import MediaPipeHandKey, MediaPipeHandCategory, MediaPipeHandArgs
+from .mp_constants import HandLandmark
 
 
-class MediaPipeHandNames(IntEnum):
-    WRIST = 0
-    THUMB_CMC = 1
-    THUMB_MCP = 2
-    THUMB_IP = 3
-    THUMB_TIP = 4
-    INDEX_FINGER_MCP = 5
-    INDEX_FINGER_PIP = 6
-    INDEX_FINGER_DIP = 7
-    INDEX_FINGER_TIP = 8
-    MIDDLE_FINGER_MCP = 9
-    MIDDLE_FINGER_PIP = 10
-    MIDDLE_FINGER_DIP = 11
-    MIDDLE_FINGER_TIP = 12
-    RING_FINGER_MCP = 13
-    RING_FINGER_PIP = 14
-    RING_FINGER_DIP = 15
-    RING_FINGER_TIP = 16
-    PINKY_MCP = 17
-    PINKY_PIP = 18
-    PINKY_DIP = 19
-    PINKY_TIP = 20
+# Deprecated: Use HandLandmark from constants module instead
+# This alias is kept for backward compatibility
+MediaPipeHandNames = HandLandmark
+"""Deprecated: Use ``HandLandmark`` from ``constants`` module instead.
+
+This is an alias to MediaPipe's official ``HandLandmark`` enum for backward
+compatibility. New code should import directly from the constants module::
+
+    from cslrtools2.plugins.mediapipe.lmpipe.constants import HandLandmark
+
+.. deprecated:: 0.1.0
+    Use :class:`~cslrtools2.plugins.mediapipe.lmpipe.constants.HandLandmark` instead.
+"""
 
 
 class MediaPipeHandEstimator(
@@ -90,7 +96,7 @@ class MediaPipeHandEstimator(
         elif self.category == "right":
             return "mediapipe.right_hand"
         # bothの時、各メソッドはMapping[MediaPipeHandKey, NDArrayFloat | None]を返すようにする
-        raise ValueError(
+        raise ValidationError(
             f"Invalid category for MediaPipeHandEstimator: {self.category}. "
             "Use 'left' or 'right'."
         )
@@ -149,12 +155,12 @@ class MediaPipeHandEstimator(
 
         if not landmarks:
             return None
-        
+
         left_hand_landmarks: NDArrayFloat | None = None
         right_hand_landmarks: NDArrayFloat | None = None
-        
+
         for ctgrs, lms in zip(handedness, landmarks):
-            
+
             if not ctgrs:
                 continue
 
@@ -172,15 +178,15 @@ class MediaPipeHandEstimator(
                 ])
 
         if self.category == "both":
-            
+
             return {
                 "mediapipe.left_hand": left_hand_landmarks,
                 "mediapipe.right_hand": right_hand_landmarks
             }
-        
+
         if self.category == "left":
             return left_hand_landmarks
-        
+
         if self.category == "right":
             return right_hand_landmarks
 

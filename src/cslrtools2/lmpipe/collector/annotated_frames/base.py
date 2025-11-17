@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from abc import abstractmethod
 from typing import Any, Iterable, Protocol, final
 from pathlib import Path
@@ -34,7 +48,7 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
     @abstractmethod
     def file_ext(self) -> str:
         """File extension for this collector's output format.
-        
+
         For image sequence collectors, this is the extension of individual frames.
         For video collectors, this is the extension of the video file.
         """
@@ -42,7 +56,7 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
 
     def configure_from_options(self, options: LMPipeOptions) -> None:
         """Configure collector from LMPipe options.
-        
+
         Args:
             options (`LMPipeOptions`): The pipeline options containing configuration.
         """
@@ -51,13 +65,13 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
     @final
     def _get_output_path(self, dst: Path) -> Path:
         """Get the output path for annotated frames.
-        
+
         This method is final and uses the abstract properties (is_video, is_image_sequence, file_ext)
         to determine the correct output path.
-        
+
         Args:
             dst: The destination directory path.
-        
+
         Returns:
             :class:`Path`: The full output path.
                 - For image sequence collectors: dst/annotated_frames/ (directory)
@@ -72,30 +86,30 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
 
     def apply_exist_rule(self, runspec: "RunSpec[Any]") -> bool:
         """Apply the existence rule to determine if processing should continue.
-        
+
         This method can be overridden by subclasses for custom existence checking logic.
-        
+
         Args:
             runspec: The RunSpec instance containing input/output path information.
-        
+
         Returns:
             :class:`bool`: True if processing should continue, False if it should be skipped.
-        
+
         Raises:
             FileExistsError: If exist_rule is "error" and the output already exists.
         """
         output_path = self._get_output_path(runspec.dst)
-        
+
         if self.is_video:
             # Video mode: check if the video file exists
             exists = output_path.exists()
         else:
             # Image sequence mode: check if the directory exists
             exists = output_path.exists() and output_path.is_dir()
-        
+
         if not exists:
             return True  # No conflict, proceed
-        
+
         if self.exist_rule == "skip":
             return False  # Skip processing
         elif self.exist_rule == "overwrite":
@@ -105,7 +119,7 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
             return True  # For now, just overwrite
         elif self.exist_rule == "error":
             raise FileExistsError(f"Output already exists: {output_path}")
-        
+
         return True  # Default: proceed
 
     # overridable hook
@@ -151,7 +165,7 @@ class AnnotatedFramesShowCollector[K: str](Collector[K]):
 
     def configure_from_options(self, options: LMPipeOptions) -> None:
         """Configure collector from LMPipe options.
-        
+
         Args:
             options (`LMPipeOptions`): The pipeline options containing configuration.
         """

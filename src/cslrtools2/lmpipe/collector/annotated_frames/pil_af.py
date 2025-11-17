@@ -50,10 +50,10 @@ def pil_af_show_collector_creator[K: str](
     key_type: type[K]
     ) -> AnnotatedFramesShowCollector[K]:
     """Create a PilAnnotatedFramesShowCollector instance.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`AnnotatedFramesShowCollector[K]`: PIL/Pillow-based annotated frames viewer.
     """

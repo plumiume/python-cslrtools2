@@ -1,0 +1,49 @@
+# Jekyll configuration for GitHub Pages
+theme: jekyll-theme-cayman
+title: cslrtools2
+description: Comprehensive toolkit for Continuous Sign Language Recognition research
+show_downloads: true
+google_analytics: # Optional: Add your GA tracking ID
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Installation
+    url: /installation
+  - title: API Reference
+    url: /api/
+  - title: Examples
+    url: /examples/
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - .git/
+  - .github/
+
+# Plugins
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-feed
+
+# SEO
+url: "https://ikegami-yukino.github.io"
+baseurl: "/python-cslrtools2"
+repository: "ikegami-yukino/python-cslrtools2"
+
+# Social
+github_username: ikegami-yukino

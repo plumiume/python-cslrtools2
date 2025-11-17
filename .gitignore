@@ -1,13 +1,15 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
-build/
+/build/
 dist/
 wheels/
 *.egg-info
+src/cslrtools2/_version.py
 
 # Virtual environments
 .venv
+.venv-*/
 
 # Assets
 src/cslrtools2/assets/
@@ -16,3 +18,26 @@ src/cslrtools2/assets/
 logs/
 *.log
 log.txt
+
+# IDE and development tools
+.vscode/
+.dockerignore
+
+# Docker
+docker-compose.override.yaml
+.docker/
+# Docker test環境は除外しない (tests/build/)
+
+# Test files and outputs
+/test_*.py
+/analyze_*.py
+/check_*.py
+/create_*.py
+/process_*.py
+/test_output/
+
+*_frame/
+*.mp4
+
+# Temporary documentation
+github-issue-*.md

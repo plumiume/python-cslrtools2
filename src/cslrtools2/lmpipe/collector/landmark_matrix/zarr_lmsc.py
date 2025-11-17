@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from pathlib import Path
 from typing import Mapping
 
@@ -10,7 +24,7 @@ from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 class ZarrLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
     """Write landmarks into Zarr array storage.
-    
+
     Supports two modes:
     - Container mode (per_key=False): Single ``landmarks.zarr/`` directory with all keys as datasets
     - Per-key mode (per_key=True): Multiple ``{key}.zarr/`` directories in ``landmarks/`` directory
@@ -18,7 +32,7 @@ class ZarrLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
     def __init__(self, *, per_key: bool = False) -> None:
         """Initialize the Zarr landmark matrix save collector.
-        
+
         Args:
             per_key (:class:`bool`, optional): If True, save each key to a separate .zarr directory.
                 If False, save all keys to a single landmarks.zarr directory. Defaults to False.
@@ -85,10 +99,10 @@ class ZarrLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
 def zarr_lmsc_creator[K: str](key_type: type[K]) -> ZarrLandmarkMatrixSaveCollector[K]:
     """Create a Zarr landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`ZarrLandmarkMatrixSaveCollector[K]`: Zarr landmark matrix saver (container mode by default).
     """

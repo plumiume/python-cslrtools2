@@ -1,372 +1,317 @@
-# Main Branch Guardian (main-ai) - Code Agent Instructions
+# Dataset Enhancement Workspace - Code Agent Instructions
 
-## 🛡️ Role: main Branch Quality Gatekeeper
+## 🎯 Workspace Context
 
-**Branch**: `main-ai`  
-**Location**: `C:\Users\ikeda\Workspace\1github\cslrtools2-merge`  
-**Purpose**: Monitor and approve merges from `dev-ai/merge-integration` to `main`
+**Branch**: `dev-ai/dataset-enhancement`  
+**Location**: `C:\Users\ikeda\Workspace\1github\cslrtools2-dataset`  
+**Purpose**: SLDataset feature enhancements, test infrastructure, and documentation
 
-## 📋 Mission Statement
+## 📋 Current State
 
-I am the **main-ai guardian**, responsible for ensuring that only high-quality, well-tested code reaches the `main` branch. I enforce strict quality standards and provide clear feedback to development teams.
+### Completed
+- ✅ Workspace setup with independent `.venv`
+- ✅ 44 packages installed via `uv sync --all-groups`
+- ✅ Python 3.12.11 + PyTorch 2.9.0+cu128
+- ✅ Clean working tree
 
-## 🎯 Quality Standards (All Must Pass)
+### Pending Integration
+**Branch to merge**: `origin/dev-ai/merge-integration`
+- Contains: utilities-expansion, dependencies-update, gitignore-cleanup
+- Includes: `tests/` directory with core import tests
+- Status: Ready to merge
 
-### 1. Test Coverage ✅
-- **Minimum**: 80% overall coverage
-- **Core modules**: 85%+ (sldataset, lmpipe/estimator)
-- **All tests**: 100% passing
-- **MediaPipe tests**: Properly skipped when not installed
+## 🚀 Priority Tasks (in order)
 
-### 2. Type Safety ✅
-- **Pyright**: 0 errors in strict mode
-- **Type annotations**: All public APIs fully typed
-- **Generic types**: Proper PEP 695 usage
-
-### 3. Documentation ✅
-- **README.md**: Updated with new features
-- **CHANGELOG.md**: Release entry created
-- **Docstrings**: All public functions documented
-- **Examples**: Working code samples provided
-
-### 4. Code Quality ✅
-- **No critical TODOs**: In production paths
-- **Consistent style**: PEP 8 compliant
-- **Clean imports**: No unused imports
-- **Error handling**: Proper exception usage
-
-### 5. Git Hygiene ✅
-- **Commit history**: Clean, squashed
-- **Commit message**: Conventional Commits format
-- **Breaking changes**: Clearly marked
-- **No conflicts**: Clean merge from main
-
-## 🔍 Review Process
-
-### Step 1: Automated Checks
-
+### 1. Merge Integration Branch
 ```powershell
-cd C:\Users\ikeda\Workspace\1github\cslrtools2-merge
-
-# Fetch latest integration branch
 git fetch origin
-git checkout dev-ai/merge-integration
-git pull origin dev-ai/merge-integration
+git merge origin/dev-ai/merge-integration --no-edit
+```
 
-# Install dependencies
+**Expected changes**:
+- New `tests/` directory with `test_core_imports.py`, `test_mediapipe_constants.py`
+- Updated exception handling and utilities
+- Apache 2.0 license headers in new files
+
+### 2. Add Test Dependencies
+Edit `pyproject.toml`:
+```toml
+[dependency-groups]
+test = [
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
+]
+```
+
+Then run:
+```powershell
 uv sync --all-groups
+```
 
-# Run test suite
-uv run pytest tests/ -v --cov=cslrtools2 --cov-report=term --cov-report=html
+### 3. Create SLDataset Tests
 
-# Check type safety
+**File**: `tests/test_sldataset.py`
+
+Test coverage:
+- ✅ Dataset creation with Zarr backend
+- ✅ Item addition (videos, landmarks, targets)
+- ✅ Metadata management
+- ✅ `__getitem__` and `__len__` operations
+- ✅ PyTorch DataLoader compatibility
+- ✅ Connection graph storage
+
+**Example structure**:
+```python
+# tests/test_sldataset.py
+from __future__ import annotations
+
+import pytest
+import tempfile
+from pathlib import Path
+from cslrtools2.sldataset.dataset import SLDataset
+
+@pytest.fixture
+def temp_dataset_path(tmp_path):
+    return tmp_path / "test_dataset.zarr"
+
+def test_create_dataset(temp_dataset_path):
+    """Test basic dataset creation."""
+    dataset = SLDataset.create(
+        path=temp_dataset_path,
+        metadata={"name": "test", "version": "0.1"}
+    )
+    assert dataset.path.exists()
+    assert len(dataset) == 0
+
+def test_add_item(temp_dataset_path):
+    """Test adding items to dataset."""
+    # Implementation needed
+    ...
+```
+
+### 4. Create Array Loader Tests
+
+**File**: `tests/test_array_loader.py`
+
+Test coverage:
+- ✅ Load from NumPy arrays
+- ✅ Load from videos (cv2)
+- ✅ Load from Zarr arrays
+- ✅ Load from PyTorch tensors
+- ✅ Format auto-detection
+
+### 5. Implement sldataset2 CLI Commands
+
+**File**: `src/cslrtools2/sldataset/app/cli.py`
+
+Add subcommands:
+
+```python
+@namespace
+class SLDatasetArgs:
+    command: Literal["info", "validate", "convert"] = "info"
+    
+    # info command
+    dataset_path: Path | None = None
+    
+    # validate command
+    check_integrity: bool = False
+    
+    # convert command
+    input_path: Path | None = None
+    output_path: Path | None = None
+    output_format: Literal["zarr", "hdf5"] | None = None
+```
+
+**Implementation targets**:
+1. `sldataset2 info <dataset.zarr>`: Show dataset statistics
+   - Number of items
+   - Metadata summary
+   - Size on disk
+   - Video/landmark/target shapes
+
+2. `sldataset2 validate <dataset.zarr>`: Check integrity
+   - Verify all items have required keys
+   - Check array shapes consistency
+   - Validate connection graphs
+
+3. `sldataset2 convert <input> <output>`: Format conversion
+   - Support zarr → zarr (optimization)
+   - Future: zarr → hdf5, hdf5 → zarr
+
+### 6. Documentation Updates
+
+**File**: `README.md`
+
+Add sections:
+
+1. **FluentSigners50 Plugin Usage**:
+```python
+from cslrtools2.plugins.fluentsigners50.sldataset import load_fluentsigners50
+
+# Load dataset
+dataset = load_fluentsigners50(
+    data_dir="/path/to/fluentsigners50",
+    split="train"
+)
+
+# Use with PyTorch
+from torch.utils.data import DataLoader
+loader = DataLoader(dataset, batch_size=16, shuffle=True)
+```
+
+2. **sldataset2 CLI Examples**:
+```bash
+# Show dataset info
+uv run sldataset2 info my_dataset.zarr
+
+# Validate dataset
+uv run sldataset2 validate my_dataset.zarr --check-integrity
+
+# Convert dataset
+uv run sldataset2 convert input.zarr output_optimized.zarr
+```
+
+3. **Dataset Creation Tutorial**:
+- Step-by-step guide
+- Code examples for each stage
+- Best practices
+
+### 7. Type Stub Completion
+
+**File**: `typings/zarr/api/synchronous.pyi`
+
+Complete TODO items:
+- `fill_value` parameter types
+- `object_codec` types
+- `write_empty_chunks` types
+- `meta_array` return types
+
+Reference: Zarr v3 API documentation
+
+## 🔧 Development Workflow
+
+### Always use `uv run python`
+```powershell
+# ❌ Wrong
+python script.py
+
+# ✅ Correct
+uv run python script.py
+```
+
+### Testing
+```powershell
+# Run all tests
+uv run pytest tests/ -v
+
+# Run with coverage
+uv run pytest tests/ --cov=cslrtools2 --cov-report=html
+
+# Run specific test file
+uv run pytest tests/test_sldataset.py -v
+```
+
+### Type Checking
+```powershell
 uv run pyright src/
-
-# Verify no critical issues
-git log main..HEAD --oneline
-git diff main..HEAD --stat
 ```
 
-### Step 2: Coverage Analysis
-
-**Acceptance criteria**:
-```
-TOTAL coverage ≥ 80%
-
-Specific modules:
-- src/cslrtools2/sldataset/dataset.py ≥ 85%
-- src/cslrtools2/sldataset/array_loader.py ≥ 80%
-- src/cslrtools2/lmpipe/estimator.py ≥ 80%
-- src/cslrtools2/convsize.py ≥ 75%
-- src/cslrtools2/lmpipe/collector/* ≥ 70% (average)
-```
-
-### Step 3: Documentation Review
-
-**Checklist**:
-- [ ] README.md updated with new features
-- [ ] CHANGELOG.md has version entry
-- [ ] CLI help text matches implementation
-- [ ] Code examples are runnable
-- [ ] API documentation complete
-
-### Step 4: Manual Review
-
-**Code quality checks**:
-- Review critical path implementations
-- Check error handling patterns
-- Verify logging is appropriate
-- Ensure no security issues
-- Validate performance considerations
-
-## ✅ Approval Workflow
-
-### If All Checks Pass
-
+### Code Formatting (if needed)
 ```powershell
-# Switch to main-ai branch
-git checkout main-ai
-
-# Update from main
-git pull origin main
-
-# Merge integration branch (squash)
-git merge --squash dev-ai/merge-integration
-
-# Create approval commit
-git commit -m "feat: Approve merge from dev-ai/merge-integration
-
-[Provide detailed summary of changes]
-
-Quality checks:
-✅ Tests: [X]/[X] passed, [Y]% coverage
-✅ Type safety: 0 errors
-✅ Documentation: Complete
-✅ Breaking changes: [None/Listed below]
-
-Merged branches:
-- dev-ai/utilities-expansion
-- dev-ai/dataset-enhancement
-- dev-ai/[other-branches]
-
-Closes: #[issue-numbers]"
-
-# Push to main
-git push origin main-ai:main
-
-# Notify teams
-Write-Host "✅ Merge approved and pushed to main" -ForegroundColor Green
+uv run ruff check src/
+uv run ruff format src/
 ```
 
-## 🚫 Rejection Workflow
+## 📐 Architecture Patterns to Follow
 
-### If Checks Fail
+### 1. Generic Key Types
+```python
+class SLDataset[Kmeta: str, Kvid: str, Klm: str, Ktgt: str]:
+    # K types preserve through operations
+    def __getitem__(self, idx: int) -> SLDatasetItem[Kmeta, Kvid, Klm, Ktgt]:
+        ...
+```
 
-Create detailed rejection report:
+### 2. Entry Point Plugins
+All plugins register via `pyproject.toml`:
+```toml
+[project.entry-points."cslrtools2.sldataset.plugins"]
+"fluentsigners50" = "cslrtools2.plugins.fluentsigners50.sldataset:fluentsigners50_loader"
+```
 
+### 3. Type Annotations
+Always use:
+- `from __future__ import annotations`
+- PEP 695 generic syntax: `class MyClass[T]:`
+- Explicit return types on all functions
+
+### 4. Error Handling
+Use custom exceptions from `cslrtools2.exceptions`:
+```python
+from cslrtools2.exceptions import CSLRToolsError, DatasetError
+
+raise DatasetError(f"Invalid dataset path: {path}")
+```
+
+## ⚠️ Important Notes
+
+### MediaPipe is Optional
+- MediaPipe tests should skip gracefully if not installed
+- Use `pytest.mark.skipif` for MediaPipe-dependent tests
+- Check `tests/test_mediapipe_constants.py` for example
+
+### Zarr Storage Format
+Dataset structure:
+```
+dataset.zarr/
+├── metadata/          # Dataset-level info
+├── connections/       # Landmark connectivity graphs
+└── items/{idx}/
+    ├── videos/{kvid}  # Video arrays
+    ├── landmarks/{klm}  # Landmark matrices
+    └── targets/{ktgt}  # Labels/annotations
+```
+
+### Commit Message Format
+Follow Conventional Commits:
+```
+feat: Add sldataset2 info command
+fix: Correct array loader video detection
+test: Add SLDataset CRUD tests
+docs: Add FluentSigners50 usage examples
+refactor: Improve type hints in dataset.py
+```
+
+## 🎯 Success Criteria
+
+Before merging to `dev-ai/merge-integration`:
+- ✅ All tests pass (`uv run pytest tests/ -v`)
+- ✅ No type errors (`uv run pyright src/`)
+- ✅ At least 80% test coverage for `sldataset/` module
+- ✅ `sldataset2` CLI commands functional
+- ✅ Documentation updated with examples
+- ✅ Clean commit history (squash if needed)
+
+## 📞 Next Steps After Completion
+
+1. Push to remote:
 ```powershell
-# Document issues
-$report = @"
-🛡️ main-ai Guardian Report - REJECTION
-
-Date: $(Get-Date -Format "yyyy-MM-dd HH:mm")
-Branch: dev-ai/merge-integration
-Reviewer: main-ai
-
-❌ MERGE REJECTED
-
-Failed Criteria:
-[List each failed criterion with details]
-
-Example:
-1. ❌ Test Coverage: 41% < 80% (FAIL)
-   - Current: 795/1919 lines covered
-   - Required: 1535+ lines
-   - Missing tests:
-     * test_sldataset.py
-     * test_array_loader.py
-     * test_estimator.py
-
-2. ✅ Type Safety: PASS (0 errors)
-
-3. ❌ Documentation: Incomplete
-   - Missing: CLI usage examples
-   - Missing: CHANGELOG.md entry
-
-Required Actions:
-1. Add test coverage to meet 80% threshold
-2. Complete documentation
-3. Re-submit for review
-
-Estimated work: [hours/days]
-"@
-
-# Save report
-$report | Out-File -FilePath "GUARDIAN_REPORT_$(Get-Date -Format 'yyyyMMdd_HHmmss').md"
-
-# Stay on main-ai (do NOT merge)
-git checkout main-ai
-
-# Notify teams
-Write-Host "🚫 Merge rejected - see GUARDIAN_REPORT for details" -ForegroundColor Red
+git push origin dev-ai/dataset-enhancement
 ```
 
-## 📊 Current Status Dashboard
-
-### Latest Check Results
-
-Run this to get current status:
-
+2. Merge into integration branch:
 ```powershell
 cd C:\Users\ikeda\Workspace\1github\cslrtools2-merge
-
-Write-Host "`n🛡️ main-ai Guardian Status`n" -ForegroundColor Cyan
-
-# Check if on correct branch
-$branch = git branch --show-current
-Write-Host "Current branch: $branch" -ForegroundColor $(if ($branch -eq "main-ai") {"Green"} else {"Yellow"})
-
-# Commits waiting for review
-$commits = git log --oneline main..origin/dev-ai/merge-integration 2>$null | Measure-Object -Line
-Write-Host "Commits pending review: $($commits.Lines)" -ForegroundColor Cyan
-
-# Last check time
-if (Test-Path "GUARDIAN_REPORT_*.md") {
-    $lastReport = Get-ChildItem "GUARDIAN_REPORT_*.md" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    Write-Host "Last review: $($lastReport.LastWriteTime)" -ForegroundColor Gray
-}
+git merge dev-ai/dataset-enhancement
+uv run pytest tests/ -v
 ```
 
-## 🔔 Monitoring Integration Branch
-
-### Watch for Completion Signals
-
-Monitor `dev-ai/merge-integration` for:
-
-1. **New commits pushed**
-   ```powershell
-   git fetch origin
-   git log main..origin/dev-ai/merge-integration --oneline
-   ```
-
-2. **Test results in commit messages**
-   ```powershell
-   git log origin/dev-ai/merge-integration -1 --format="%B" | Select-String "test|coverage"
-   ```
-
-3. **Ready-for-merge markers**
-   - Commit message contains: "Ready for main merge"
-   - All CI/CD checks passing (future)
-   - Coverage report in commit
-
-### Automated Polling (Optional)
-
-```powershell
-# Poll every 30 minutes
-while ($true) {
-    git fetch origin
-    $newCommits = git log main..origin/dev-ai/merge-integration --oneline | Measure-Object -Line
-    
-    if ($newCommits.Lines -gt 0) {
-        Write-Host "🔔 New commits detected on merge-integration!" -ForegroundColor Yellow
-        # Trigger review process
-    }
-    
-    Start-Sleep -Seconds 1800  # 30 minutes
-}
-```
-
-## 📝 Rejection Patterns
-
-### Common Rejection Reasons
-
-1. **Insufficient Test Coverage** (Most common)
-   - Missing: `test_sldataset.py`, `test_array_loader.py`
-   - Low coverage in collectors, estimators
-   - No integration tests
-
-2. **Type Safety Issues**
-   - Missing return types
-   - Improper generic usage
-   - Optional type mishandling
-
-3. **Incomplete Documentation**
-   - No CHANGELOG entry
-   - Missing README updates
-   - Undocumented API changes
-
-4. **Code Quality Concerns**
-   - Critical TODOs in production code
-   - Poor error handling
-   - Performance regressions
-
-### Response Templates
-
-**Test Coverage Failure**:
-```
-Test coverage 41% < 80% (FAIL)
-
-Required test files:
-- tests/test_sldataset.py: SLDataset CRUD operations
-- tests/test_array_loader.py: Multi-format loading
-- tests/test_estimator.py: Base estimator functionality
-- tests/test_collectors.py: Format-specific collectors
-- tests/test_convsize.py: Convolution size calculations
-
-Target: 80% overall, 85% for core modules
-ETA: 2-3 hours in dataset-enhancement workspace
-```
-
-**Type Safety Failure**:
-```
-Pyright errors detected: [count] errors
-
-Fix required:
-[List specific errors with file/line numbers]
-
-All public APIs must have complete type annotations.
-```
-
-**Documentation Failure**:
-```
-Documentation incomplete:
-
-Missing:
-- README.md: New feature examples
-- CHANGELOG.md: v[X.Y.Z] release entry
-- Docstrings: [specific functions]
-
-Required: All public APIs documented with examples.
-```
-
-## 🎯 Success Metrics
-
-### Approval Statistics (Track Over Time)
-
-- **Approval rate**: [X]% of review attempts
-- **Average time to approval**: [Y] days
-- **Common rejection reasons**: [List top 3]
-- **Test coverage trend**: [Improving/Stable/Declining]
-
-### Quality Trends
-
-Monitor:
-- Coverage percentage over time
-- Type error count trend
-- Documentation completeness
-- Commit message quality
-
-## 🔄 Continuous Monitoring Mode
-
-### Stay Active on main-ai
-
-```powershell
-# Always work from main-ai branch
-git checkout main-ai
-
-# Keep synchronized with main
-git fetch origin main
-git merge --ff-only origin/main
-
-# Watch for integration updates
-git fetch origin dev-ai/merge-integration
-
-# Review when ready
-# [Run review process from Step 1]
-```
-
-### Communication with Integration Workspace
-
-When integration branch signals ready:
-1. Fetch latest changes
-2. Run automated checks
-3. Generate approval/rejection report
-4. Merge to main OR provide feedback
-5. Notify team of decision
+3. Create PR to `main` (if all tests pass)
 
 ---
 
-**Guardian Mode**: ACTIVE  
 **Last Updated**: 2025-11-14  
-**Branch**: main-ai  
-**Vigilance Level**: MAXIMUM 🛡️
+**Agent Mode**: Autonomous Development  
+**Python Version**: 3.12.11  
+**Package Manager**: uv (with `uv.lock`)

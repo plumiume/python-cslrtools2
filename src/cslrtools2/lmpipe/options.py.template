@@ -1,61 +1,76 @@
 #! /usr/bin/env python3
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from .typings import ExecutorMode, ExecutorType, ExistRule
 
 
 class LoggingOptions:
-    """options for logging configuration"""
+    """Logging configuration for pipeline execution."""
 
     log_level: str = "info"
-    "logging level (e.g., 'debug', 'info', 'warning', 'error')"
+    "Logging verbosity level. Choices: 'debug', 'info', 'warning', 'error', 'critical'."
     log_file: str | None = None
-    "file path to save logs; if None, logs are printed to console"
+    "Optional path to save log output. If None, logs are written to console only."
 
 
 class RuntimeResources:
-    """specification of runtime resource allocation"""
+    """Runtime resource allocation for parallel execution."""
+    
     cpu: float = 1.0
-    "amount of CPU resources to allocate"
+    "Number of CPU cores to allocate per worker (float allows fractional allocation)."
     cpu_tags: list[str] = []
-    "tags for CPU resource allocation"
+    "Tags for CPU resource management (used by advanced schedulers)."
     gpu: float = 0.0
-    "amount of GPU resources to allocate"
+    "Number of GPU devices to allocate per worker (0.0 = CPU-only execution)."
     gpu_tags: list[str] = []
-    "tags for GPU resource allocation"
+    "Tags for GPU resource management (used by advanced schedulers)."
 
 
 class ExecutorOptions:
-    """options for executor configuration"""
+    """Parallel execution configuration."""
+    
     max_cpus: int = 1
-    "maximum number of CPUs to allocate for the executor"
+    "Maximum number of parallel workers. Set to 1 for sequential processing."
     executor_mode: ExecutorMode = None
-    "execution mode for the executor"
+    "Execution mode: 'loky' for robust multiprocessing, 'thread' for I/O bound tasks, or None for auto-detection."
     executor_type: ExecutorType = None
-    "type of executor to use"
+    "Executor backend: 'process' for CPU-bound tasks, 'thread' for I/O-bound, or None for auto-selection."
 
 
 class CollectorOptions:
-    """options for collector configuration"""
+    """Output collection and saving configuration."""
 
     # landmark matrix save options
     landmark_matrix_save_file_format: str | None = None
-    "file format for saving landmark matrix files"
+    "File format for landmark coordinates. Supported: '.csv', '.json', '.npy', '.npz', '.pt', '.safetensors', '.zarr'. None = disabled."
     landmark_matrix_save_exist_rule: ExistRule = "skip"
-    "existence rule for saving landmark matrix files"
+    "Behavior when output file exists: 'skip' (keep existing), 'overwrite' (replace), or 'error' (raise exception)."
 
     # annotated frames save options
     annotated_frames_save_file_format: str = ".mp4"
-    "file format for saving annotated frame files"
+    "Video format for annotated output. Supported: '.mp4', '.avi', '.mov', '.mkv'."
     annotated_frames_save_framework: str | None = None
-    "framework to use for saving annotated frames (e.g., 'cv2')"
+    "Framework for video encoding: 'cv2' (OpenCV), 'matplotlib', or None for auto-detection."
     # video file ext -> annotated_frames{ext}
     # image file ext -> annotated_frames/{seq_id}{ext}
     annotated_frames_save_exist_rule: ExistRule = "skip"
-    "existence rule for saving annotated frame files"
+    "Behavior when annotated output exists: 'skip', 'overwrite', or 'error'."
 
     # annotated frames show options
     annotated_frames_show_framework: str | None = None
-    "framework to use for displaying annotated frames (e.g., 'cv2')"
+    "Framework for live preview display: 'cv2' (OpenCV window), 'pil' (PIL), 'matplotlib', 'torchvision', or None to disable."
 
 
 class LMPipeOptions(

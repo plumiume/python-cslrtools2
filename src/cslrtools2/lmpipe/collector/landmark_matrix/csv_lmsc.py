@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from csv import DictWriter
 from pathlib import Path
 from typing import Mapping, TextIO
@@ -19,7 +33,7 @@ class CsvLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
         extension: str | None = None,
     ) -> None:
         """Initialize the CSV landmark matrix save collector.
-        
+
         Args:
             delimiter (:class:`str`, optional): Field delimiter. Defaults to ",".
             encoding (:class:`str`, optional): File encoding. Defaults to "utf-8".
@@ -52,10 +66,10 @@ class CsvLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
     @staticmethod
     def _guess_extension(delimiter: str) -> str:
         """Guess file extension based on delimiter.
-        
+
         Args:
             delimiter (:class:`str`): The field delimiter.
-            
+
         Returns:
             :class:`str`: The guessed file extension.
         """
@@ -74,14 +88,14 @@ class CsvLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
     def _ensure_writer(self, key: str, sample_width: int) -> DictWriter[str]:
         """Ensure a CSV writer exists for the given key.
-        
+
         Args:
             key (:class:`str`): The landmark key.
             sample_width (:class:`int`): The width of each sample.
-            
+
         Returns:
             `DictWriter[str]`: The CSV writer for this key.
-            
+
         Raises:
             RuntimeError: If the landmark directory is not prepared.
             ValueError: If sample width is inconsistent.
@@ -147,10 +161,10 @@ class CsvLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
 
 def csv_lmsc_creator[K: str](key_type: type[K]) -> CsvLandmarkMatrixSaveCollector[K]:
     """Create a CSV landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`CsvLandmarkMatrixSaveCollector[K]`: CSV landmark matrix saver with comma delimiter.
     """
@@ -158,10 +172,10 @@ def csv_lmsc_creator[K: str](key_type: type[K]) -> CsvLandmarkMatrixSaveCollecto
 
 def tsv_lmsc_creator[K: str](key_type: type[K]) -> CsvLandmarkMatrixSaveCollector[K]:
     """Create a TSV landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`CsvLandmarkMatrixSaveCollector[K]`: CSV landmark matrix saver with tab delimiter.
     """
@@ -169,10 +183,10 @@ def tsv_lmsc_creator[K: str](key_type: type[K]) -> CsvLandmarkMatrixSaveCollecto
 
 def ssv_lmsc_creator[K: str](key_type: type[K]) -> CsvLandmarkMatrixSaveCollector[K]:
     """Create an SSV landmark matrix save collector.
-    
+
     Args:
         key_type (`type[K]`): Type of the key for type checking.
-    
+
     Returns:
         :class:`CsvLandmarkMatrixSaveCollector[K]`: CSV landmark matrix saver with semicolon delimiter.
     """

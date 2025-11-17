@@ -43,41 +43,59 @@ Helper functions for calculating convolution output sizes in PyTorch models.
 
 ## 📦 Installation
 
-### Basic Installation
+### Recommended: Using `uv`
+
+[`uv`](https://github.com/astral-sh/uv) is the recommended package manager for faster and more reliable installations:
 
 ```bash
-pip install cslrtools2
-```
+# Install cslrtools2
+uv pip install cslrtools2
 
-### With MediaPipe Support
-
-For landmark extraction features, install with MediaPipe:
-
-```bash
-pip install cslrtools2
-pip install --upgrade mediapipe  # Install MediaPipe separately
-```
-
-Or using dependency groups (with `uv`):
-
-```bash
+# With MediaPipe support (for landmark extraction)
 uv pip install cslrtools2 --group mediapipe
+
+# For development
+uv pip install cslrtools2 --group dev
 ```
+
+### Using pip
+
+```bash
+# Basic installation
+pip install cslrtools2
+
+# With MediaPipe support
+pip install cslrtools2
+pip install mediapipe>=0.10.14
+```
+
+### PyTorch with CUDA Support
+
+For GPU acceleration, install PyTorch with CUDA support:
+
+```bash
+# Using uv (recommended)
+uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+
+# Using pip
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+```
+
+See [PyTorch Getting Started](https://pytorch.org/get-started/locally/) for other CUDA versions.
 
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/python-cslrtools2.git
+git clone https://github.com/ikegami-yukino/python-cslrtools2.git
 cd python-cslrtools2
+
+# Using uv (recommended)
+uv pip install -e .
+uv pip install -e . --group dev --group mediapipe
+
+# Using pip
 pip install -e .
-```
-
-### Development Installation
-
-```bash
-git clone https://github.com/yourusername/python-cslrtools2.git
-cd python-cslrtools2
-pip install -e ".[dev]"
+pip install -e ".[dev,mediapipe]"
 ```
 
 ---
@@ -265,6 +283,27 @@ pytest
 # Run with coverage
 pytest --cov=cslrtools2 --cov-report=html
 ```
+
+### Docker Test Environments
+
+Multiple PyTorch+CUDA environments for testing. See [`tests/build/`](tests/build/) for details.
+
+```bash
+cd tests/build
+
+# Build and test specific environment
+docker compose build pytorch-cu128
+docker compose run --rm pytorch-cu128 uv run python tests/build/test_pytorch_cuda.py
+
+# Test all environments
+foreach ($env in @('pytorch-cu128', 'pytorch-cu126', 'pytorch-cu130', 'pytorch-cpu')) {
+    docker compose run --rm $env uv run python tests/build/test_pytorch_cuda.py
+}
+```
+
+For more information, see:
+- [`tests/build/README.md`](tests/build/README.md) - Quick start guide
+- [`tests/build/DOCKER_STRATEGY.md`](tests/build/DOCKER_STRATEGY.md) - Detailed strategy
 
 ---
 

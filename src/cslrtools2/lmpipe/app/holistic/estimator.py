@@ -1,3 +1,17 @@
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from abc import abstractmethod
 from functools import cache
 from typing import Any, Mapping
@@ -20,21 +34,21 @@ class HolisticPoseEstimator[K: str](Estimator[K]):
         landmarks: Mapping[K, NDArrayFloat],
         height: int, width: int
         ) -> BaseROI: ...
-    
+
     @abstractmethod
     def configure_right_hand_roi(
         self,
         landmarks: Mapping[K, NDArrayFloat],
         height: int, width: int
         ) -> BaseROI: ...
-    
+
     @abstractmethod
     def configure_both_hands_roi(
         self,
         landmarks: Mapping[K, NDArrayFloat],
         height: int, width: int
         ) -> BaseROI: ...
-    
+
     @abstractmethod
     def configure_face_roi(
         self,
@@ -275,4 +289,3 @@ class HolisticEstimator(Estimator[str]):
             self.left_hand_estimator.setup()
         if self.face_estimator:
             self.face_estimator.setup()
-

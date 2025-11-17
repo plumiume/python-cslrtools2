@@ -1,0 +1,86 @@
+services:
+  # CUDA 12.8 (メイン開発環境)
+  pytorch-cu128:
+    build:
+      context: ../..
+      dockerfile: tests/build/Dockerfile
+      target: cuda-12.8
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - UV_CACHE_DIR=/root/.cache/uv
+    volumes:
+      - ../..:/workspace:cached
+      - uv-cache:/root/.cache/uv:cached
+    working_dir: /workspace
+    command: tail -f /dev/null
+
+  # CUDA 12.6 (後方互換性検証)
+  pytorch-cu126:
+    build:
+      context: ../..
+      dockerfile: tests/build/Dockerfile
+      target: cuda-12.6
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - UV_CACHE_DIR=/root/.cache/uv
+    volumes:
+      - ../..:/workspace:cached
+      - uv-cache:/root/.cache/uv:cached
+    working_dir: /workspace
+    command: tail -f /dev/null
+
+  # CUDA 13.0 (最新CUDA検証)
+  pytorch-cu130:
+    build:
+      context: ../..
+      dockerfile: tests/build/Dockerfile
+      target: cuda-13.0
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - UV_CACHE_DIR=/root/.cache/uv
+    volumes:
+      - ../..:/workspace:cached
+      - uv-cache:/root/.cache/uv:cached
+    working_dir: /workspace
+    command: tail -f /dev/null
+
+  # CPU版 (CI/CD用)
+  pytorch-cpu:
+    build:
+      context: ../..
+      dockerfile: tests/build/Dockerfile
+      target: cpu
+    environment:
+      - UV_CACHE_DIR=/root/.cache/uv
+    volumes:
+      - ../..:/workspace:cached
+      - uv-cache:/root/.cache/uv:cached
+    working_dir: /workspace
+    command: tail -f /dev/null
+
+  # PyTorch 2.3.0 (最小バージョン検証)
+  pytorch-2.3-cu128:
+    build:
+      context: ../..
+      dockerfile: tests/build/Dockerfile
+      target: pytorch-2.3
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - UV_CACHE_DIR=/root/.cache/uv
+    volumes:
+      - ../..:/workspace:cached
+      - uv-cache:/root/.cache/uv:cached
+    working_dir: /workspace
+    command: tail -f /dev/null
+
+volumes:
+  uv-cache:
+
+networks:
+  default:
+    name: pypi-cache-network
+    external: true

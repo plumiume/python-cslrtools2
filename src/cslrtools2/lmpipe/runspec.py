@@ -26,25 +26,25 @@ __all__ = [
 
 class RunSpec[S: Path | int]:
     """Specification of a processing run, including source and destination.
-    
+
     Encapsulates the source input (file path or camera index) and the
     destination output directory for a landmark processing pipeline run.
-    
+
     Type Parameters:
         S: Source type, either :class:`pathlib.Path` for file inputs or
             :obj:`int` for camera device indices.
-    
+
     Attributes:
         src (S): Source path or camera index.
         dst (:class:`pathlib.Path`): Destination output directory path.
     """
-    
+
     def __init__(self, src: S, dst: Path):
         self.src: S = src
         "Source path or index."
         self.dst: Path = dst
         "Destination path."
-        
+
     @classmethod
     def from_pathlikes(cls: type[RunSpec[Path]], src: PathLike, dst: PathLike) -> RunSpec[Path]:
         """Create a RunSpec from path-like source and destination.
@@ -55,7 +55,7 @@ class RunSpec[S: Path | int]:
 
         Returns:
             :class:`RunSpec`\\[:class:`pathlib.Path`\\]: The created :class:`RunSpec` instance.
-            
+
         Raises:
             :exc:`VideoProcessingError`: If the source path does not exist.
         """
@@ -70,7 +70,7 @@ class RunSpec[S: Path | int]:
             )
 
         return cls(src_path, dst_path)
-        
+
     @classmethod
     def from_index(cls: type[RunSpec[int]], src: int, dst: PathLike) -> RunSpec[int]:
         """Create a RunSpec from a camera index and a destination path.
