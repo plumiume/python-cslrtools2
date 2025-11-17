@@ -47,6 +47,9 @@ sldataset2 = "cslrtools2.sldataset.app.cli:main"
 "mediapipe.face" = "cslrtools2.plugins.mediapipe.lmpipe.face_args:face_info"
 "mediapipe.holistic" = "cslrtools2.plugins.mediapipe.lmpipe.holistic_args:holistic_info"
 
+[project.entry-points."cslrtools2.sldataset.plugins"]
+"fs50" = "cslrtools2.plugins.fluentsigners50.sldataset:info"
+
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"

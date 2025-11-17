@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyright: reportMissingTypeStubs=false
 
 from __future__ import annotations
 
@@ -23,17 +24,14 @@ import numpy as np
 import cv2
 
 from mediapipe.python.solutions.holistic import (
-    # pyright: ignore[reportMissingTypeStubs]
     Holistic,
     PoseLandmark,
     HandLandmark,
 )
 from mediapipe.tasks.python.vision.core.vision_task_running_mode import (
-    # pyright: ignore[reportMissingTypeStubs]
     VisionTaskRunningMode,
 )
 from mediapipe.tasks.python.components.containers.landmark import (
-    # pyright: ignore[reportMissingTypeStubs]
     Landmark,
     NormalizedLandmark,
 )

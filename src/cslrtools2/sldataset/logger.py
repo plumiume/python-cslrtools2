@@ -21,4 +21,11 @@ import logging
 
 sldataset_logger = logging.getLogger("cslrtools2.sldataset")
 
+
+sldataset_formatter = logging.Formatter(
+    fmt="%(asctime)s [%(levelname)s] %(name)s (%(pathname)s:%(lineno)d): %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+
 __all__ = ["sldataset_logger"]

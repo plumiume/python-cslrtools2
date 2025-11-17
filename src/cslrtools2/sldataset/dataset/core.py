@@ -254,6 +254,7 @@ def dataset_to_zarr(
         else (dataset[i] for i in range(len(dataset)))
     )
     for idx, item in enumerate(item_iter):
+        sldataset_logger.debug(f"Writing item {idx} to Zarr store")
         item.to_zarr(items_group.create_group(str(idx)))
 
     return root_group

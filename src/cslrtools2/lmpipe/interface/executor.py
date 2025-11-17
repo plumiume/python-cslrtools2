@@ -18,8 +18,9 @@ from __future__ import annotations
 from typing import Callable
 from concurrent.futures import Executor, Future
 
-# pyright: ignore[reportMissingTypeStubs]
-from loky import ProcessPoolExecutor as LokyExecutor
+from loky import (  # pyright: ignore[reportMissingTypeStubs]
+    ProcessPoolExecutor as LokyExecutor
+)
 
 
 class DummyExecutor(Executor):

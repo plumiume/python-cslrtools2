@@ -185,6 +185,8 @@ class SLDatasetItem[
             Loaded dataset item.
         """
 
+        sldataset_logger.debug(f"Loading SLDatasetItem from file system at: {path}")
+
         path = Path(path)
 
         prekey_load_funcs = {**prekey_loaders, **extra_prekey_load_funcs}
@@ -201,6 +203,11 @@ class SLDatasetItem[
         )
         targets = cls._load_category_from_fs(
             path / "targets", cls.is_target_key, prekey_load_funcs, container_load_funcs
+        )
+
+        sldataset_logger.debug(
+            f"Loaded SLDatasetItem with {len(videos)} videos, "
+            f"{len(landmarks)} landmark types, {len(targets)} targets"
         )
 
         return SLDatasetItem(videos=videos, landmarks=landmarks, targets=targets)

@@ -23,7 +23,16 @@ plugins = loader()
 
 @namespace
 class CliArgs(mixin.ReprMixin, mixin.CommandMixin):
-    pass
+    """Command-line arguments for the sldataset tool."""
+
+    log_level: str = "info"
+    """Logging verbosity level.
+    Options are: 'debug', 'info', 'warning', 'error', 'critical'.
+    """
+    logfile: str | None = None
+    """Optional path to save log output.
+    If not specified, logs are printed to the console.
+    """
 
 
 for pl_info in plugins.values():

@@ -36,21 +36,34 @@ class FS50Args(mixin.ReprMixin):
 
 def processor(args: FS50Args.T):
     import zarr.storage
-
     from ....sldataset.dataset import dataset_to_zarr
+    from ....sldataset.logger import sldataset_logger
     from .main import load
 
+    sldataset_logger.info("Starting FS50 dataset processing")
+    sldataset_logger.debug(f"Origin: {args.origin}")
+    sldataset_logger.debug(f"Processed: {args.processed}")
+    sldataset_logger.debug(f"Output: {args.output}")
+    sldataset_logger.debug(f"Use ZIP: {args.use_zip}")
+
+    sldataset_logger.info("Loading dataset from file system...")
     dataset = load(origin=args.origin, processed=args.processed)
+    sldataset_logger.info("Loaded dataset successfully")
 
     if args.use_zip:
+        sldataset_logger.info(f"Creating ZIP store at: {args.output}")
         store = zarr.storage.ZipStore(args.output, mode="w")
     else:
+        sldataset_logger.info(f"Creating local store at: {args.output}")
         store = zarr.storage.LocalStore(args.output)
 
-    dataset_to_zarr(
+    sldataset_logger.info("Converting dataset to Zarr format...")
+    group = dataset_to_zarr(
         dataset,
         zarr.create_group(store),
     )
+    sldataset_logger.debug(f"zarr store with {len(group)} subgroups/arrays created")
+    sldataset_logger.info("Dataset successfully converted to Zarr format")
 
 
 info: Info[FS50Args.T] = (FS50Args, processor)

@@ -19,6 +19,7 @@ from typing import Any, Callable, TypedDict, TypeGuard, Protocol, runtime_checka
 import importlib.metadata
 from clipar.entities import NamespaceWrapper
 
+from ..logger import sldataset_logger
 from ...exceptions import PluginError
 
 
@@ -56,12 +57,21 @@ def loader() -> dict[str, PluginInfo[Any]]:
     for ep in entry_points:
         info = ep.load()
 
+        sldataset_logger.debug(f"Loaded plugin entry point {ep.name}: {info}")
+
         if not _is_tuple(info):
+            sldataset_logger.error(
+                f"Plugin entry point {ep.name} did not return a tuple: {info}"
+            )
             raise PluginError(
                 f"Plugin entry point {ep.name} does not return a tuple. "
                 f"Plugin must return (NamespaceWrapper, processor_callable)."
             )
         if len(info) != 2:
+            sldataset_logger.error(
+                f"Plugin entry point {ep.name} returned tuple of length "
+                f"{len(info)} instead of 2: {info}"
+            )
             raise PluginError(
                 f"Plugin entry point {ep.name} does not return a tuple of "
                 f"length 2. Expected (NamespaceWrapper, processor_callable), "
@@ -71,12 +81,20 @@ def loader() -> dict[str, PluginInfo[Any]]:
         nswrapper, processor = info
 
         if not _is_nswrapper(nswrapper):
+            sldataset_logger.error(
+                f"First element of plugin entry point {ep.name} is not a "
+                f"NamespaceWrapper: {nswrapper}"
+            )
             raise PluginError(
                 f"First element of plugin entry point {ep.name} is not a "
                 f"NamespaceWrapper. Got {type(nswrapper)}."
             )
 
         if not _is_processor(processor):
+            sldataset_logger.error(
+                f"Second element of plugin entry point {ep.name} is not a "
+                f"processor callable: {processor}"
+            )
             raise PluginError(
                 f"Second element of plugin entry point {ep.name} is not a "
                 f"processor callable. Expected a Callable[[T], None], "
@@ -86,5 +104,7 @@ def loader() -> dict[str, PluginInfo[Any]]:
         plugins[ep.name] = PluginInfo(
             name=ep.name, nswrapper=nswrapper, processor=processor
         )
+
+        sldataset_logger.info(f"Registered plugin: {ep.name}")
 
     return plugins

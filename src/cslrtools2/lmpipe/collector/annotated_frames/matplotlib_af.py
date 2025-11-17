@@ -126,13 +126,15 @@ class MatplotlibAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollecto
     def _update(self, result: ProcessResult[K]):
         if self._ax is not None:
             if self._im is None:
-                # pyright: ignore[reportUnknownMemberType]
-                self._im = self._ax.imshow(result.annotated_frame)
+                self._im = self._ax.imshow(  # pyright: ignore[reportUnknownMemberType]
+                    result.annotated_frame
+                )
             else:
                 self._im.set_data(result.annotated_frame)
 
-            # pyright: ignore[reportUnknownMemberType]
-            self._ax.set_title(f"Frame {result.frame_id}")
+            self._ax.set_title(  # pyright: ignore[reportUnknownMemberType]
+                f"Frame {result.frame_id}"
+            )
 
         if self._fig is not None:
             self._fig.canvas.draw()  # pyright: ignore[reportUnknownMemberType]

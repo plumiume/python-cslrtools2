@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyright: reportMissingTypeStubs=false
 
 from __future__ import annotations
 
@@ -23,14 +24,14 @@ import numpy as np
 
 from mediapipe.tasks.python.core.base_options import (
     BaseOptions,
-)  # pyright: ignore[reportMissingTypeStubs]
+)
 from mediapipe.tasks.python.vision.face_landmarker import (
     FaceLandmarker,
     FaceLandmarkerOptions,
-)  # pyright: ignore[reportMissingTypeStubs]
+)
 from mediapipe.tasks.python.components.containers.landmark import (
     NormalizedLandmark,
-)  # pyright: ignore[reportMissingTypeStubs]
+)
 from mediapipe import Image, ImageFormat
 
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
@@ -98,15 +99,16 @@ class MediaPipeFaceEstimator(
 
     @estimate
     def estimate(self, frame_src: MatLike, frame_idx: int) -> NDArrayFloat | None:
+
         mp_image = Image(
             image_format=ImageFormat.SRGB, data=np.ascontiguousarray(frame_src)
         )
 
-        # pyright: ignore[reportUnknownMemberType]
-        detection_result = self.landmarker.detect(mp_image)
-        landmarks: list[list[NormalizedLandmark]] = (
+        detection_result = self.landmarker.detect(  # pyright: ignore[reportUnknownMemberType] # noqa: E501
+            mp_image
+        )
+        landmarks: list[list[NormalizedLandmark]] = (  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa: E501
             detection_result.face_landmarks
-            # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         )
 
         self._disable_suppress_stderr()

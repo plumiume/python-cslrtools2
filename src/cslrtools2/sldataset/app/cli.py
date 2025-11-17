@@ -27,8 +27,10 @@ Example:
         $ sldataset fluentsigners50 --input-dir data/ --output-dir processed/
 """
 
+import logging
+
 from ...exceptions import ConfigurationError
-from ..logger import sldataset_logger
+from ..logger import sldataset_logger, sldataset_formatter
 from .args import CliArgs, plugins
 
 
@@ -44,9 +46,20 @@ def main():
 
     args = CliArgs.parse_args()
 
+    sldataset_logger.setLevel(args.log_level.upper())
+    if args.logfile:
+        file_handler = logging.FileHandler(args.logfile)
+        file_handler.setFormatter(sldataset_formatter)
+        sldataset_logger.addHandler(file_handler)
+    else:
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(sldataset_formatter)
+        sldataset_logger.addHandler(console_handler)
+
     sldataset_logger.info(f"Starting sldataset CLI with command: {args.command}")
 
-    assert args.command
+    if not args.command:
+        raise ConfigurationError("No command specified.")
 
     pl_info = plugins.get(args.command)
 
@@ -62,7 +75,12 @@ def main():
         )
 
     sldataset_logger.debug(f"Executing plugin processor for command: {args.command}")
-    pl_info["processor"](args)
+
+    # Get the subcommand arguments
+    subcommand_args = getattr(args, args.command)
+    sldataset_logger.debug(f"Subcommand args type: {type(subcommand_args)}")
+
+    pl_info["processor"](subcommand_args)
 
 
 if __name__ == "__main__":

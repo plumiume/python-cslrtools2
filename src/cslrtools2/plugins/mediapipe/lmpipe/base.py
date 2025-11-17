@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyright: reportMissingTypeStubs=false
 
 from __future__ import annotations
 
@@ -22,13 +23,13 @@ import requests
 try:
     from mediapipe.tasks.python.core.base_options import (
         BaseOptions,
-    )  # pyright: ignore[reportMissingTypeStubs]
+    )
     from mediapipe.tasks.python.vision.core.vision_task_running_mode import (
         VisionTaskRunningMode,
-    )  # pyright: ignore[reportMissingTypeStubs]
+    )
     from mediapipe.tasks.python.components.containers.landmark import (
         NormalizedLandmark,
-    )  # pyright: ignore[reportMissingTypeStubs]
+    )
 except ImportError as exc:
     raise ImportError(
         "MediaPipe is required to use this plugin. "
