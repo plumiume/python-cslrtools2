@@ -1,0 +1,50 @@
+{
+  "workspace": "python-cslrtools2",
+  "branch": "dev-ai/fix-sldataset-logger",
+  "status": "active",
+  "started": "2025-11-14",
+  "commits_ahead": 3,
+  "unpushed": true,
+  "changes": [
+    {
+      "file": "src/cslrtools2/sldataset/logger.py",
+      "status": "completed",
+      "lines_added": 21
+    },
+    {
+      "file": ".github/copilot-instructions.md",
+      "status": "completed",
+      "lines_added": 188
+    },
+    {
+      "file": "WORKSPACE_SETUP.md",
+      "status": "completed",
+      "lines_added": 271
+    }
+  ],
+  "next_actions": [
+    "git push origin dev-ai/fix-sldataset-logger",
+    "Review conflicts with utilities-expansion",
+    "Prepare squash merge to main"
+  ],
+  "worktrees": [
+    {
+      "path": "../cslrtools2-utilities",
+      "branch": "origin/dev-ai/utilities-expansion",
+      "status": "detached",
+      "action_needed": "review"
+    },
+    {
+      "path": "../cslrtools2-dependencies",
+      "branch": "origin/dev-ai/dependencies-update",
+      "status": "detached",
+      "action_needed": "test"
+    },
+    {
+      "path": "../cslrtools2-gitignore",
+      "branch": "origin/dev-ai/gitignore-cleanup",
+      "status": "detached",
+      "action_needed": "review"
+    }
+  ]
+}
