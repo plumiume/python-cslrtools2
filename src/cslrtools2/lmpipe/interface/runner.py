@@ -72,7 +72,6 @@ if TYPE_CHECKING:
     from . import LMPipeInterface
 
 
-
 def _runner_public_api[S: LMPipeRunner[Any], **P, R](
     func: Callable[Concatenate[S, P], R]
 ) -> Callable[Concatenate[S, P], R | None]:
@@ -1189,7 +1188,6 @@ class LMPipeRunner[K: str]:
 
         def __init__(self, main_pid: int):
             self._main_pid = main_pid
-
 
         def __call__(self, signum: int, frame: FrameType | None):
             # Re-raise KeyboardInterrupt in the main process
