@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from typing import Any, Literal, Mapping
 from pathlib import Path
 import re
@@ -22,12 +25,14 @@ from ....sldataset.array_loader import prekey_loaders, container_loaders
 from ....sldataset.dataset import SLDatasetItem, SLDataset
 
 type FS50MetaKeys = Literal[
-    "signer_ids", "sentence_ids", "take_ids",
-    "gloss_annotation", "russian_translation"
+    "signer_ids", "sentence_ids", "take_ids", "gloss_annotation", "russian_translation"
 ]
 
-RE_PATTERN = re.compile(r"^P(?P<signer_id>\d{2})_S(?P<sentence_id>\d{3})_(?P<take_id>\d{2})$")
+RE_PATTERN = re.compile(
+    r"^P(?P<signer_id>\d{2})_S(?P<sentence_id>\d{3})_(?P<take_id>\d{2})$"
+)
 GLOB_PATTERN = "**/P??_S???_??*"
+
 
 def load(
     origin: PathLike,
@@ -37,8 +42,7 @@ def load(
     processed: PathLike,
     # (processed) / <directory> / "P{:02d}_S{:03d}_{:02d}" / any files or dirs,
     # (processed) / connections (dir or file)
-    ) -> SLDataset[FS50MetaKeys, Any, Any, Any, ArrayLike]:
-
+) -> SLDataset[FS50MetaKeys, Any, Any, Any, ArrayLike]:
     origin = Path(origin)
     processed = Path(processed)
 
@@ -59,7 +63,9 @@ def load(
     pathes = list(processed.glob(GLOB_PATTERN))
 
     items = [
-        SLDatasetItem[Any, ArrayLike, Any, ArrayLike, Any, ArrayLike].from_file_system(p)
+        SLDatasetItem[Any, ArrayLike, Any, ArrayLike, Any, ArrayLike].from_file_system(
+            p
+        )
         for p in pathes
     ]
 
@@ -68,11 +74,13 @@ def load(
         m = RE_PATTERN.match(p.stem)
         if m is None:
             raise ValueError(f"Invalid file or directory name: {p}")
-        matches.append((
-            int(m.group("signer_id")),
-            int(m.group("sentence_id")),
-            int(m.group("take_id")),
-        ))
+        matches.append(
+            (
+                int(m.group("signer_id")),
+                int(m.group("sentence_id")),
+                int(m.group("take_id")),
+            )
+        )
 
     conn_path = processed / "connections"
     connections: Mapping[tuple[str, str], Any] = {}
@@ -83,7 +91,7 @@ def load(
             loader = prekey_loaders.get(file.suffix)
             if loader is None:
                 continue
-            a, b = file.stem.split('.', 1)
+            a, b = file.stem.split(".", 1)
             connections[(a, b)] = loader(file)
     else:
         for ext, loader in container_loaders.items():
@@ -92,7 +100,7 @@ def load(
                 continue
             mapping = loader(file)
             for key, value in mapping.items():
-                a, b = key.split('.', 1)
+                a, b = key.split(".", 1)
                 connections[(a, b)] = value
             break
 

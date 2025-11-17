@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from abc import abstractmethod
 from typing import Any, Iterable, Protocol, final
 from pathlib import Path
@@ -35,13 +38,15 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
     @property
     @abstractmethod
     def is_video(self) -> bool:
-        """Whether this collector saves as a video file (True) or image sequence (False)."""
+        """Whether this collector saves as a video file (True)
+        or image sequence (False)."""
         ...
 
     @property
     @abstractmethod
     def is_image_sequence(self) -> bool:
-        """Whether this collector saves as an image sequence (True) or video file (False)."""
+        """Whether this collector saves as an image sequence (True)
+        or video file (False)."""
         ...
 
     @property
@@ -66,8 +71,8 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
     def _get_output_path(self, dst: Path) -> Path:
         """Get the output path for annotated frames.
 
-        This method is final and uses the abstract properties (is_video, is_image_sequence, file_ext)
-        to determine the correct output path.
+        This method is final and uses the abstract properties (is_video,
+        is_image_sequence, file_ext) to determine the correct output path.
 
         Args:
             dst: The destination directory path.
@@ -93,7 +98,8 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
             runspec: The RunSpec instance containing input/output path information.
 
         Returns:
-            :class:`bool`: True if processing should continue, False if it should be skipped.
+            :class:`bool`: True if processing should continue, False if it
+                should be skipped.
 
         Raises:
             FileExistsError: If exist_rule is "error" and the output already exists.
@@ -115,7 +121,8 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
         elif self.exist_rule == "overwrite":
             return True  # Overwrite existing file/directory
         elif self.exist_rule == "suffix":
-            # TODO: Implement suffix logic (e.g., annotated_frames_1.mp4, annotated_frames_2.mp4)
+            # TODO: Implement suffix logic (e.g., annotated_frames_1.mp4,
+            # annotated_frames_2.mp4)
             return True  # For now, just overwrite
         elif self.exist_rule == "error":
             raise FileExistsError(f"Output already exists: {output_path}")
@@ -145,12 +152,15 @@ class AnnotatedFramesSaveCollector[K: str](Collector[K]):
         """Finalize and clean up after writing annotated frames."""
         pass
 
-    def collect_results(self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]):
+    def collect_results(
+        self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]
+    ):
         """Collect annotated frame results and save them.
 
         Args:
             runspec (`RunSpec[Any]`): The run specification for the current task.
-            results (`Iterable[ProcessResult[K]]`): An iterable of :class:`ProcessResult` objects.
+            results (`Iterable[ProcessResult[K]]`): An iterable of
+                :class:`ProcessResult` objects.
         """
         self._open_file(runspec.dst)
         try:
@@ -182,7 +192,8 @@ class AnnotatedFramesShowCollector[K: str](Collector[K]):
         """Update the display with a new annotated frame.
 
         Args:
-            result (`ProcessResult[K]`): The result containing the annotated frame to display.
+            result (`ProcessResult[K]`): The result containing the annotated
+                frame to display.
         """
         pass
 
@@ -191,12 +202,15 @@ class AnnotatedFramesShowCollector[K: str](Collector[K]):
         """Clean up display resources after showing all frames."""
         pass
 
-    def collect_results(self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]):
+    def collect_results(
+        self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]
+    ):
         """Display annotated frame results interactively.
 
         Args:
             runspec (`RunSpec[Any]`): The run specification for the current task.
-            results (`Iterable[ProcessResult[K]]`): An iterable of :class:`ProcessResult` objects.
+            results (`Iterable[ProcessResult[K]]`): An iterable of
+                :class:`ProcessResult` objects.
         """
         self._setup()
         try:
@@ -208,16 +222,15 @@ class AnnotatedFramesShowCollector[K: str](Collector[K]):
 
 class AFSaveCollectorCreator(Protocol):
     def __call__[K: str](
-        self,
-        file_ext: str,
-        key_type: type[K]
-        ) -> AnnotatedFramesSaveCollector[K]: ...
+        self, file_ext: str, key_type: type[K]
+    ) -> AnnotatedFramesSaveCollector[K]: ...
+
 
 class AFShowCollectorCreator(Protocol):
     def __call__[K: str](
-        self,
-        key_type: type[K]
-        ) -> AnnotatedFramesShowCollector[K]: ...
+        self, key_type: type[K]
+    ) -> AnnotatedFramesShowCollector[K]: ...
+
 
 af_save_aliases: dict[str, AFSaveCollectorCreator] = {}
 af_show_aliases: dict[str, AFShowCollectorCreator] = {}

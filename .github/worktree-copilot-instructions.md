@@ -24,24 +24,24 @@ Outputs expected
 
 # Worktree Copilot Instructions — main-ai
 
-Worktree: main-ai
+Worktree: integration-ai (integration for gitignore & docker)
 
 Purpose
-- Provide integration-level instructions for agents operating in the `main-ai` workspace.
+- Provide focused instructions for testing gitignore and Docker-related changes in this workspace.
 
 Goal
-- Verify integration of AI-driven features into `main` and prepare release-ready checks.
+- Verify Docker-based workflows and ensure .gitignore changes do not omit essential files.
 
 Tasks for the agent
-1. Run the integration test suite: `uv run pytest -q` and collect results.
-2. Run static checks (type checks / lint) and summarize critical issues.
-3. Generate a short report listing merged `dev-ai/*` branches and any outstanding CI failures.
-4. If regressions are found, produce PR-ready patches targeting the originating `dev-ai/*` branches.
+1. Run lightweight container build checks if Docker is available, otherwise verify Dockerfile syntax.
+2. Scan `.gitignore` changes and report any risky omissions (e.g., committing `.venv` or build artifacts).
+3. Run unit tests affected by Docker-related utilities and report failures.
+4. Propose corrective patches or .gitignore fine-tuning entries.
 
 Constraints
-- Use `uv` for all Python execution.
-- Do not alter release version numbers without explicit approval.
+- Do not push large binary artifacts as part of fixes.
+- If Docker cannot run in the environment, produce reproducible checks that do not require container execution.
 
 Outputs expected
-- Integration test summary and failing test list (if any).
-- A short PR description template when a fix is prepared.
+- A short report on Dockerfile health and `.gitignore` recommendations.
+- PR-ready patches for small fixes.

@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """Logging utilities for cslrtools2.
 
 This module provides unified logging configuration for all cslrtools2
@@ -51,13 +54,13 @@ root_logger = logging.getLogger("cslrtools2")
 # Standard formatter for production use
 standard_formatter = logging.Formatter(
     fmt="%(asctime)s [%(levelname)-8s] %(name)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 # Detailed formatter for debugging
 detailed_formatter = logging.Formatter(
     fmt="%(asctime)s [%(levelname)-8s] %(name)s (%(pathname)s:%(lineno)d): %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 

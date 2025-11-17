@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from abc import abstractmethod
 from functools import cache
 from typing import Any, Mapping
@@ -19,9 +22,7 @@ from typing import Any, Mapping
 # import cv2
 
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
-from ...estimator import (
-    Estimator, shape, headers, estimate, annotate
-)
+from ...estimator import Estimator, shape, headers, estimate, annotate
 from .roi import BaseROI
 
 
@@ -30,38 +31,28 @@ class HolisticPartEstimator[K: str](Estimator[K]):
 
 
 class HolisticPoseEstimator[K: str](Estimator[K]):
-
     @abstractmethod
     def configure_left_hand_roi(
-        self,
-        landmarks: Mapping[K, NDArrayFloat],
-        height: int, width: int
-        ) -> BaseROI: ...
+        self, landmarks: Mapping[K, NDArrayFloat], height: int, width: int
+    ) -> BaseROI: ...
 
     @abstractmethod
     def configure_right_hand_roi(
-        self,
-        landmarks: Mapping[K, NDArrayFloat],
-        height: int, width: int
-        ) -> BaseROI: ...
+        self, landmarks: Mapping[K, NDArrayFloat], height: int, width: int
+    ) -> BaseROI: ...
 
     @abstractmethod
     def configure_both_hands_roi(
-        self,
-        landmarks: Mapping[K, NDArrayFloat],
-        height: int, width: int
-        ) -> BaseROI: ...
+        self, landmarks: Mapping[K, NDArrayFloat], height: int, width: int
+    ) -> BaseROI: ...
 
     @abstractmethod
     def configure_face_roi(
-        self,
-        landmarks: Mapping[K, NDArrayFloat],
-        height: int, width: int
-        ) -> BaseROI: ...
+        self, landmarks: Mapping[K, NDArrayFloat], height: int, width: int
+    ) -> BaseROI: ...
 
 
 class HolisticEstimator(Estimator[str]):
-
     MIN_ROI_IMAGE_SHAPE = (32, 32)
 
     def configure_estimator_name(self) -> str:
@@ -74,7 +65,7 @@ class HolisticEstimator(Estimator[str]):
         right_hand_estimator: HolisticPartEstimator[Any] | None = None,
         left_hand_estimator: HolisticPartEstimator[Any] | None = None,
         face_estimator: HolisticPartEstimator[Any] | None = None,
-        ) -> None:
+    ) -> None:
         self.pose_estimator = pose_estimator
         self.both_hands_estimator = both_hands_estimator
         self.right_hand_estimator = right_hand_estimator
@@ -85,7 +76,6 @@ class HolisticEstimator(Estimator[str]):
     @property
     @shape
     def shape(self) -> Mapping[str, tuple[int, int]]:
-
         result: dict[str, tuple[int, int]] = {}
 
         result.update(self.pose_estimator.shape)
@@ -106,18 +96,12 @@ class HolisticEstimator(Estimator[str]):
 
     @estimate
     def estimate(
-        self,
-        frame_src: MatLike,
-        frame_idx: int
-        ) -> Mapping[str, NDArrayFloat | None]:
-
+        self, frame_src: MatLike, frame_idx: int
+    ) -> Mapping[str, NDArrayFloat | None]:
         result: dict[str, NDArrayFloat | None] = {}
 
         pose_landmarks = self.pose_estimator.estimate(frame_src, frame_idx)
-        result.update({
-            f'{klm}': vlm
-            for klm, vlm in pose_landmarks.items()
-        })
+        result.update({f"{klm}": vlm for klm, vlm in pose_landmarks.items()})
 
         if self.both_hands_estimator:
             both_hands_roi = self.pose_estimator.configure_both_hands_roi(
@@ -128,15 +112,15 @@ class HolisticEstimator(Estimator[str]):
                 both_hands_frame_src is None
                 or both_hands_frame_src.shape[0] < self.MIN_ROI_IMAGE_SHAPE[0]
                 or both_hands_frame_src.shape[1] < self.MIN_ROI_IMAGE_SHAPE[1]
-                ):
+            ):
                 # ROIが計算できない、ROIが小さすぎる場合はスキップ
-                result.update({
-                    klm: None
-                    for klm in self.both_hands_estimator.headers.keys()
-                })
+                result.update(
+                    {klm: None for klm in self.both_hands_estimator.headers.keys()}
+                )
             else:
                 # cv2.imshow("both_hands_frame_src", both_hands_frame_src)
-                # cv2.imwrite(f"both_hands_frame/{frame_idx:04d}.png", both_hands_frame_src)
+                # Debug: save frame
+                # cv2.imwrite(f"both_hands_frame/{frame_idx:04d}.png", ...)
                 result.update(
                     both_hands_roi.apply_world_coords(
                         self.both_hands_estimator.estimate(
@@ -154,15 +138,15 @@ class HolisticEstimator(Estimator[str]):
                 left_hand_frame_src is None
                 or left_hand_frame_src.shape[0] < self.MIN_ROI_IMAGE_SHAPE[0]
                 or left_hand_frame_src.shape[1] < self.MIN_ROI_IMAGE_SHAPE[1]
-                ):
+            ):
                 # ROIが計算できない、ROIが小さすぎる場合はスキップ
-                result.update({
-                    klm: None
-                    for klm in self.left_hand_estimator.headers.keys()
-                })
+                result.update(
+                    {klm: None for klm in self.left_hand_estimator.headers.keys()}
+                )
             else:
                 # cv2.imshow("left_hand_frame_src", left_hand_frame_src)
-                # cv2.imwrite(f"left_hand_frame/{frame_idx:04d}.png", left_hand_frame_src)
+                # Debug: save frame
+                # cv2.imwrite(f"left_hand_frame/{frame_idx:04d}.png", ...)
                 result.update(
                     left_hand_roi.apply_world_coords(
                         self.left_hand_estimator.estimate(
@@ -180,15 +164,15 @@ class HolisticEstimator(Estimator[str]):
                 right_hand_frame_src is None
                 or right_hand_frame_src.shape[0] < self.MIN_ROI_IMAGE_SHAPE[0]
                 or right_hand_frame_src.shape[1] < self.MIN_ROI_IMAGE_SHAPE[1]
-                ):
+            ):
                 # ROIが計算できない、ROIが小さすぎる場合はスキップ
-                result.update({
-                    klm: None
-                    for klm in self.right_hand_estimator.headers.keys()
-                })
+                result.update(
+                    {klm: None for klm in self.right_hand_estimator.headers.keys()}
+                )
             else:
                 # cv2.imshow("right_hand_frame_src", right_hand_frame_src)
-                # cv2.imwrite(f"right_hand_frame/{frame_idx:04d}.png", right_hand_frame_src)
+                # Debug: save frame
+                # cv2.imwrite(f"right_hand_frame/{frame_idx:04d}.png", ...)
                 result.update(
                     right_hand_roi.apply_world_coords(
                         self.right_hand_estimator.estimate(
@@ -206,18 +190,13 @@ class HolisticEstimator(Estimator[str]):
                 face_frame_src is None
                 or face_frame_src.shape[0] < self.MIN_ROI_IMAGE_SHAPE[0]
                 or face_frame_src.shape[1] < self.MIN_ROI_IMAGE_SHAPE[1]
-                ):
+            ):
                 # ROIが計算できない、ROIが小さすぎる場合はスキップ
-                result.update({
-                    klm: None
-                    for klm in self.face_estimator.headers.keys()
-                })
+                result.update({klm: None for klm in self.face_estimator.headers.keys()})
             else:
                 result.update(
                     face_roi.apply_world_coords(
-                        self.face_estimator.estimate(
-                            face_frame_src, frame_idx
-                        )
+                        self.face_estimator.estimate(face_frame_src, frame_idx)
                     )
                 )
 
@@ -229,7 +208,6 @@ class HolisticEstimator(Estimator[str]):
     @headers
     @cache
     def headers(self) -> Mapping[str, NDArrayStr]:
-
         result: dict[str, NDArrayStr] = {}
 
         result.update(self.pose_estimator.headers)
@@ -250,15 +228,9 @@ class HolisticEstimator(Estimator[str]):
 
     @annotate
     def annotate(
-        self,
-        frame_src: MatLike,
-        frame_idx: int,
-        landmarks: Mapping[str, NDArrayFloat]
-        ) -> MatLike:
-
-        frame_src = self.pose_estimator.annotate(
-            frame_src, frame_idx, landmarks
-        )
+        self, frame_src: MatLike, frame_idx: int, landmarks: Mapping[str, NDArrayFloat]
+    ) -> MatLike:
+        frame_src = self.pose_estimator.annotate(frame_src, frame_idx, landmarks)
 
         if self.both_hands_estimator:
             frame_src = self.both_hands_estimator.annotate(
@@ -276,9 +248,7 @@ class HolisticEstimator(Estimator[str]):
             )
 
         if self.face_estimator:
-            frame_src = self.face_estimator.annotate(
-                frame_src, frame_idx, landmarks
-            )
+            frame_src = self.face_estimator.annotate(frame_src, frame_idx, landmarks)
 
         return frame_src
 

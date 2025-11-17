@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from pathlib import Path
+
 _FILE = Path(__file__).resolve()
 PACKAGE_ROOT = _FILE.parent

@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from clipar import namespace, mixin
 from pathlib import Path
 
 from ....sldataset.app.plugins import Info
 
+
 @namespace
 class FS50Args(mixin.ReprMixin):
-
     origin: Path
     "Path to the original Fluentsigners50 dataset directory."
     processed: Path
@@ -30,17 +33,14 @@ class FS50Args(mixin.ReprMixin):
     use_zip: bool = False
     "Whether to use zip store for Zarr dataset."
 
-def processor(args: FS50Args.T):
 
+def processor(args: FS50Args.T):
     import zarr.storage
 
     from ....sldataset.dataset import dataset_to_zarr
     from .main import load
 
-    dataset = load(
-        origin=args.origin,
-        processed=args.processed
-    )
+    dataset = load(origin=args.origin, processed=args.processed)
 
     if args.use_zip:
         store = zarr.storage.ZipStore(args.output, mode="w")
@@ -52,6 +52,5 @@ def processor(args: FS50Args.T):
         zarr.create_group(store),
     )
 
-info: Info[FS50Args.T] = (
-    FS50Args, processor
-)
+
+info: Info[FS50Args.T] = (FS50Args, processor)

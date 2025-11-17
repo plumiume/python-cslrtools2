@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Mapping
 
 import numpy as np
 import zarr
 
-from ....typings import NDArrayFloat
+from ....typings import NDArrayFloat, NDArrayStr
 from .base import LandmarkMatrixSaveCollector, lmsc_aliases
 
 
@@ -26,16 +29,20 @@ class ZarrLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
     """Write landmarks into Zarr array storage.
 
     Supports two modes:
-    - Container mode (per_key=False): Single ``landmarks.zarr/`` directory with all keys as datasets
-    - Per-key mode (per_key=True): Multiple ``{key}.zarr/`` directories in ``landmarks/`` directory
+    - Container mode (per_key=False): Single ``landmarks.zarr/`` directory with
+      all keys as datasets
+    - Per-key mode (per_key=True): Multiple ``{key}.zarr/`` directories in
+      ``landmarks/`` directory
     """
 
     def __init__(self, *, per_key: bool = False) -> None:
         """Initialize the Zarr landmark matrix save collector.
 
         Args:
-            per_key (:class:`bool`, optional): If True, save each key to a separate .zarr directory.
-                If False, save all keys to a single landmarks.zarr directory. Defaults to False.
+            per_key (:class:`bool`, optional): If True, save each key to a
+                separate .zarr directory.
+                If False, save all keys to a single landmarks.zarr directory.
+                Defaults to False.
         """
         self.per_key = per_key
         self.USE_LANDMARK_DIR = per_key  # Use directory for per-key mode
@@ -67,8 +74,13 @@ class ZarrLandmarkMatrixSaveCollector[K: str](LandmarkMatrixSaveCollector[K]):
             self._base_dir = None
         self._buffer = {}
 
-    def _append_result(self, result: Mapping[K, NDArrayFloat]):
-        for key, value in result.items():
+    def _append_result(
+        self,
+        frame_id: int,
+        headers: Mapping[K, NDArrayStr],
+        landmarks: Mapping[K, NDArrayFloat],
+    ):
+        for key, value in landmarks.items():
             bucket = self._buffer.setdefault(str(key), [])
             bucket.append(np.asarray(value))
 
@@ -104,10 +116,14 @@ def zarr_lmsc_creator[K: str](key_type: type[K]) -> ZarrLandmarkMatrixSaveCollec
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`ZarrLandmarkMatrixSaveCollector[K]`: Zarr landmark matrix saver (container mode by default).
+        :class:`ZarrLandmarkMatrixSaveCollector[K]`: Zarr landmark matrix saver
+            (container mode by default).
     """
     return ZarrLandmarkMatrixSaveCollector[K]()
 
-lmsc_aliases.update({
-    ".zarr": zarr_lmsc_creator,
-})
+
+lmsc_aliases.update(
+    {
+        ".zarr": zarr_lmsc_creator,
+    }
+)

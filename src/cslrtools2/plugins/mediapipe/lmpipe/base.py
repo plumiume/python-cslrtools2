@@ -12,14 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 import os
 import warnings
 import requests
 
 try:
-    from mediapipe.tasks.python.core.base_options import BaseOptions # pyright: ignore[reportMissingTypeStubs]
-    from mediapipe.tasks.python.vision.core.vision_task_running_mode import VisionTaskRunningMode # pyright: ignore[reportMissingTypeStubs]
-    from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark # pyright: ignore[reportMissingTypeStubs]
+    from mediapipe.tasks.python.core.base_options import (
+        BaseOptions,
+    )  # pyright: ignore[reportMissingTypeStubs]
+    from mediapipe.tasks.python.vision.core.vision_task_running_mode import (
+        VisionTaskRunningMode,
+    )  # pyright: ignore[reportMissingTypeStubs]
+    from mediapipe.tasks.python.components.containers.landmark import (
+        NormalizedLandmark,
+    )  # pyright: ignore[reportMissingTypeStubs]
 except ImportError as exc:
     raise ImportError(
         "MediaPipe is required to use this plugin. "
@@ -33,20 +42,36 @@ from .base_args import MediaPipeBaseArgs
 
 MODELS: dict[str, dict[str, str]] = {
     "pose": {
-        "lite": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
-        "full": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task",
-        "heavy": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task"
+        "lite": (
+            "https://storage.googleapis.com/mediapipe-models/pose_landmarker/"
+            "pose_landmarker_lite/float16/latest/pose_landmarker_lite.task"
+        ),
+        "full": (
+            "https://storage.googleapis.com/mediapipe-models/pose_landmarker/"
+            "pose_landmarker_full/float16/latest/pose_landmarker_full.task"
+        ),
+        "heavy": (
+            "https://storage.googleapis.com/mediapipe-models/pose_landmarker/"
+            "pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task"
+        ),
     },
     "hand": {
-        "full": "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task"
+        "full": (
+            "https://storage.googleapis.com/mediapipe-models/hand_landmarker/"
+            "hand_landmarker/float16/latest/hand_landmarker.task"
+        )
     },
     "face": {
-        "full": "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task"
-    }
+        "full": (
+            "https://storage.googleapis.com/mediapipe-models/face_landmarker/"
+            "face_landmarker/float16/latest/face_landmarker.task"
+        )
+    },
 }
 
 ASSETS_PATH = PACKAGE_ROOT / "assets"
 ASSETS_PATH.mkdir(parents=True, exist_ok=True)
+
 
 def get_mediapipe_model(part: str, size: str) -> str:
     """Download or retrieve cached MediaPipe model file.
@@ -109,10 +134,10 @@ def get_mediapipe_model(part: str, size: str) -> str:
         )
 
     with model_file.open("wb") as f:
-
         f.write(response.content)
 
     return str(model_file)
+
 
 class MediaPipeEstimator[K: str](Estimator[K]):
     """Base class for MediaPipe-based landmark estimators.
@@ -136,27 +161,26 @@ class MediaPipeEstimator[K: str](Estimator[K]):
 
     _is_now_suppressing_stderr: bool = False
 
-    def _get_array_from_landmarks(
-        self, lm: NormalizedLandmark
-        ) -> list[float]:
+    def _get_array_from_landmarks(self, lm: NormalizedLandmark) -> list[float]:
         """Convert MediaPipe landmark to coordinate array.
 
         Args:
-            lm (:class:`mediapipe.tasks.python.components.containers.landmark.NormalizedLandmark`):
+            lm (:class:`mediapipe.tasks.python.components.containers.landmark.
+                NormalizedLandmark`):
                 MediaPipe normalized landmark.
 
         Returns:
-            :obj:`list`\\[:obj:`float`\\]: Coordinate array ``[x, y, z, confidence]``.
+            :obj:`list`\\[:obj:`float`\\]: Coordinate array
+            ``[x, y, z, confidence]``.
         """
         return [
             lm.x or self.missing_value,
             lm.y or self.missing_value,
             lm.z or self.missing_value,
-            max(0.0, (lm.visibility or 0.0) * (lm.presence or 0.0))
+            max(0.0, (lm.visibility or 0.0) * (lm.presence or 0.0)),
         ]
 
     def _enable_suppress_stderr(self):
-
         if self._is_now_suppressing_stderr:
             return
 
@@ -167,7 +191,6 @@ class MediaPipeEstimator[K: str](Estimator[K]):
         os.dup2(self._devnull_fd, 2)
 
     def _disable_suppress_stderr(self):
-
         if not self._is_now_suppressing_stderr:
             return
 
@@ -178,13 +201,12 @@ class MediaPipeEstimator[K: str](Estimator[K]):
         self._is_now_suppressing_stderr = False
 
     def __init__(self, base_args: MediaPipeBaseArgs):
-
         # Suppress protobuf deprecation warning from mediapipe
         warnings.filterwarnings(
             "ignore",
             message="SymbolDatabase.GetPrototype\\(\\) is deprecated",
             category=UserWarning,
-            module="google.protobuf.symbol_database"
+            module="google.protobuf.symbol_database",
         )
 
         self.base_args = base_args

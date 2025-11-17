@@ -46,6 +46,7 @@ from ..runspec import RunSpec
 from .runner import LMPipeRunner
 
 
+
 def _update_lmpipe_options(
     base: LMPipeOptions,
     *updates: LMPipeOptions | LMPipeOptionsPartial
@@ -58,12 +59,14 @@ def _update_lmpipe_options(
             Variable number of partial options to merge.
 
     Returns:
-        :class:`LMPipeOptions`: Updated options with all partial options merged.
+        :class:`LMPipeOptions`: Updated options with all partial options
+            merged.
     """
     ret = base.copy()
     for opt in updates:
         ret.update(opt)
     return ret
+
 
 
 class LMPipeInterface[K: str]:
@@ -174,9 +177,7 @@ class LMPipeInterface[K: str]:
         self.estimator = estimator
         "Core estimator implementation provided by the caller."
         self.lmpipe_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options,
-            kwargs
+            self.lmpipe_options, options, kwargs
         )
         "Effective interface configuration after overrides."
         self.collectors_or_factory = collectors
@@ -233,10 +234,7 @@ class LMPipeInterface[K: str]:
                     executor_mode='parallel'
                 )
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         lmpipe_logger.info(f"Starting run: src={src}, dst={dst}, mode=auto-detect")
         lmpipe_logger.debug(f"Run options: {updated_options}")
@@ -275,10 +273,7 @@ class LMPipeInterface[K: str]:
                     executor_type='process'
                 )
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         lmpipe_logger.info(f"Starting batch processing: src={src}, dst={dst}")
         lmpipe_logger.debug(f"Batch options: {updated_options}")
@@ -319,10 +314,7 @@ class LMPipeInterface[K: str]:
                 # Automatically detects and processes image sequence directory
                 interface.run_single('frames_dir/', 'output/')
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         return self.runner_type(self, updated_options).run_single(runspec)
 
@@ -359,10 +351,7 @@ class LMPipeInterface[K: str]:
                     max_cpus=4
                 )
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         return self.runner_type(self, updated_options).run_video(runspec)
 
@@ -395,10 +384,7 @@ class LMPipeInterface[K: str]:
                 # frames/ contains: frame_0001.png, frame_0002.png, ...
                 interface.run_sequence_images('frames/', 'results/')
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         return self.runner_type(self, updated_options).run_sequence_images(runspec)
 
@@ -438,10 +424,7 @@ class LMPipeInterface[K: str]:
                 )
                 interface.run_single_image('test.png', 'results/')
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_pathlikes(src, dst)
         return self.runner_type(self, updated_options).run_single_image(runspec)
 
@@ -488,12 +471,9 @@ class LMPipeInterface[K: str]:
                 )
                 interface.run_stream(0, 'stream_output/')
         """
-        updated_options = _update_lmpipe_options(
-            self.lmpipe_options,
-            options
-        )
+        updated_options = _update_lmpipe_options(self.lmpipe_options, options)
         runspec = RunSpec.from_index(src, dst)
         return self.runner_type(self, updated_options).run_stream(runspec)
 
 
-__all__ = ['LMPipeInterface', 'LMPipeRunner']
+__all__ = ["LMPipeInterface", "LMPipeRunner"]

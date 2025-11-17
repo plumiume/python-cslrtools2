@@ -12,19 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ...estimator import ProcessResult
 from .base import (
-    AnnotatedFramesSaveCollector, af_save_aliases,
-    AnnotatedFramesShowCollector, af_show_aliases
+    AnnotatedFramesSaveCollector,
+    af_save_aliases,
+    AnnotatedFramesShowCollector,
+    af_show_aliases,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
     from matplotlib.image import AxesImage
+else:
+    Axes = None  # pyright: ignore
+    Figure = None  # pyright: ignore
+    AxesImage = None  # pyright: ignore
 
 
 class MatplotlibAnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollector[K]):
@@ -37,14 +46,17 @@ class MatplotlibAnnotatedFramesSaveCollector[K: str](AnnotatedFramesSaveCollecto
         """Initialize the Matplotlib annotated frames saver.
 
         Args:
-            extension (`str`, optional): File extension for saved images. Defaults to ".png".
-            dpi (`int`, optional): Dots per inch for saved images. Defaults to 100.
+            extension (`str`, optional): File extension for saved images.
+                Defaults to ".png".
+            dpi (`int`, optional): Dots per inch for saved images.
+                Defaults to 100.
         """
         try:
             import matplotlib.pyplot as plt
         except ImportError as exc:
             raise RuntimeError(
-                "MatplotlibAnnotatedFramesSaveCollector requires the 'matplotlib' package."
+                "MatplotlibAnnotatedFramesSaveCollector requires the "
+                "'matplotlib' package."
             ) from exc
         self._plt = plt
         self.extension = extension
@@ -90,13 +102,15 @@ class MatplotlibAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollecto
         """Initialize the Matplotlib frame viewer.
 
         Args:
-            figsize (`tuple[int, int]`, optional): Figure size in inches. Defaults to (10, 8).
+            figsize (`tuple[int, int]`, optional): Figure size in inches.
+                Defaults to (10, 8).
         """
         try:
             import matplotlib.pyplot as plt
         except ImportError as exc:
             raise RuntimeError(
-                "MatplotlibAnnotatedFramesShowCollector requires the 'matplotlib' package."
+                "MatplotlibAnnotatedFramesShowCollector requires the "
+                "'matplotlib' package."
             ) from exc
         self._plt = plt
         self.figsize = figsize
@@ -107,17 +121,22 @@ class MatplotlibAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollecto
     def _setup(self):
         self._plt.ion()
         self._fig, self._ax = self._plt.subplots(figsize=self.figsize)
-        self._ax.axis('off') # type: ignore
+        self._ax.axis("off")  # pyright: ignore[reportAttributeAccessIssue]
 
     def _update(self, result: ProcessResult[K]):
-        if self._im is None:
-            self._im = self._ax.imshow(result.annotated_frame) # type: ignore
-        else:
-            self._im.set_data(result.annotated_frame)
+        if self._ax is not None:
+            if self._im is None:
+                # pyright: ignore[reportUnknownMemberType]
+                self._im = self._ax.imshow(result.annotated_frame)
+            else:
+                self._im.set_data(result.annotated_frame)
 
-        self._ax.set_title(f"Frame {result.frame_id}") # type: ignore
-        self._fig.canvas.draw() # type: ignore
-        self._fig.canvas.flush_events() # type: ignore
+            # pyright: ignore[reportUnknownMemberType]
+            self._ax.set_title(f"Frame {result.frame_id}")
+
+        if self._fig is not None:
+            self._fig.canvas.draw()  # pyright: ignore[reportUnknownMemberType]
+            self._fig.canvas.flush_events()  # pyright: ignore[reportUnknownMemberType]
         self._plt.pause(0.001)
 
     def _cleanup(self):
@@ -129,9 +148,8 @@ class MatplotlibAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollecto
 
 
 def matplotlib_af_save_collector_creator[K: str](
-    file_ext: str,
-    key_type: type[K]
-    ) -> AnnotatedFramesSaveCollector[K]:
+    file_ext: str, key_type: type[K]
+) -> AnnotatedFramesSaveCollector[K]:
     """Create a MatplotlibAnnotatedFramesSaveCollector instance.
 
     Args:
@@ -139,24 +157,26 @@ def matplotlib_af_save_collector_creator[K: str](
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`AnnotatedFramesSaveCollector[K]`: Matplotlib-based annotated frames saver.
+        :class:`AnnotatedFramesSaveCollector[K]`: Matplotlib-based annotated
+            frames saver.
     """
-    return MatplotlibAnnotatedFramesSaveCollector[K](
-        extension=file_ext
-    )
+    return MatplotlibAnnotatedFramesSaveCollector[K](extension=file_ext)
+
 
 def matplotlib_af_show_collector_creator[K: str](
-    key_type: type[K]
-    ) -> AnnotatedFramesShowCollector[K]:
+    key_type: type[K],
+) -> AnnotatedFramesShowCollector[K]:
     """Create a MatplotlibAnnotatedFramesShowCollector instance.
 
     Args:
         key_type (`type[K]`): Type of the key for type checking.
 
     Returns:
-        :class:`AnnotatedFramesShowCollector[K]`: Matplotlib-based annotated frames viewer.
+        :class:`AnnotatedFramesShowCollector[K]`: Matplotlib-based annotated
+            frames viewer.
     """
     return MatplotlibAnnotatedFramesShowCollector[K]()
+
 
 af_save_aliases["matplotlib"] = matplotlib_af_save_collector_creator
 af_show_aliases["matplotlib"] = matplotlib_af_show_collector_creator

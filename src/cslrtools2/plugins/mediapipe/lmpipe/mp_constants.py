@@ -162,7 +162,8 @@ from mediapipe.python.solutions.pose import (  # pyright: ignore[reportMissingTy
 )
 
 # Hand landmarks (21 landmarks)
-from mediapipe.python.solutions.hands import (  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.python.solutions.hands import (
+    # pyright: ignore[reportMissingTypeStubs]
     HandLandmark as _HandLandmark,
 )
 
@@ -195,9 +196,12 @@ HandLandmark = _HandLandmark
 Complete list of hand landmarks:
     - WRIST (0)
     - THUMB_CMC (1), THUMB_MCP (2), THUMB_IP (3), THUMB_TIP (4)
-    - INDEX_FINGER_MCP (5), INDEX_FINGER_PIP (6), INDEX_FINGER_DIP (7), INDEX_FINGER_TIP (8)
-    - MIDDLE_FINGER_MCP (9), MIDDLE_FINGER_PIP (10), MIDDLE_FINGER_DIP (11), MIDDLE_FINGER_TIP (12)
-    - RING_FINGER_MCP (13), RING_FINGER_PIP (14), RING_FINGER_DIP (15), RING_FINGER_TIP (16)
+    - INDEX_FINGER_MCP (5), INDEX_FINGER_PIP (6), INDEX_FINGER_DIP (7),
+      INDEX_FINGER_TIP (8)
+    - MIDDLE_FINGER_MCP (9), MIDDLE_FINGER_PIP (10), MIDDLE_FINGER_DIP (11),
+      MIDDLE_FINGER_TIP (12)
+    - RING_FINGER_MCP (13), RING_FINGER_PIP (14), RING_FINGER_DIP (15),
+      RING_FINGER_TIP (16)
     - PINKY_MCP (17), PINKY_PIP (18), PINKY_DIP (19), PINKY_TIP (20)
 """
 
@@ -207,19 +211,24 @@ Complete list of hand landmarks:
 # ============================================================================
 
 # Pose connections (33 landmarks, 35 connections)
-from mediapipe.python.solutions.pose import (  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.python.solutions.pose import (
+    # pyright: ignore[reportMissingTypeStubs]
     POSE_CONNECTIONS as _POSE_CONNECTIONS,
 )
 
 # Hand connections (21 landmarks, 21 connections)
-from mediapipe.python.solutions.hands import (  # pyright: ignore[reportMissingTypeStubs]
-    HAND_CONNECTIONS as _HAND_CONNECTIONS,  # pyright: ignore[reportUnknownVariableType]
+from mediapipe.python.solutions.hands import (
+    # pyright: ignore[reportMissingTypeStubs]
+    # pyright: ignore[reportUnknownVariableType]
+    HAND_CONNECTIONS as _HAND_CONNECTIONS,
 )
 
 # Face mesh connections (468 landmarks without irises, 478 with irises)
-from mediapipe.python.solutions.face_mesh import (  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.python.solutions.face_mesh import (
+    # pyright: ignore[reportMissingTypeStubs]
     FACEMESH_TESSELATION as _FACEMESH_TESSELATION,
-    FACEMESH_CONTOURS as _FACEMESH_CONTOURS,  # pyright: ignore[reportUnknownVariableType]
+    # pyright: ignore[reportUnknownVariableType]
+    FACEMESH_CONTOURS as _FACEMESH_CONTOURS,
     FACEMESH_IRISES as _FACEMESH_IRISES,  # pyright: ignore[reportUnknownVariableType]
     FACEMESH_FACE_OVAL as _FACEMESH_FACE_OVAL,
     FACEMESH_LEFT_EYE as _FACEMESH_LEFT_EYE,
@@ -248,7 +257,8 @@ POSE_CONNECTIONS: ConnectionSet = _POSE_CONNECTIONS
 Defines the full body skeleton structure for MediaPipe Pose model.
 """
 
-HAND_CONNECTIONS: ConnectionSet = _HAND_CONNECTIONS  # pyright: ignore[reportUnknownVariableType]
+# pyright: ignore[reportUnknownVariableType]
+HAND_CONNECTIONS: ConnectionSet = _HAND_CONNECTIONS
 """Hand skeleton connections (21 connections between 21 landmarks).
 
 Defines the hand skeleton structure for MediaPipe Hands model.
@@ -262,13 +272,15 @@ High-density triangular mesh covering the entire face.
 Recommended for high-quality offline processing only due to high overhead.
 """
 
-FACEMESH_CONTOURS: ConnectionSet = _FACEMESH_CONTOURS  # pyright: ignore[reportUnknownVariableType]
+# pyright: ignore[reportUnknownVariableType]
+FACEMESH_CONTOURS: ConnectionSet = _FACEMESH_CONTOURS
 """Face mesh contours (124 connections).
 
 Lightweight outline of facial features. Recommended for real-time applications.
 """
 
-FACEMESH_IRISES: ConnectionSet = _FACEMESH_IRISES  # pyright: ignore[reportUnknownVariableType]
+# pyright: ignore[reportUnknownVariableType]
+FACEMESH_IRISES: ConnectionSet = _FACEMESH_IRISES
 """Iris connections (8 connections, 4 per iris).
 
 Circles around left and right irises. Only available when using face mesh

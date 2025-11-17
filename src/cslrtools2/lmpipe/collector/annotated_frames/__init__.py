@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 """Annotated frames save and show collectors.
 
 This subpackage provides collectors that save or display annotated frames

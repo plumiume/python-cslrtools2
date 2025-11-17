@@ -72,13 +72,13 @@ if TYPE_CHECKING:
     from . import LMPipeInterface
 
 
+
 def _runner_public_api[S: LMPipeRunner[Any], **P, R](
     func: Callable[Concatenate[S, P], R]
 ) -> Callable[Concatenate[S, P], R | None]:
 
     @wraps(func)
     def wrapper(self: S, *args: P.args, **kwargs: P.kwargs) -> R | None:
-
         if not self.toplevel_call:
             return func(self, *args, **kwargs)
         self.toplevel_call = False
@@ -95,6 +95,9 @@ def _runner_public_api[S: LMPipeRunner[Any], **P, R](
             lmpipe_logger.error(
                 f"Task failed with exception: {func.__name__}", exc_info=True
             )
+            lmpipe_logger.error(
+                f"Task failed with exception: {func.__name__}", exc_info=True
+            )
             self.on_general_exception(e)
         finally:
             lmpipe_logger.debug(f"Shutting down executors for task: {func.__name__}")
@@ -103,6 +106,7 @@ def _runner_public_api[S: LMPipeRunner[Any], **P, R](
                 executor.shutdown(wait=False, cancel_futures=True)
             self.on_finally()
             lmpipe_logger.info(f"Task finalized: {func.__name__}")
+
     return wrapper
 
 
@@ -125,13 +129,10 @@ class LMPipeRunner[K: str]:
     toplevel_call: bool = True
     "Indicates if this is the top-level call in nested executions."
 
-    executors: dict[ExecutorMode, Executor] = {}
-    "Executor instances used for parallel processing, keyed by execution mode."
-
     def __getstate__(self) -> dict[str, Any]:
         return {
             **self.__dict__,
-            "executors": {}  # Exclude executors from serialization
+            "executors": {},  # Exclude executors from serialization
         }
 
     def __setstate__(self, state: dict[str, Any]):
@@ -141,6 +142,7 @@ class LMPipeRunner[K: str]:
         self,
         interface: LMPipeInterface[K],
         options: LMPipeOptions = DEFAULT_LMPIPE_OPTIONS,
+    ):
     ):
         """Initialize LMPipeRunner with interface and options.
 
@@ -182,6 +184,9 @@ class LMPipeRunner[K: str]:
         "Parent interface coordinating execution."
         self.lmpipe_options = options
         "Runner-specific configuration snapshot."
+
+        self.executors: dict[ExecutorMode, Executor] = {}
+        "Executor instances used for parallel processing, keyed by execution mode."
 
         self.collectors = self._configure_collectors()
         "Active collectors receiving processing results."
@@ -268,27 +273,29 @@ class LMPipeRunner[K: str]:
                     executor.submit(
                         self._task_with_events(
                             task=self._local_runner_method(
-                                type(self).run_single, self,
-                                task_runspec
+                                type(self).run_single, self, task_runspec
                             ),
                             on_start=self._local_runner_method(
-                                type(self).on_start_batch_task, self,
-                                task_runspec, task_id
+                                type(self).on_start_batch_task,
+                                self,
+                                task_runspec,
+                                task_id,
                             ),
                             on_end=self._local_runner_method(
-                                type(self).on_end_batch_task, self,
-                                task_runspec, task_id
-                            )
+                                type(self).on_end_batch_task,
+                                self,
+                                task_runspec,
+                                task_id,
+                            ),
                         )
                     ),
                     self.on_submit_batch_task,
                     self.on_success_batch_task,
                     self.on_failure_batch_task,
-                    task_runspec, task_id
+                    task_runspec,
+                    task_id,
                 )
-                for task_id, task_runspec in enumerate(
-                    self._get_runspecs(runspec)
-                )
+                for task_id, task_runspec in enumerate(self._get_runspecs(runspec))
             ]
 
             self.on_determined_batch_task_count(runspec, len(futures))
@@ -299,6 +306,7 @@ class LMPipeRunner[K: str]:
                     lmpipe_logger.debug(f"Batch task completed successfully: {ftr}")
                 except Exception as e:
                     lmpipe_logger.error(f"Batch task failed: {ftr} with exception: {e}")
+                    pass  # Handled in on_failure_batch_task
                     pass  # Handled in on_failure_batch_task
 
     @_runner_public_api
@@ -333,6 +341,9 @@ class LMPipeRunner[K: str]:
             return self.run_video(runspec)
 
         if is_images_dir(runspec.src):
+            lmpipe_logger.debug(
+                "Detected image directory, delegating to run_sequence_images"
+            )
             lmpipe_logger.debug(
                 "Detected image directory, delegating to run_sequence_images"
             )
@@ -407,7 +418,7 @@ class LMPipeRunner[K: str]:
                 Run specification with source directory and destination.
         """
         lmpipe_logger.info(f"Processing image sequence: {runspec.src}")
-        image_count = len(list(runspec.src.glob('*')))
+        image_count = len(list(runspec.src.glob("*")))
         lmpipe_logger.debug(f"Image sequence contains {image_count} files")
 
         results = self.process_frames(seq_imgs_to_frames(runspec.src))
@@ -540,23 +551,20 @@ class LMPipeRunner[K: str]:
                     executor.submit(
                         self._task_with_events(
                             self._local_runner_method(
-                                type(self)._call_estimator, self,
-                                frame_src, frame_idx
+                                type(self)._call_estimator, self, frame_src, frame_idx
                             ),
                             self._local_runner_method(
-                                type(self).on_start_frames_task, self,
-                                task_id=frame_idx
+                                type(self).on_start_frames_task, self, task_id=frame_idx
                             ),
                             self._local_runner_method(
-                                type(self).on_end_frames_task, self,
-                                task_id=frame_idx
-                            )
+                                type(self).on_end_frames_task, self, task_id=frame_idx
+                            ),
                         )
                     ),
                     self.on_submit_frames_task,
                     self.on_success_frames_task,
                     self.on_failure_frames_task,
-                    frame_idx
+                    frame_idx,
                 )
                 for frame_idx, frame_src in enumerate(frames)
             ]
@@ -567,6 +575,9 @@ class LMPipeRunner[K: str]:
             for ftr in futures:
                 yield ftr.result()
 
+            lmpipe_logger.debug(
+                f"Frame processing completed: {len(futures)} frames processed"
+            )
             lmpipe_logger.debug(
                 f"Frame processing completed: {len(futures)} frames processed"
             )
@@ -634,7 +645,7 @@ class LMPipeRunner[K: str]:
             frame_id=frame_idx,
             headers=headers,
             landmarks=landmarks,
-            annotated_frame=annotated_frame
+            annotated_frame=annotated_frame,
         )
 
     @contextmanager
@@ -648,6 +659,7 @@ class LMPipeRunner[K: str]:
         Note:
             This is a placeholder for future resource allocation logic.
         """
+        yield  # TODO: implement resource allocation logic
         yield  # TODO: implement resource allocation logic
 
     def _collect_results(
@@ -682,7 +694,7 @@ class LMPipeRunner[K: str]:
         for collector in self.collectors:
             collector_name = type(collector).__name__
             lmpipe_logger.debug(f"Running collector: {collector_name}")
-            collector.collect_results(runspec, results)
+            collector.collect_results(runspec, results_list)
         lmpipe_logger.debug("Result collection completed")
 
     ###### Events ######
@@ -944,13 +956,7 @@ class LMPipeRunner[K: str]:
         """
 
         on_submit(*args)
-        ftr.add_done_callback(
-            self._CallbackWithEvents(
-                on_success,
-                on_failure,
-                args
-            )
-        )
+        ftr.add_done_callback(self._CallbackWithEvents(on_success, on_failure, args))
 
         return ftr
 
@@ -988,12 +994,11 @@ class LMPipeRunner[K: str]:
                 self.on_failure(*self.args, e)
 
     class _task_with_events[R]:
-
         def __init__(
             self,
             task: Callable[[], R],
             on_start: Callable[[], Any],
-            on_end: Callable[[], Any]
+            on_end: Callable[[], Any],
         ):
             self.task = task
             self.on_start = on_start
@@ -1081,7 +1086,6 @@ class LMPipeRunner[K: str]:
         "Mapping of runner IDs to runner instances in current thread."
 
     def _init_executor(self, mode: ExecutorMode):
-
         if mode in self.executors:
             return self.executors[mode]
 
@@ -1138,11 +1142,11 @@ class LMPipeRunner[K: str]:
             )
             return DummyExecutor(initializer=initializer)
 
-        max_cpus = self.lmpipe_options['max_cpus']
-        require_cpus = self.lmpipe_options['cpu']
+        max_cpus = self.lmpipe_options["max_cpus"]
+        require_cpus = self.lmpipe_options["cpu"]
         max_workers = int(max(max_cpus / require_cpus, 1))
 
-        if self.lmpipe_options['executor_type'] == 'process':
+        if self.lmpipe_options["executor_type"] == "process":
             lmpipe_logger.info(
                 f"Using ProcessPoolExecutor: max_workers={max_workers}, "
                 f"max_cpus={max_cpus}, require_cpus={require_cpus}"
@@ -1158,14 +1162,9 @@ class LMPipeRunner[K: str]:
                 initializer=initializer
             )
 
-        if self.lmpipe_options['executor_type'] == 'thread':
-            lmpipe_logger.info(
-                f"Using ThreadPoolExecutor: max_workers={max_cpus}"
-            )
-            return ThreadPoolExecutor(
-                max_workers=max_cpus,
-                initializer=initializer
-            )
+        if self.lmpipe_options["executor_type"] == "thread":
+            lmpipe_logger.info(f"Using ThreadPoolExecutor: max_workers={max_cpus}")
+            return ThreadPoolExecutor(max_workers=max_cpus, initializer=initializer)
 
         lmpipe_logger.debug("No specific executor type configured, using DummyExecutor")
         return DummyExecutor(initializer=initializer)
@@ -1192,6 +1191,7 @@ class LMPipeRunner[K: str]:
         def __init__(self, main_pid: int):
             self._main_pid = main_pid
 
+
         def __call__(self, signum: int, frame: FrameType | None):
             # Re-raise KeyboardInterrupt in the main process
             os.kill(self._main_pid, signal.SIGINT)
@@ -1212,14 +1212,13 @@ class LMPipeRunner[K: str]:
         spec_count = 0
 
         for dirpath, _, filenames in runspec.src.walk():
-
             rel_dst = runspec.dst / dirpath.relative_to(runspec.src)
 
-            if any(part.startswith('.') for part in rel_dst.parts):
+            if any(part.startswith(".") for part in rel_dst.parts):
                 lmpipe_logger.debug(f"Skipping hidden directory: {rel_dst}")
                 continue
 
-            files = [dirpath / f for f in filenames if not f.startswith('.')]
+            files = [dirpath / f for f in filenames if not f.startswith(".")]
 
             all_image_files = files and all(
                 is_image_file(file_path) for file_path in files
@@ -1229,16 +1228,21 @@ class LMPipeRunner[K: str]:
                 lmpipe_logger.debug(
                     f"Processing directory as image sequence: {dirpath}"
                 )
+                lmpipe_logger.debug(
+                    f"Processing directory as image sequence: {dirpath}"
+                )
                 iterable = [RunSpec(dirpath, rel_dst)]
             else:
+                lmpipe_logger.debug(
+                    f"Processing individual files in directory: {dirpath}"
+                )
                 lmpipe_logger.debug(
                     f"Processing individual files in directory: {dirpath}"
                 )
                 iterable = (
                     RunSpec(file_path, rel_dst / file_path.name)
                     for file_path in files
-                    if is_video_file(file_path)
-                    or is_image_file(file_path)
+                    if is_video_file(file_path) or is_image_file(file_path)
                 )
 
             for spec in iterable:
@@ -1284,8 +1288,14 @@ class LMPipeRunner[K: str]:
             lmpipe_logger.warning(
                 "No collectors configured - results will not be saved"
             )
+            lmpipe_logger.warning(
+                "No collectors configured - results will not be saved"
+            )
         else:
             collector_names = [type(c).__name__ for c in collectors]
+            lmpipe_logger.info(
+                f"Configured {len(collectors)} collectors: {', '.join(collector_names)}"
+            )
             lmpipe_logger.info(
                 f"Configured {len(collectors)} collectors: {', '.join(collector_names)}"
             )
@@ -1302,15 +1312,15 @@ class LMPipeRunner[K: str]:
         Returns:
             :code:`bool`: True if the runspec should be processed, False otherwise.
         """
-        result = any(
-            cllctr.apply_exist_rule(runspec)
-            for cllctr in self.collectors
-        )
+        result = any(cllctr.apply_exist_rule(runspec) for cllctr in self.collectors)
         if not result:
+            lmpipe_logger.warning(
+                f"Skipping existing file per collector rules: {runspec.src}"
+            )
             lmpipe_logger.warning(
                 f"Skipping existing file per collector rules: {runspec.src}"
             )
         return result
 
 
-__all__ = ['LMPipeRunner', '_runner_public_api']
+__all__ = ["LMPipeRunner", "_runner_public_api"]

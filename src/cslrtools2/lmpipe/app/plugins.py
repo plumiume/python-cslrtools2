@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import annotations
+
 from typing import Any, TYPE_CHECKING, TypeGuard, Protocol, TypedDict, runtime_checkable
 import importlib.metadata
 from clipar.entities import NamespaceWrapper
@@ -21,23 +24,26 @@ if TYPE_CHECKING:
 else:
     Estimator = tuple
 
+
 def _is_tuple(obj: object) -> TypeGuard[tuple[Any, ...]]:
     return isinstance(obj, tuple)
 
+
 def _is_nswrapper(obj: object) -> TypeGuard[NamespaceWrapper[Any]]:
     return isinstance(obj, NamespaceWrapper)
+
 
 @runtime_checkable
 class _EstimatorCreator[T, K: str](Protocol):
     def __call__(self, ns: T) -> Estimator[K]: ...
 
+
 def _is_estimator_creator(obj: object) -> TypeGuard[_EstimatorCreator[Any, Any]]:
     return isinstance(obj, _EstimatorCreator)
 
-type Info[T, K: str] = tuple[
-    NamespaceWrapper[T],
-    _EstimatorCreator[T, K]
-]
+
+type Info[T, K: str] = tuple[NamespaceWrapper[T], _EstimatorCreator[T, K]]
+
 
 class PluginInfo[T, K: str](TypedDict):
     name: str
@@ -45,22 +51,17 @@ class PluginInfo[T, K: str](TypedDict):
     nswrapper: NamespaceWrapper[T]
     creator: _EstimatorCreator[T, K]
 
-def loader() -> dict[str, dict[str, PluginInfo[Any, Any]]]:
 
-    entry_points = importlib.metadata.entry_points(
-        group="cslrtools2.lmpipe.plugins"
-    )
+def loader() -> dict[str, dict[str, PluginInfo[Any, Any]]]:
+    entry_points = importlib.metadata.entry_points(group="cslrtools2.lmpipe.plugins")
 
     plugins: dict[str, dict[str, PluginInfo[Any, Any]]] = {}
 
     for ep in entry_points:
-
         info = ep.load()
 
         if not _is_tuple(info):
-            raise TypeError(
-                f"Plugin entry point {ep.name} does not return a tuple"
-            )
+            raise TypeError(f"Plugin entry point {ep.name} does not return a tuple")
         if len(info) != 2:
             raise ValueError(
                 f"Plugin entry point {ep.name} does not return a tuple of length 2"
@@ -70,7 +71,8 @@ def loader() -> dict[str, dict[str, PluginInfo[Any, Any]]]:
 
         if not _is_nswrapper(nswrapper):
             raise TypeError(
-                f"First element of plugin entry point {ep.name} is not a NamespaceWrapper"
+                f"First element of plugin entry point {ep.name} is not a "
+                f"NamespaceWrapper"
             )
 
         if not _is_estimator_creator(creator):
@@ -81,10 +83,7 @@ def loader() -> dict[str, dict[str, PluginInfo[Any, Any]]]:
         name_, type_ = ep.name.rsplit(".", 1)
 
         plugins.setdefault(type_, {})[name_] = PluginInfo(
-            name=name_,
-            type=type_,
-            nswrapper=nswrapper,
-            creator=creator
+            name=name_, type=type_, nswrapper=nswrapper, creator=creator
         )
 
     return plugins
