@@ -46,7 +46,6 @@ from ..runspec import RunSpec
 from .runner import LMPipeRunner
 
 
-
 def _update_lmpipe_options(
     base: LMPipeOptions,
     *updates: LMPipeOptions | LMPipeOptionsPartial
@@ -66,7 +65,6 @@ def _update_lmpipe_options(
     for opt in updates:
         ret.update(opt)
     return ret
-
 
 
 class LMPipeInterface[K: str]:

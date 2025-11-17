@@ -40,13 +40,11 @@ from .mp_rich import RichManager
 DESC_TEMPLATE = "[{deco}]{desc}[/{deco}]"
 
 
-
 class _Local(local):
     manager_map: dict[int, RichManager] = {}
     search_progress_task_ids: dict[int, TaskID] = {}
     batch_progress_task_ids: dict[int, TaskID] = {}
     frames_progress_task_ids: dict[int, TaskID] = {}
-
 
 
 _local = _Local()

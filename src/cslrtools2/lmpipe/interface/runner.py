@@ -143,7 +143,6 @@ class LMPipeRunner[K: str]:
         interface: LMPipeInterface[K],
         options: LMPipeOptions = DEFAULT_LMPIPE_OPTIONS,
     ):
-    ):
         """Initialize LMPipeRunner with interface and options.
 
         Sets up the runner with necessary components including collectors,
@@ -694,7 +693,7 @@ class LMPipeRunner[K: str]:
         for collector in self.collectors:
             collector_name = type(collector).__name__
             lmpipe_logger.debug(f"Running collector: {collector_name}")
-            collector.collect_results(runspec, results_list)
+            collector.collect_results(runspec, results)
         lmpipe_logger.debug("Result collection completed")
 
     ###### Events ######

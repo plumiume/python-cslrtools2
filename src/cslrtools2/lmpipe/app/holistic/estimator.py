@@ -248,7 +248,9 @@ class HolisticEstimator(Estimator[str]):
             )
 
         if self.face_estimator:
-            frame_src = self.face_estimator.annotate(frame_src, frame_idx, landmarks)
+            frame_src = self.face_estimator.annotate(
+                frame_src, frame_idx, landmarks
+            )
 
         return frame_src
 
