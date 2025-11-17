@@ -33,7 +33,13 @@ Example:
     ...         print(f"Starting batch job: {runspec.src}")
 """
 
-from typing import * # pyright: ignore[reportWildcardImportFromLibrary]
+from __future__ import annotations
+
+from typing import (
+    TYPE_CHECKING, Any,
+    Callable, Concatenate,
+    Iterable
+)
 from types import FrameType
 from contextlib import contextmanager
 from functools import wraps
@@ -65,9 +71,10 @@ from ..utils import (
 if TYPE_CHECKING:
     from . import LMPipeInterface
 
+
 def _runner_public_api[S: LMPipeRunner[Any], **P, R](
     func: Callable[Concatenate[S, P], R]
-    ) -> Callable[Concatenate[S, P], R | None]:
+) -> Callable[Concatenate[S, P], R | None]:
 
     @wraps(func)
     def wrapper(self: S, *args: P.args, **kwargs: P.kwargs) -> R | None:
@@ -85,7 +92,9 @@ def _runner_public_api[S: LMPipeRunner[Any], **P, R](
             lmpipe_logger.warning(f"Task interrupted by user: {func.__name__}")
             self.on_keyboard_interrupt(e)
         except Exception as e:
-            lmpipe_logger.error(f"Task failed with exception: {func.__name__}", exc_info=True)
+            lmpipe_logger.error(
+                f"Task failed with exception: {func.__name__}", exc_info=True
+            )
             self.on_general_exception(e)
         finally:
             lmpipe_logger.debug(f"Shutting down executors for task: {func.__name__}")
@@ -132,7 +141,7 @@ class LMPipeRunner[K: str]:
         self,
         interface: LMPipeInterface[K],
         options: LMPipeOptions = DEFAULT_LMPIPE_OPTIONS,
-        ):
+    ):
         """Initialize LMPipeRunner with interface and options.
 
         Sets up the runner with necessary components including collectors,
@@ -140,9 +149,11 @@ class LMPipeRunner[K: str]:
         called internally by :class:`LMPipeInterface` methods.
 
         Args:
-            interface (:class:`LMPipeInterface`\\[:obj:`K`\\]): Parent :class:`LMPipeInterface` instance.
+            interface (:class:`LMPipeInterface`\\[:obj:`K`\\]):
+                Parent :class:`LMPipeInterface` instance.
             options (:class:`~cslrtools2.lmpipe.options.LMPipeOptions`):
-                Configuration options for execution. Defaults to :obj:`DEFAULT_LMPIPE_OPTIONS`.
+                Configuration options for execution.
+                Defaults to :obj:`DEFAULT_LMPIPE_OPTIONS`.
 
         Example:
             Typically instantiated internally::
@@ -181,7 +192,6 @@ class LMPipeRunner[K: str]:
             f"runner_type={type(self).__name__}"
         )
 
-
     @_runner_public_api
     def run(self, runspec: RunSpec[Path]):
         """Execute processing based on run specification with automatic type detection.
@@ -192,7 +202,8 @@ class LMPipeRunner[K: str]:
         This is the main entry point for runner-level execution.
 
         Args:
-            runspec (`RunSpec[Path]`): Run specification containing source and destination paths.
+            runspec (`RunSpec[Path]`):
+                Run specification containing source and destination paths.
 
         Raises:
             ValueError: If source path type is not supported.
@@ -222,7 +233,6 @@ class LMPipeRunner[K: str]:
         lmpipe_logger.error(f"Source path does not exist: {runspec.src}")
         raise FileNotFoundError(f"Source path does not exist: {runspec.src}")
 
-
     @_runner_public_api
     def run_batch(self, runspec: RunSpec[Path]):
         """Execute batch processing on multiple files using parallel execution.
@@ -233,7 +243,8 @@ class LMPipeRunner[K: str]:
         is processed independently, enabling efficient parallelization.
 
         Args:
-            runspec (`RunSpec[Path]`): Run specification with source directory and destination.
+            runspec (`RunSpec[Path]`):
+                Run specification with source directory and destination.
 
         Example:
             Process multiple files in parallel::
@@ -248,7 +259,7 @@ class LMPipeRunner[K: str]:
         with (
             self._init_executor("batch") as executor,
             self._events_ctxmgr(self.on_start_batch_job, self.on_end_batch_job, runspec)
-            ):
+        ):
 
             lmpipe_logger.debug(f"Batch executor configured: {type(executor).__name__}")
 
@@ -288,8 +299,7 @@ class LMPipeRunner[K: str]:
                     lmpipe_logger.debug(f"Batch task completed successfully: {ftr}")
                 except Exception as e:
                     lmpipe_logger.error(f"Batch task failed: {ftr} with exception: {e}")
-                    pass # Handled in on_failure_batch_task
-
+                    pass  # Handled in on_failure_batch_task
 
     @_runner_public_api
     def run_single(self, runspec: RunSpec[Path]):
@@ -299,7 +309,8 @@ class LMPipeRunner[K: str]:
         processing method (video, image sequence, or single image).
 
         Args:
-            runspec (`RunSpec[Path]`): Run specification with source file and destination.
+            runspec (`RunSpec[Path]`):
+                Run specification with source file and destination.
 
         Raises:
             ValueError: If file type is not supported.
@@ -322,7 +333,9 @@ class LMPipeRunner[K: str]:
             return self.run_video(runspec)
 
         if is_images_dir(runspec.src):
-            lmpipe_logger.debug("Detected image directory, delegating to run_sequence_images")
+            lmpipe_logger.debug(
+                "Detected image directory, delegating to run_sequence_images"
+            )
             return self.run_sequence_images(runspec)
 
         if is_image_file(runspec.src):
@@ -332,7 +345,6 @@ class LMPipeRunner[K: str]:
         lmpipe_logger.error(f"Unsupported file type: {runspec.src}")
         raise ValueError(f"Unsupported source path: {runspec.src}")
 
-
     @_runner_public_api
     def run_video(self, runspec: RunSpec[Path]):
         """Execute processing on a video file.
@@ -341,7 +353,8 @@ class LMPipeRunner[K: str]:
         each frame through the estimator pipeline.
 
         Args:
-            runspec (`RunSpec[Path]`): Run specification with source video file and destination.
+            runspec (`RunSpec[Path]`):
+                Run specification with source video file and destination.
 
         Raises:
             ValueError: If video file cannot be opened.
@@ -382,7 +395,6 @@ class LMPipeRunner[K: str]:
         self._collect_results(runspec, results)
         lmpipe_logger.info(f"Video processing completed: {runspec.src}")
 
-
     @_runner_public_api
     def run_sequence_images(self, runspec: RunSpec[Path]):
         """Execute processing on an image sequence directory.
@@ -391,7 +403,8 @@ class LMPipeRunner[K: str]:
         temporal order for frame-based analysis.
 
         Args:
-            runspec (:class:`RunSpec`[Path]): Run specification with source directory and destination.
+            runspec (:class:`RunSpec`[Path]):
+                Run specification with source directory and destination.
         """
         lmpipe_logger.info(f"Processing image sequence: {runspec.src}")
         image_count = len(list(runspec.src.glob('*')))
@@ -402,7 +415,6 @@ class LMPipeRunner[K: str]:
         self._collect_results(runspec, results)
         lmpipe_logger.info(f"Image sequence processing completed: {runspec.src}")
 
-
     @_runner_public_api
     def run_single_image(self, runspec: RunSpec[Path]):
         """Execute processing on a single image file.
@@ -410,14 +422,14 @@ class LMPipeRunner[K: str]:
         Loads and processes a single image through the estimator pipeline.
 
         Args:
-            runspec (:class:`RunSpec`[Path]): Run specification with source image file and destination.
+            runspec (:class:`RunSpec`[Path]):
+                Run specification with source image file and destination.
         """
         lmpipe_logger.info(f"Processing single image: {runspec.src}")
         results = self.process_frames([image_file_to_frame(runspec.src)])
 
         self._collect_results(runspec, results)
         lmpipe_logger.info(f"Single image processing completed: {runspec.src}")
-
 
     @_runner_public_api
     def run_stream(self, runspec: RunSpec[int]):
@@ -427,7 +439,8 @@ class LMPipeRunner[K: str]:
         them in real-time through the estimator pipeline.
 
         Args:
-            runspec (`RunSpec[int]`): Run specification with stream index and destination.
+            runspec (`RunSpec[int]`):
+                Run specification with stream index and destination.
 
         Raises:
             ValueError: If video stream cannot be opened.
@@ -466,7 +479,6 @@ class LMPipeRunner[K: str]:
         self._collect_results(runspec, results)
         lmpipe_logger.info(f"Stream processing completed: device={runspec.src}")
 
-
     def process_frames(self, frames: Iterable[MatLike]) -> Iterable[ProcessResult[K]]:
         """Process a sequence of frames through the estimator pipeline.
 
@@ -478,7 +490,8 @@ class LMPipeRunner[K: str]:
             frames (`Iterable[MatLike]`): Iterable of frame matrices to process.
 
         Yields:
-            :class:`ProcessResult[K]`: ProcessResult objects containing landmarks and annotated frames.
+            :class:`ProcessResult[K]`:
+                ProcessResult objects containing landmarks and annotated frames.
 
         Subclass Development:
             Override to implement custom frame processing strategies::
@@ -498,7 +511,10 @@ class LMPipeRunner[K: str]:
                 class MyRunner(LMPipeRunner):
                     def process_frames(self, frames):
                         frame_list = list(frames)
-                        with self.configure_executor("frames", self._default_executor_initializer) as executor:
+                        with self.configure_executor(
+                            "frames",
+                            self._default_executor_initializer
+                        ) as executor:
                             futures = [
                                 executor.submit(self._call_estimator, frame, idx)
                                 for idx, frame in enumerate(frame_list)
@@ -514,7 +530,8 @@ class LMPipeRunner[K: str]:
             self._events_ctxmgr(
                 self.on_start_frames_job,
                 self.on_end_frames_job,
-            )):
+            )
+        ):
 
             lmpipe_logger.debug(f"Frame executor configured: {type(executor).__name__}")
 
@@ -550,8 +567,9 @@ class LMPipeRunner[K: str]:
             for ftr in futures:
                 yield ftr.result()
 
-            lmpipe_logger.debug(f"Frame processing completed: {len(futures)} frames processed")
-
+            lmpipe_logger.debug(
+                f"Frame processing completed: {len(futures)} frames processed"
+            )
 
     def _call_estimator(self, frame_src: MatLike, frame_idx: int) -> ProcessResult[K]:
         """Execute estimator on a single frame.
@@ -564,7 +582,9 @@ class LMPipeRunner[K: str]:
             frame_idx (`int`): Index/ID of the frame in the sequence.
 
         Returns:
-            :class:`ProcessResult[K]`: ProcessResult containing frame ID, headers, landmarks, and annotated frame.
+            :class:`ProcessResult[K]`:
+                ProcessResult containing frame ID, headers, landmarks,
+                and annotated frame.
 
         Subclass Development:
             Override to customize single frame processing::
@@ -622,19 +642,25 @@ class LMPipeRunner[K: str]:
         """Context manager for allocating executor resources.
 
         Args:
-            estimator (:class:`Estimator`[K]): The estimator that will use the resources.
+            estimator (:class:`Estimator`[K]):
+                The estimator that will use the resources.
 
         Note:
             This is a placeholder for future resource allocation logic.
         """
-        yield # TODO: implement resource allocation logic
+        yield  # TODO: implement resource allocation logic
 
-    def _collect_results(self, runspec: RunSpec[Any], results: Iterable[ProcessResult[K]]):
+    def _collect_results(
+        self,
+        runspec: RunSpec[Any],
+        results: Iterable[ProcessResult[K]]
+    ):
         """Collect processing results using configured collectors.
 
         Args:
             runspec (`RunSpec[Any]`): Run specification for context.
-            results (`Iterable[ProcessResult[K]]`): Iterable of processing results to collect.
+            results (`Iterable[ProcessResult[K]]`):
+                Iterable of processing results to collect.
 
         Subclass Development:
             Override to add custom result processing before collection::
@@ -650,7 +676,9 @@ class LMPipeRunner[K: str]:
                         # Add custom post-collection processing
                         self.generate_summary_report(runspec)
         """
-        lmpipe_logger.debug(f"Collecting results with {len(self.collectors)} collectors")
+        lmpipe_logger.debug(
+            f"Collecting results with {len(self.collectors)} collectors"
+        )
         for collector in self.collectors:
             collector_name = type(collector).__name__
             lmpipe_logger.debug(f"Running collector: {collector_name}")
@@ -722,7 +750,12 @@ class LMPipeRunner[K: str]:
         """
         ...
 
-    def on_failure_batch_task(self, runspec: RunSpec[Path], task_id: int, error: Exception):
+    def on_failure_batch_task(
+        self,
+        runspec: RunSpec[Path],
+        task_id: int,
+        error: Exception
+    ):
         """Event handler called when a batch task fails.
 
         Args:
@@ -761,6 +794,7 @@ class LMPipeRunner[K: str]:
         """
         ...
 
+    ###### Frame Events ######
 
     def on_start_frames_job(self):
         """Event handler called when frame processing job starts."""
@@ -827,7 +861,8 @@ class LMPipeRunner[K: str]:
             error (`KeyboardInterrupt`): The keyboard interrupt exception.
 
         Raises:
-            :class:`KeyboardInterrupt`: Re-raises the keyboard interrupt to halt execution.
+            :class:`KeyboardInterrupt`:
+                Re-raises the keyboard interrupt to halt execution.
         """
         raise error
 
@@ -858,15 +893,17 @@ class LMPipeRunner[K: str]:
         on_start: Callable[[*Ts], Any],
         on_end: Callable[[*Ts], Any],
         *args: *Ts
-        ):
+    ):
         """Context manager for wrapping execution blocks with start/end event handlers.
 
         Provides a convenient way to ensure event handlers are called at the beginning
         and end of an execution block, with guaranteed cleanup even if exceptions occur.
 
         Args:
-            on_start (`((*Ts) -> Any)`): Event handler to call when entering the context.
-            on_end (`((*Ts) -> Any)`): Event handler to call when exiting the context.
+            on_start (`((*Ts) -> Any)`):
+                Event handler to call when entering the context.
+            on_end (`((*Ts) -> Any)`):
+                Event handler to call when exiting the context.
             *args (`*Ts`): Arguments to pass to both event handlers.
 
         Yields:
@@ -885,7 +922,7 @@ class LMPipeRunner[K: str]:
         on_success: Callable[[*Ts, R], Any],
         on_failure: Callable[[*Ts, Exception], Any],
         *args: *Ts
-        ) -> Future[R]:
+    ) -> Future[R]:
         """Submit a task with event callbacks for submission, success, and failure.
 
         Wraps a Future with event handlers that are triggered at different stages
@@ -894,9 +931,12 @@ class LMPipeRunner[K: str]:
 
         Args:
             ftr (`Future[R]`): The future representing the submitted task.
-            on_submit (`((*Ts) -> Any)`): Event handler called immediately when task is submitted.
-            on_success (`((*Ts, R) -> Any)`): Event handler called when task completes successfully.
-            on_failure (`((*Ts, Exception) -> Any)`): Event handler called when task fails.
+            on_submit (`((*Ts) -> Any)`)
+                Event handler called immediately when task is submitted.
+            on_success (`((*Ts, R) -> Any)`):
+                Event handler called when task completes successfully.
+            on_failure (`((*Ts, Exception) -> Any)`):
+                Event handler called when task fails.
             *args (`*Ts`): Arguments to pass to the event handlers.
 
         Returns:
@@ -927,7 +967,7 @@ class LMPipeRunner[K: str]:
             on_success: Callable[[*Ts, R], Any],
             on_failure: Callable[[*Ts, Exception], Any],
             args: tuple[*Ts]
-            ):
+        ):
             self.on_success = on_success
             "Callback invoked when the task succeeds."
             self.on_failure = on_failure
@@ -971,7 +1011,7 @@ class LMPipeRunner[K: str]:
             return result
 
     class _local_runner_method[T: LMPipeRunner[Any], **P, R]:
-        """Internal callable wrapper for executing runner methods in worker processes/threads.
+        """Internal callable wrapper for executing runner methods in worker.
 
         This class serializes runner method calls for execution across process/thread
         boundaries by storing the method reference, runner ID, and arguments. When
@@ -986,7 +1026,7 @@ class LMPipeRunner[K: str]:
             self,
             method: Callable[Concatenate[T, P], R],
             runner: T, *args: P.args, **kwargs: P.kwargs
-            ):
+        ):
 
             self.method = method
             "The runner method to be invoked."
@@ -1051,7 +1091,11 @@ class LMPipeRunner[K: str]:
 
         return self.executors[mode]
 
-    def configure_executor(self, mode: ExecutorMode, initializer: Callable[[], Any]) -> Executor:
+    def configure_executor(
+        self,
+        mode: ExecutorMode,
+        initializer: Callable[[], Any]
+    ) -> Executor:
         """Configure and return an appropriate executor for the given mode.
 
         This method can be overridden in subclasses to customize executor
@@ -1085,9 +1129,11 @@ class LMPipeRunner[K: str]:
         if (
             self.lmpipe_options['executor_mode'] != mode
             or self.lmpipe_options['max_cpus'] == 0
-            ):
+        ):
             lmpipe_logger.debug(
-                f"Using DummyExecutor: executor_mode={self.lmpipe_options['executor_mode']}, "
+                f"Using DummyExecutor: executor_mode={
+                    self.lmpipe_options['executor_mode']
+                }, "
                 f"max_cpus={self.lmpipe_options['max_cpus']}"
             )
             return DummyExecutor(initializer=initializer)
@@ -1102,7 +1148,11 @@ class LMPipeRunner[K: str]:
                 f"max_cpus={max_cpus}, require_cpus={require_cpus}"
             )
             # TODO: cpu_tagsを考慮したリソース割り当てロジックを実装する
-            lmpipe_logger.debug(f"cpu_tags not yet implemented: {self.lmpipe_options.get('cpu_tags', [])}")
+            lmpipe_logger.debug(
+                f"cpu_tags not yet implemented: {
+                    self.lmpipe_options.get('cpu_tags', [])
+                }"
+            )
             return ProcessPoolExecutor(
                 max_workers=max_workers,
                 initializer=initializer
@@ -1132,11 +1182,16 @@ class LMPipeRunner[K: str]:
         if get_ident() == self._main_tid and os.getpid() == self._main_pid:
             return
 
-        signal.signal(signal.SIGINT, self._sigint_handler_not_for_main_thread(self._main_pid))
+        signal.signal(
+            signal.SIGINT,
+            self._sigint_handler_not_for_main_thread(self._main_pid)
+        )
 
     class _sigint_handler_not_for_main_thread:
+
         def __init__(self, main_pid: int):
             self._main_pid = main_pid
+
         def __call__(self, signum: int, frame: FrameType | None):
             # Re-raise KeyboardInterrupt in the main process
             os.kill(self._main_pid, signal.SIGINT)
@@ -1171,10 +1226,14 @@ class LMPipeRunner[K: str]:
             )
 
             if all_image_files:
-                lmpipe_logger.debug(f"Processing directory as image sequence: {dirpath}")
+                lmpipe_logger.debug(
+                    f"Processing directory as image sequence: {dirpath}"
+                )
                 iterable = [RunSpec(dirpath, rel_dst)]
             else:
-                lmpipe_logger.debug(f"Processing individual files in directory: {dirpath}")
+                lmpipe_logger.debug(
+                    f"Processing individual files in directory: {dirpath}"
+                )
                 iterable = (
                     RunSpec(file_path, rel_dst / file_path.name)
                     for file_path in files
@@ -1222,10 +1281,14 @@ class LMPipeRunner[K: str]:
             collectors = self.lmpipe_interface.collectors_or_factory
 
         if not collectors:
-            lmpipe_logger.warning("No collectors configured - results will not be saved")
+            lmpipe_logger.warning(
+                "No collectors configured - results will not be saved"
+            )
         else:
             collector_names = [type(c).__name__ for c in collectors]
-            lmpipe_logger.info(f"Configured {len(collectors)} collectors: {', '.join(collector_names)}")
+            lmpipe_logger.info(
+                f"Configured {len(collectors)} collectors: {', '.join(collector_names)}"
+            )
 
         return collectors
 
@@ -1244,7 +1307,9 @@ class LMPipeRunner[K: str]:
             for cllctr in self.collectors
         )
         if not result:
-            lmpipe_logger.warning(f"Skipping existing file per collector rules: {runspec.src}")
+            lmpipe_logger.warning(
+                f"Skipping existing file per collector rules: {runspec.src}"
+            )
         return result
 
 

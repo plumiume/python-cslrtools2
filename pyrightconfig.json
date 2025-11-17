@@ -1,0 +1,9 @@
+{
+    "typeCheckingMode": "strict",
+    "executionEnvironments": [
+        {
+            "root": "./tests",
+            "reportUnusedImport": "warning"
+        }
+    ]
+}

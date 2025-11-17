@@ -1,7 +1,7 @@
 from typing import TypeAlias, Any, Literal, Iterable
 from typing_extensions import deprecated
 from pathlib import Path
-from fsspec.mapping import FSMap as _FSMap # pyright: ignore[reportMissingTypeStubs]
+from fsspec.mapping import FSMap as _FSMap  # pyright: ignore[reportMissingTypeStubs]
 
 import numpy as np
 import numpy.typing as npt
@@ -63,7 +63,6 @@ __all__ = [
 ]
 
 
-
 FSMap: TypeAlias = _FSMap | None
 StoreLike: TypeAlias = Store | StorePath | FSMap | Path | str | dict[str, Buffer]
 
@@ -104,7 +103,11 @@ def open(
     ) -> Array | Group: ...
 
 
-def open_consolidated(*args: Any, use_consolidated: Literal[True] = True, **kwargs: Any) -> Group: ...
+def open_consolidated(
+    *args: Any,
+    use_consolidated: Literal[True] = True,
+    **kwargs: Any
+    ) -> Group: ...
 
 
 def save(
@@ -315,8 +318,3 @@ def zeros(shape: tuple[int, ...], **kwargs: Any) -> Array: ...
 
 
 def zeros_like(a: ArrayLike, **kwargs: Any) -> Array: ...
-
-
-
-
-

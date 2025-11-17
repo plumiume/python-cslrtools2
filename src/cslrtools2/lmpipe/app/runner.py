@@ -32,13 +32,16 @@ from .mp_rich import RichManager
 
 DESC_TEMPLATE = "[{deco}]{desc}[/{deco}]"
 
+
 class _Local(local):
     manager_map: dict[int, RichManager] = {}
     search_progress_task_ids: dict[int, TaskID] = {}
     batch_progress_task_ids: dict[int, TaskID] = {}
     frames_progress_task_ids: dict[int, TaskID] = {}
 
+
 _local = _Local()
+
 
 class CliAppRunner[K: str](LMPipeRunner[K]):
 
@@ -46,7 +49,7 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
         self,
         interface: LMPipeInterface[K],
         options: LMPipeOptions = DEFAULT_LMPIPE_OPTIONS
-        ):
+    ):
 
         super().__init__(interface, options)
 
@@ -108,7 +111,7 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
             refresh_per_second=4
         )
 
-        self.rich_client.call_method( # Live.start
+        self.rich_client.call_method(  # Live.start
             self.rich_live_ref,
             Live.start
         )
@@ -116,9 +119,11 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
     @property
     def search_progress_finish_task(self):
         return Progress.stop_task
+
     @property
     def batch_progress_finish_task(self):
         return Progress.stop_task
+
     @property
     def frames_progress_finish_task(self):
         return Progress.remove_task
@@ -214,7 +219,12 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
                 batch_progress_task_id
             )
 
-    def on_failure_batch_task(self, runspec: RunSpec[Path], task_id: int, error: Exception):
+    def on_failure_batch_task(
+        self,
+        runspec: RunSpec[Path],
+        task_id: int,
+        error: Exception
+    ):
 
         batch_progress_task_id = _local.batch_progress_task_ids.get(id(self))
         if batch_progress_task_id is not None:
@@ -246,6 +256,7 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
                 batch_progress_task_id
             )
 
+    ##### Frames Task Callbacks #####
 
     def on_start_frames_job(self):
 
@@ -394,7 +405,7 @@ class CliAppRunner[K: str](LMPipeRunner[K]):
 
     def on_finally(self):
 
-        self.rich_client.call_method( # Live.stop
+        self.rich_client.call_method(  # Live.stop
             self.rich_live_ref,
             Live.stop
         )

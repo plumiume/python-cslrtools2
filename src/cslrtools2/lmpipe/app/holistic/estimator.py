@@ -24,7 +24,10 @@ from ...estimator import (
 )
 from .roi import BaseROI
 
-class HolisticPartEstimator[K: str](Estimator[K]): ...
+
+class HolisticPartEstimator[K: str](Estimator[K]):
+    ...
+
 
 class HolisticPoseEstimator[K: str](Estimator[K]):
 
