@@ -21,7 +21,7 @@ classifiers = [
 ]
 urls = { "Repository" = "https://github.com/ikegami-yukino/python-cslrtools2" }
 dependencies = [
-    "clipar",
+    "clipar @ https://github.com/plumiume/python-clipar.git",
     "loky>=3.0.0",
     "matplotlib>=3.5.0",
     "numpy>=2.0.0",
@@ -50,6 +50,9 @@ sldataset2 = "cslrtools2.sldataset.app.cli:main"
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.version]
 source = "vcs"
