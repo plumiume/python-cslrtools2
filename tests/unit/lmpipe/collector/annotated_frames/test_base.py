@@ -1,5 +1,7 @@
 """Tests for annotated frames collector base classes."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -22,7 +24,7 @@ class DummyImageSequenceSaveCollector(AnnotatedFramesSaveCollector[str]):
         self._extension = extension
         self.opened = False
         self.closed = False
-        self.appended_results = []
+        self.appended_results: list[ProcessResult[str]] = []
 
     @property
     def is_video(self) -> bool:
@@ -53,7 +55,7 @@ class DummyVideoSaveCollector(AnnotatedFramesSaveCollector[str]):
         self._extension = extension
         self.opened = False
         self.closed = False
-        self.appended_results = []
+        self.appended_results: list[ProcessResult[str]] = []
 
     @property
     def is_video(self) -> bool:
@@ -83,7 +85,7 @@ class DummyShowCollector(AnnotatedFramesShowCollector[str]):
     def __init__(self):
         self.setup_called = False
         self.cleanup_called = False
-        self.updated_results = []
+        self.updated_results: list[ProcessResult[str]] = []
 
     def _setup(self):
         self.setup_called = True
@@ -276,7 +278,7 @@ class TestAnnotatedFramesSaveCollectorWorkflow:
         collector = DummyImageSequenceSaveCollector()
 
         # Override _append_result to raise an error
-        def error_append(result):
+        def error_append(result: ProcessResult[str]):
             raise RuntimeError("Test error")
 
         collector._append_result = error_append

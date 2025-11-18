@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import pytest  # pyright: ignore[reportUnusedImport]
@@ -24,7 +26,11 @@ from cslrtools2.lmpipe.interface import LMPipeInterface, LMPipeRunner
 from cslrtools2.lmpipe.interface import _update_lmpipe_options
 from cslrtools2.lmpipe.estimator import Estimator
 from cslrtools2.lmpipe.collector import Collector
-from cslrtools2.lmpipe.options import DEFAULT_LMPIPE_OPTIONS, LMPipeOptionsPartial
+from cslrtools2.lmpipe.options import (
+    DEFAULT_LMPIPE_OPTIONS,
+    LMPipeOptionsPartial,
+    LMPipeOptions
+)
 from cslrtools2.lmpipe.runspec import RunSpec
 from cslrtools2.typings import NDArrayFloat, NDArrayStr, MatLike
 
@@ -51,7 +57,12 @@ class DummyEstimator(Estimator[Literal["test"]]):
     ) -> Mapping[Literal["test"], NDArrayFloat]:
         return {"test": np.array([[1.0, 2.0, 3.0]])}
 
-    def annotate(self, frame_src: MatLike | None, frame_idx: int, landmarks) -> MatLike:
+    def annotate(
+        self,
+        frame_src: MatLike | None,
+        frame_idx: int,
+        landmarks: Mapping[Literal["test"], NDArrayFloat],
+    ) -> MatLike:
         return (
             frame_src if frame_src is not None else np.zeros((1, 1, 3), dtype=np.uint8)
         )
@@ -125,7 +136,9 @@ class TestUpdateLMPipeOptions:
 class TestLMPipeInterfaceInitialization:
     """Tests for LMPipeInterface initialization."""
 
-    def test_initialization_with_estimator_only(self, dummy_estimator):
+    def test_initialization_with_estimator_only(
+        self, dummy_estimator: Estimator[Literal["test"]]
+    ):
         """Test basic initialization with only an estimator."""
         interface = LMPipeInterface(dummy_estimator)
 
@@ -134,7 +147,11 @@ class TestLMPipeInterfaceInitialization:
         assert interface.collectors_or_factory == []
         assert interface.runner_type is LMPipeRunner
 
-    def test_initialization_with_collectors_list(self, dummy_estimator, mock_collector):
+    def test_initialization_with_collectors_list(
+        self,
+        dummy_estimator: Estimator[Literal["test"]],
+        mock_collector: Collector[Literal["test"]]
+    ):
         """Test initialization with list of collectors."""
         collectors = [mock_collector]
         interface = LMPipeInterface(dummy_estimator, collectors=collectors)
@@ -143,7 +160,9 @@ class TestLMPipeInterfaceInitialization:
         assert isinstance(interface.collectors_or_factory, list)
 
     def test_initialization_with_collectors_factory(
-        self, dummy_estimator, mock_collector
+        self,
+        dummy_estimator: Estimator[Literal["test"]],
+        mock_collector: Collector[Literal["test"]]
     ):
         """Test initialization with collector factory function."""
         factory = Mock(return_value=[mock_collector])
@@ -151,7 +170,9 @@ class TestLMPipeInterfaceInitialization:
 
         assert interface.collectors_or_factory is factory
 
-    def test_initialization_with_options_dict(self, dummy_estimator):
+    def test_initialization_with_options_dict(
+        self, dummy_estimator: Estimator[Literal["test"]]
+    ):
         """Test initialization with options dictionary."""
         options: LMPipeOptionsPartial = {"max_cpus": 8, "executor_type": "thread"}
         interface = LMPipeInterface(dummy_estimator, options=options)
@@ -159,7 +180,9 @@ class TestLMPipeInterfaceInitialization:
         assert interface.lmpipe_options["max_cpus"] == 8
         assert interface.lmpipe_options["executor_type"] == "thread"
 
-    def test_initialization_with_kwargs(self, dummy_estimator):
+    def test_initialization_with_kwargs(
+        self, dummy_estimator: Estimator[Literal["test"]]
+    ):
         """Test initialization with keyword arguments."""
         interface = LMPipeInterface(
             dummy_estimator, max_cpus=4, executor_type="process"
@@ -168,17 +191,21 @@ class TestLMPipeInterfaceInitialization:
         assert interface.lmpipe_options["max_cpus"] == 4
         assert interface.lmpipe_options["executor_type"] == "process"
 
-    def test_initialization_kwargs_override_options(self, dummy_estimator):
+    def test_initialization_kwargs_override_options(
+        self, dummy_estimator: Estimator[Literal["test"]]
+    ):
         """Test that kwargs override options dict."""
         options: LMPipeOptionsPartial = {"max_cpus": 4}
         interface = LMPipeInterface(dummy_estimator, options=options, max_cpus=8)
 
         assert interface.lmpipe_options["max_cpus"] == 8
 
-    def test_initialization_with_custom_runner_type(self, dummy_estimator):
+    def test_initialization_with_custom_runner_type(
+        self, dummy_estimator: Estimator[Literal["test"]]
+    ):
         """Test initialization with custom runner type."""
 
-        class CustomRunner(LMPipeRunner):
+        class CustomRunner(LMPipeRunner[Literal["test"]]):
             pass
 
         interface = LMPipeInterface(dummy_estimator, runner_type=CustomRunner)
@@ -189,7 +216,9 @@ class TestLMPipeInterfaceInitialization:
 class TestLMPipeInterfaceRunMethods:
     """Tests for LMPipeInterface run methods."""
 
-    def test_run_creates_runner_and_calls_run(self, dummy_estimator, tmp_path):
+    def test_run_creates_runner_and_calls_run(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test run() creates runner and delegates to runner.run()."""
         src = tmp_path / "input.mp4"
         src.touch()
@@ -206,7 +235,9 @@ class TestLMPipeInterfaceRunMethods:
             assert call_args[0].src == src
             assert call_args[0].dst == dst
 
-    def test_run_with_options_override(self, dummy_estimator, tmp_path):
+    def test_run_with_options_override(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test run() with option overrides."""
         src = tmp_path / "input.mp4"
         src.touch()
@@ -226,7 +257,7 @@ class TestLMPipeInterfaceRunMethods:
             assert runner_options["max_cpus"] == 8
 
     def test_run_batch_creates_runner_and_calls_run_batch(
-        self, dummy_estimator, tmp_path
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
     ):
         """Test run_batch() creates runner and delegates to runner.run_batch()."""
         src = tmp_path / "input"
@@ -244,7 +275,7 @@ class TestLMPipeInterfaceRunMethods:
             assert call_args[0].src == src
 
     def test_run_single_creates_runner_and_calls_run_single(
-        self, dummy_estimator, tmp_path
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
     ):
         """Test run_single() creates runner and delegates to runner.run_single()."""
         src = tmp_path / "input.mp4"
@@ -261,7 +292,7 @@ class TestLMPipeInterfaceRunMethods:
             assert isinstance(call_args[0], RunSpec)
 
     def test_run_video_creates_runner_and_calls_run_video(
-        self, dummy_estimator, tmp_path
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
     ):
         """Test run_video() creates runner and delegates to runner.run_video()."""
         src = tmp_path / "input.mp4"
@@ -278,7 +309,7 @@ class TestLMPipeInterfaceRunMethods:
             assert isinstance(call_args[0], RunSpec)
 
     def test_run_sequence_images_creates_runner_and_calls_run_sequence_images(
-        self, dummy_estimator, tmp_path
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
     ):
         """Test run_sequence_images() creates runner and delegates correctly."""
         src = tmp_path / "images"
@@ -295,7 +326,7 @@ class TestLMPipeInterfaceRunMethods:
             assert isinstance(call_args[0], RunSpec)
 
     def test_run_single_image_creates_runner_and_calls_run_single_image(
-        self, dummy_estimator, tmp_path
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
     ):
         """Test run_single_image() creates runner and delegates correctly."""
         src = tmp_path / "image.jpg"
@@ -312,7 +343,7 @@ class TestLMPipeInterfaceRunMethods:
             assert isinstance(call_args[0], RunSpec)
 
     def test_run_stream_creates_runner_and_calls_run_stream(
-        self, dummy_estimator, tmp_path
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
     ):
         """Test run_stream() creates runner and delegates to runner.run_stream()."""
         dst = tmp_path / "output"
@@ -331,7 +362,9 @@ class TestLMPipeInterfaceRunMethods:
 class TestLMPipeInterfaceRunSpecCreation:
     """Tests for RunSpec creation in interface methods."""
 
-    def test_run_creates_runspec_from_pathlikes(self, dummy_estimator, tmp_path):
+    def test_run_creates_runspec_from_pathlikes(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test that run() creates RunSpec from path-like objects."""
         src = tmp_path / "input.mp4"
         src.touch()
@@ -348,7 +381,9 @@ class TestLMPipeInterfaceRunSpecCreation:
             assert runspec.src == src
             assert runspec.dst == dst
 
-    def test_run_stream_creates_runspec_from_index(self, dummy_estimator, tmp_path):
+    def test_run_stream_creates_runspec_from_index(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test that run_stream() creates RunSpec from integer index."""
         dst = tmp_path / "output"
 
@@ -365,7 +400,9 @@ class TestLMPipeInterfaceRunSpecCreation:
 class TestLMPipeInterfaceOptionsHandling:
     """Tests for options handling in interface methods."""
 
-    def test_each_method_updates_options(self, dummy_estimator, tmp_path):
+    def test_each_method_updates_options(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test that each run method properly updates options."""
         src = tmp_path / "input.mp4"
         src.touch()
@@ -395,7 +432,9 @@ class TestLMPipeInterfaceOptionsHandling:
                     f"Failed for method {method_name}"
                 )
 
-    def test_batch_method_updates_options(self, dummy_estimator, tmp_path):
+    def test_batch_method_updates_options(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test that run_batch() properly updates options."""
         src = tmp_path / "input"
         src.mkdir()
@@ -412,7 +451,9 @@ class TestLMPipeInterfaceOptionsHandling:
             runner_options = mock_init.call_args[0][1]
             assert runner_options["executor_type"] == "thread"
 
-    def test_sequence_images_method_updates_options(self, dummy_estimator, tmp_path):
+    def test_sequence_images_method_updates_options(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test that run_sequence_images() properly updates options."""
         src = tmp_path / "images"
         src.mkdir()
@@ -429,7 +470,9 @@ class TestLMPipeInterfaceOptionsHandling:
             runner_options = mock_init.call_args[0][1]
             assert runner_options["max_cpus"] == 16
 
-    def test_stream_method_updates_options(self, dummy_estimator, tmp_path):
+    def test_stream_method_updates_options(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test that run_stream() properly updates options."""
         dst = tmp_path / "output"
 
@@ -448,13 +491,15 @@ class TestLMPipeInterfaceOptionsHandling:
 class TestLMPipeInterfaceCustomRunner:
     """Tests for custom runner type support."""
 
-    def test_custom_runner_is_used(self, dummy_estimator, tmp_path):
+    def test_custom_runner_is_used(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test that custom runner type is instantiated."""
         src = tmp_path / "input.mp4"
         src.touch()
         dst = tmp_path / "output"
 
-        class CustomRunner(LMPipeRunner):
+        class CustomRunner(LMPipeRunner[Literal["test"]]):
             pass
 
         interface = LMPipeInterface(dummy_estimator, runner_type=CustomRunner)
@@ -468,14 +513,14 @@ class TestLMPipeInterfaceCustomRunner:
             mock_init.assert_called_once()
 
     def test_custom_runner_receives_interface_and_options(
-        self, dummy_estimator, tmp_path
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
     ):
         """Test that custom runner receives correct interface and options."""
         src = tmp_path / "input.mp4"
         src.touch()
         dst = tmp_path / "output"
 
-        class CustomRunner(LMPipeRunner):
+        class CustomRunner(LMPipeRunner[Literal["test"]]):
             pass
 
         interface = LMPipeInterface(
@@ -496,21 +541,27 @@ class TestLMPipeInterfaceCustomRunner:
 class TestLMPipeInterfaceIntegration:
     """Integration tests for LMPipeInterface."""
 
-    def test_interface_preserves_collectors(self, dummy_estimator, mock_collector):
+    def test_interface_preserves_collectors(
+        self,
+        dummy_estimator: Estimator[Literal["test"]],
+        mock_collector: Collector[Literal["test"]]
+    ):
         """Test that interface preserves collectors configuration."""
         collectors = [mock_collector]
         interface = LMPipeInterface(dummy_estimator, collectors=collectors)
 
         assert interface.collectors_or_factory is collectors
 
-    def test_interface_preserves_estimator(self, dummy_estimator):
+    def test_interface_preserves_estimator(
+        self, dummy_estimator: Estimator[Literal["test"]]
+    ):
         """Test that interface preserves estimator reference."""
         interface = LMPipeInterface(dummy_estimator)
 
         assert interface.estimator is dummy_estimator
 
     def test_multiple_run_calls_create_separate_runners(
-        self, dummy_estimator, tmp_path
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
     ):
         """Test that multiple run calls create separate runner instances."""
         src = tmp_path / "input.mp4"
@@ -519,9 +570,12 @@ class TestLMPipeInterfaceIntegration:
 
         interface = LMPipeInterface(dummy_estimator)
 
-        runner_instances = []
+        runner_instances: list[LMPipeRunner[Literal["test"]]] = []
 
-        def track_runner(iface, options):
+        def track_runner(
+            iface: LMPipeInterface[Literal["test"]],
+            options: LMPipeOptions
+        ) -> LMPipeRunner[Literal["test"]]:
             runner = LMPipeRunner(iface, options)
             runner_instances.append(runner)
             return runner
@@ -536,7 +590,9 @@ class TestLMPipeInterfaceIntegration:
             assert len(runner_instances) == 2
             assert runner_instances[0] is not runner_instances[1]
 
-    def test_interface_with_string_paths(self, dummy_estimator, tmp_path):
+    def test_interface_with_string_paths(
+        self, dummy_estimator: Estimator[Literal["test"]], tmp_path: Path
+    ):
         """Test that interface accepts string paths."""
         src = tmp_path / "input.mp4"
         src.touch()

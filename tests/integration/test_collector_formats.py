@@ -36,9 +36,12 @@ Example:
         >>> pytest tests/integration/test_collector_formats.py -v
 """
 
+# pyright: reportPrivateUsage=false
+# pyright: reportUnknownMemberType=false
+
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Mapping
 from pathlib import Path
 
 import numpy as np
@@ -94,7 +97,11 @@ class TestCollectorRoundTrip:
             "right_hand": np.array(["x", "y"], dtype=str),
         }
 
-    def test_csv_roundtrip(self, tmp_path, sample_landmarks, sample_headers):
+    def test_csv_roundtrip(
+        self, tmp_path: Path,
+        sample_landmarks: Mapping[str, np.ndarray],
+        sample_headers: Mapping[str, np.ndarray]
+    ):
         """Test CSV format round-trip with data verification.
 
         Verifies that landmarks saved to CSV can be loaded back correctly.
@@ -132,7 +139,9 @@ class TestCollectorRoundTrip:
             assert float(rows[0]["z"]) == pytest.approx(0.3, rel=1e-5)
             assert float(rows[2]["x"]) == pytest.approx(0.7, rel=1e-5)
 
-    def test_npy_roundtrip(self, tmp_path, sample_landmarks):
+    def test_npy_roundtrip(
+        self, tmp_path: Path, sample_landmarks: Mapping[str, np.ndarray]
+    ):
         """Test NPY format round-trip with data verification.
 
         Verifies that landmarks saved to NPY files can be loaded back correctly.
@@ -164,7 +173,9 @@ class TestCollectorRoundTrip:
             loaded_left[0], sample_landmarks["left_hand"], rtol=1e-5
         )
 
-    def test_npz_roundtrip(self, tmp_path, sample_landmarks):
+    def test_npz_roundtrip(
+        self, tmp_path: Path, sample_landmarks: Mapping[str, np.ndarray]
+    ):
         """Test NPZ container format round-trip with data verification.
 
         Verifies that landmarks saved to a single NPZ file can be loaded correctly.
@@ -201,7 +212,9 @@ class TestCollectorRoundTrip:
                 data["right_hand"][0], sample_landmarks["right_hand"], rtol=1e-5
             )
 
-    def test_zarr_roundtrip(self, tmp_path, sample_landmarks):
+    def test_zarr_roundtrip(
+        self, tmp_path: Path, sample_landmarks: Mapping[str, np.ndarray]
+    ):
         """Test Zarr format round-trip with data verification.
 
         Verifies that landmarks saved to Zarr store can be loaded correctly.
@@ -270,9 +283,9 @@ class TestCollectorFormatComparison:
     """Test consistency between container and per-key formats."""
 
     @pytest.fixture
-    def multi_frame_landmarks(self):
+    def multi_frame_landmarks(self) -> list[Mapping[str, np.ndarray]]:
         """Generate multi-frame landmark data for testing."""
-        frames = []
+        frames: list[Mapping[str, np.ndarray]] = []
         for i in range(5):  # 5 frames
             frame_data = {
                 "pose": np.random.randn(33, 3).astype(np.float32) * 0.1 + i,

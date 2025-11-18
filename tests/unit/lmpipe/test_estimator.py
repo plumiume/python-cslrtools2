@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Mapping
+from typing import Any, Literal, Mapping
 
 import numpy as np
 import pytest
@@ -427,7 +427,7 @@ class TestDecoratorWithKeyOptions:
         ):
 
             @shape(123)  # type: ignore[reportArgumentType]
-            def invalid_shape(self) -> tuple[int, int]:
+            def invalid_shape(self: Any) -> tuple[int, int]:  # pyright: ignore[reportUnusedFunction] # noqa: E501
                 return (1, 1)
 
     def test_headers_decorator_with_keyoptions(self) -> None:
@@ -503,7 +503,7 @@ class TestDecoratorWithKeyOptions:
         ):
 
             @headers("invalid")  # type: ignore[reportArgumentType]
-            def invalid_headers(self) -> list[str]:
+            def invalid_headers(self: Any) -> list[str]:  # pyright: ignore[reportUnusedFunction] # noqa: E501
                 return ["x"]
 
     def test_estimate_decorator_with_keyoptions(self) -> None:
@@ -573,8 +573,8 @@ class TestDecoratorWithKeyOptions:
         ):
 
             @estimate([1, 2, 3])  # type: ignore[reportArgumentType]
-            def invalid_estimate(
-                self, frame_src: MatLike | None, frame_idx: int
+            def invalid_estimate(  # pyright: ignore[reportUnusedFunction] # noqa: E501
+                self: Any, frame_src: MatLike | None, frame_idx: int
             ) -> NDArrayFloat:
                 return np.zeros((1, 1), dtype=np.float32)
 
@@ -625,8 +625,8 @@ class TestDecoratorWithKeyOptions:
         ):
 
             @annotate(42.0)  # type: ignore[reportArgumentType]
-            def invalid_annotate(
-                self,
+            def invalid_annotate(  # pyright: ignore[reportUnusedFunction] # noqa: E501
+                self: Any,
                 frame_src: MatLike,
                 frame_idx: int,
                 landmarks: Mapping[Literal["test"], NDArrayFloat],

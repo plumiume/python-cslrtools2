@@ -4,12 +4,17 @@ Tests for JsonLandmarkMatrixSaveCollector.
 Coverage target: 43% → 85%+
 """
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
+from typing import Any
+from pathlib import Path
 import json
+
 import numpy as np
 import pytest  # pyright: ignore[reportUnusedImport]
-from pathlib import Path
+
 from typing import Literal, Mapping
 
 from cslrtools2.lmpipe.collector.landmark_matrix.json_lmsc import (
@@ -121,7 +126,7 @@ class TestJSONLMSCFileOperations:
 
         # Verify content
         with json_file.open("r", encoding="utf-8") as f:
-            data = json.load(f)
+            data: list[Any] = json.load(f)
             assert isinstance(data, list)
             assert len(data) == 1  # One append call
             assert len(data[0]) == 10  # 10 frames

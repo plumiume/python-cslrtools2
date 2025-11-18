@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import annotations
-
 """LMPipe runner module for pipeline execution coordination.
 
 This module provides the LMPipeRunner class and related utilities for coordinating

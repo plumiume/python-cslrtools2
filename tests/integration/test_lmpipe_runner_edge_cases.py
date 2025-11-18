@@ -55,7 +55,12 @@ class DummyEstimator(Estimator[Literal["test"]]):
     ) -> Mapping[Literal["test"], NDArrayFloat]:
         return {"test": np.array([[1.0, 2.0, 3.0]])}
 
-    def annotate(self, frame_src: MatLike | None, frame_idx: int, landmarks) -> MatLike:
+    def annotate(
+        self,
+        frame_src: MatLike | None,
+        frame_idx: int,
+        landmarks: Mapping[Literal["test"], NDArrayFloat],
+    ) -> MatLike:
         return (
             frame_src if frame_src is not None else np.zeros((1, 1, 3), dtype=np.uint8)
         )
@@ -80,7 +85,7 @@ class TestLMPipeRunnerEdgeCases:
         from cslrtools2.exceptions import VideoProcessingError
 
         estimator = DummyEstimator()
-        collector = NpzLandmarkMatrixSaveCollector()
+        collector = NpzLandmarkMatrixSaveCollector[Literal["test"]]()
         interface = LMPipeInterface(estimator=estimator, collectors=[collector])
 
         non_existent_path = integration_tmp_path / "non_existent_video.mp4"
@@ -105,7 +110,7 @@ class TestLMPipeRunnerEdgeCases:
         """
         # Arrange
         estimator = DummyEstimator()
-        collector = NpzLandmarkMatrixSaveCollector()
+        collector = NpzLandmarkMatrixSaveCollector[Literal["test"]]()
         LMPipeInterface(estimator=estimator, collectors=[collector])
 
         # Create a regular file but will test the logic path
@@ -132,7 +137,7 @@ class TestLMPipeRunnerEdgeCases:
         """
         # Arrange
         estimator = DummyEstimator()
-        collector = NpzLandmarkMatrixSaveCollector()
+        collector = NpzLandmarkMatrixSaveCollector[Literal["test"]]()
         interface = LMPipeInterface(estimator=estimator, collectors=[collector])
 
         empty_dir = integration_tmp_path / "empty_source"
@@ -164,7 +169,7 @@ class TestLMPipeRunnerEdgeCases:
         """
         # Arrange
         estimator = DummyEstimator()
-        collector = NpzLandmarkMatrixSaveCollector()
+        collector = NpzLandmarkMatrixSaveCollector[Literal["test"]]()
         interface = LMPipeInterface(estimator=estimator, collectors=[collector])
 
         # Create a minimal test "video" file (empty file for testing)
@@ -192,7 +197,7 @@ class TestLMPipeRunnerEdgeCases:
         """
         # Arrange
         estimator = DummyEstimator()
-        collector = NpzLandmarkMatrixSaveCollector()
+        collector = NpzLandmarkMatrixSaveCollector[Literal["test"]]()
         interface = LMPipeInterface(estimator=estimator, collectors=[collector])
 
         # Use string paths

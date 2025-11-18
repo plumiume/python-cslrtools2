@@ -12,19 +12,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
+
+from typing import Any, Callable, Literal, Mapping, cast
+from pathlib import Path
+from concurrent.futures import Future
 
 import pytest  # pyright: ignore[reportUnusedImport]
 import numpy as np
-from typing import Literal, Mapping
+from cv2 import VideoCapture
 from unittest.mock import Mock, MagicMock, patch
-from concurrent.futures import Future
 
-from cslrtools2.lmpipe.interface.runner import LMPipeRunner, _runner_public_api
+from cslrtools2.lmpipe.interface.runner import (
+    LMPipeInterface, LMPipeRunner, _runner_public_api
+)
+from cslrtools2.lmpipe.collector import Collector
 from cslrtools2.lmpipe.estimator import Estimator, ProcessResult
-from cslrtools2.lmpipe.options import DEFAULT_LMPIPE_OPTIONS
+from cslrtools2.lmpipe.options import (
+    DEFAULT_LMPIPE_OPTIONS,
+    LMPipeOptions,
+)
 from cslrtools2.lmpipe.runspec import RunSpec
 from cslrtools2.typings import NDArrayFloat, NDArrayStr, MatLike
+
+
+def dummy_enter(self: Any) -> Any:
+    return self
+
+
+class dummy_estimator_enter:
+
+    def __init__(self, estimator: Any):
+        self.estimator = estimator
+
+    def __call__(self, *args: Any) -> Any:
+        return self.estimator
+
+
+def dummy_exit(self: Any, *args: Any) -> None:
+    return None
 
 
 class DummyEstimator(Estimator[Literal["test"]]):
@@ -55,7 +83,12 @@ class DummyEstimator(Estimator[Literal["test"]]):
         self._estimate_called = True
         return {"test": np.array([[1.0, 2.0, 3.0]])}
 
-    def annotate(self, frame_src: MatLike | None, frame_idx: int, landmarks) -> MatLike:
+    def annotate(
+        self,
+        frame_src: MatLike | None,
+        frame_idx: int,
+        landmarks: Mapping[Literal["test"], NDArrayFloat],
+    ) -> MatLike:
         self._annotate_called = True
         return (
             frame_src if frame_src is not None else np.zeros((1, 1, 3), dtype=np.uint8)
@@ -72,7 +105,7 @@ def mock_interface():
 
 
 @pytest.fixture
-def runner(mock_interface):
+def runner(mock_interface: LMPipeInterface[Literal["test"]]):
     """Create a LMPipeRunner instance."""
     return LMPipeRunner(mock_interface, DEFAULT_LMPIPE_OPTIONS)
 
@@ -80,7 +113,7 @@ def runner(mock_interface):
 class TestLMPipeRunnerInitialization:
     """Tests for LMPipeRunner initialization."""
 
-    def test_initialization(self, mock_interface):
+    def test_initialization(self, mock_interface: LMPipeInterface[Literal["test"]]):
         """Test basic initialization."""
         runner = LMPipeRunner(mock_interface, DEFAULT_LMPIPE_OPTIONS)
 
@@ -90,7 +123,7 @@ class TestLMPipeRunnerInitialization:
         assert runner.executors == {}
         assert isinstance(runner.collectors, list)
 
-    def test_getstate_excludes_executors(self, runner):
+    def test_getstate_excludes_executors(self, runner: LMPipeRunner[Literal["test"]]):
         """Test __getstate__ excludes executors from serialization."""
         runner.executors["batch"] = Mock()
         state = runner.__getstate__()
@@ -99,7 +132,7 @@ class TestLMPipeRunnerInitialization:
         assert state["executors"] == {}
         assert "lmpipe_interface" in state
 
-    def test_setstate_restores_state(self, runner):
+    def test_setstate_restores_state(self, runner: LMPipeRunner[Literal["test"]]):
         """Test __setstate__ restores state."""
         state = {
             "lmpipe_interface": Mock(),
@@ -111,10 +144,12 @@ class TestLMPipeRunnerInitialization:
         assert runner.lmpipe_interface is state["lmpipe_interface"]
         assert runner.toplevel_call is False
 
-    def test_configure_collectors_with_list(self, mock_interface):
+    def test_configure_collectors_with_list(
+        self, mock_interface: LMPipeInterface[Literal["test"]]
+    ):
         """Test collector configuration with pre-configured list."""
-        collector1 = Mock()
-        collector2 = Mock()
+        collector1 = cast(Collector[Literal["test"]], Mock())
+        collector2 = cast(Collector[Literal["test"]], Mock())
         mock_interface.collectors_or_factory = [collector1, collector2]
 
         runner = LMPipeRunner(mock_interface, DEFAULT_LMPIPE_OPTIONS)
@@ -123,7 +158,9 @@ class TestLMPipeRunnerInitialization:
         assert collector1 in runner.collectors
         assert collector2 in runner.collectors
 
-    def test_configure_collectors_with_factory(self, mock_interface):
+    def test_configure_collectors_with_factory(
+        self, mock_interface: LMPipeInterface[Literal["test"]]
+    ):
         """Test collector configuration with factory function."""
         collector1 = Mock()
         collector2 = Mock()
@@ -136,7 +173,9 @@ class TestLMPipeRunnerInitialization:
         assert len(runner.collectors) == 2
         assert collector1 in runner.collectors
 
-    def test_configure_collectors_empty(self, mock_interface):
+    def test_configure_collectors_empty(
+        self, mock_interface: LMPipeInterface[Literal["test"]]
+    ):
         """Test collector configuration with empty list."""
         mock_interface.collectors_or_factory = []
 
@@ -148,7 +187,9 @@ class TestLMPipeRunnerInitialization:
 class TestRunMethodDispatch:
     """Tests for run method dispatch logic."""
 
-    def test_run_dispatches_to_run_batch_for_directory(self, runner, tmp_path):
+    def test_run_dispatches_to_run_batch_for_directory(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test run() dispatches to run_batch() for directory."""
         src_dir = tmp_path / "input"
         src_dir.mkdir()
@@ -159,7 +200,9 @@ class TestRunMethodDispatch:
             runner.run(runspec)
             mock_run_batch.assert_called_once_with(runspec)
 
-    def test_run_dispatches_to_run_single_for_file(self, runner, tmp_path):
+    def test_run_dispatches_to_run_single_for_file(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test run() dispatches to run_single() for file."""
         src_file = tmp_path / "input.mp4"
         src_file.touch()
@@ -170,7 +213,9 @@ class TestRunMethodDispatch:
             runner.run(runspec)
             mock_run_single.assert_called_once_with(runspec)
 
-    def test_run_raises_for_nonexistent_path(self, runner, tmp_path):
+    def test_run_raises_for_nonexistent_path(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test run() raises FileNotFoundError for nonexistent path."""
         src_path = tmp_path / "nonexistent"
         dst_path = tmp_path / "output"
@@ -180,7 +225,12 @@ class TestRunMethodDispatch:
             runner.run(runspec)
 
     @patch("cslrtools2.lmpipe.interface.runner.is_video_file", return_value=True)
-    def test_run_single_dispatches_to_run_video(self, mock_is_video, runner, tmp_path):
+    def test_run_single_dispatches_to_run_video(
+        self,
+        mock_is_video: Callable[[Path], bool],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
+    ):
         """Test run_single() dispatches to run_video() for video file."""
         src_file = tmp_path / "video.mp4"
         src_file.touch()
@@ -194,7 +244,11 @@ class TestRunMethodDispatch:
     @patch("cslrtools2.lmpipe.interface.runner.is_images_dir", return_value=True)
     @patch("cslrtools2.lmpipe.interface.runner.is_video_file", return_value=False)
     def test_run_single_dispatches_to_run_sequence_images(
-        self, mock_is_video, mock_is_images_dir, runner, tmp_path
+        self,
+        mock_is_video: Callable[[Path], bool],
+        mock_is_images_dir: Callable[[Path], bool],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
     ):
         """Test run_single() dispatches to run_sequence_images() for image directory."""
         src_dir = tmp_path / "images"
@@ -210,7 +264,12 @@ class TestRunMethodDispatch:
     @patch("cslrtools2.lmpipe.interface.runner.is_images_dir", return_value=False)
     @patch("cslrtools2.lmpipe.interface.runner.is_video_file", return_value=False)
     def test_run_single_dispatches_to_run_single_image(
-        self, mock_is_video, mock_is_images_dir, mock_is_image, runner, tmp_path
+        self,
+        mock_is_video: Callable[[Path], bool],
+        mock_is_images_dir: Callable[[Path], bool],
+        mock_is_image: Callable[[Path], bool],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
     ):
         """Test run_single() dispatches to run_single_image() for image file."""
         src_file = tmp_path / "image.jpg"
@@ -226,7 +285,12 @@ class TestRunMethodDispatch:
     @patch("cslrtools2.lmpipe.interface.runner.is_images_dir", return_value=False)
     @patch("cslrtools2.lmpipe.interface.runner.is_video_file", return_value=False)
     def test_run_single_raises_for_unsupported_type(
-        self, mock_is_video, mock_is_images_dir, mock_is_image, runner, tmp_path
+        self,
+        mock_is_video: Callable[[Path], bool],
+        mock_is_images_dir: Callable[[Path], bool],
+        mock_is_image: Callable[[Path], bool],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
     ):
         """Test run_single() raises ValueError for unsupported file type."""
         src_file = tmp_path / "unsupported.xyz"
@@ -244,7 +308,11 @@ class TestVideoProcessing:
     @patch("cslrtools2.lmpipe.interface.runner.cv2.VideoCapture")
     @patch("cslrtools2.lmpipe.interface.runner.capture_to_frames")
     def test_run_video_processes_frames(
-        self, mock_capture_to_frames, mock_VideoCapture, runner, tmp_path
+        self,
+        mock_capture_to_frames: Callable[[MagicMock], list[MatLike]],
+        mock_VideoCapture: Callable[..., VideoCapture],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
     ):
         """Test run_video() processes video frames."""
         src_file = tmp_path / "video.mp4"
@@ -253,7 +321,7 @@ class TestVideoProcessing:
         runspec = RunSpec(src_file, dst_file)
 
         # Mock video capture
-        mock_capture = MagicMock()
+        mock_capture = MagicMock(spec=VideoCapture)
         mock_capture.isOpened.return_value = True
         mock_capture.get.side_effect = lambda prop: {
             2: 100,  # cv2.CAP_PROP_FRAME_COUNT
@@ -278,7 +346,12 @@ class TestVideoProcessing:
             mock_collect.assert_called_once()
 
     @patch("cslrtools2.lmpipe.interface.runner.cv2.VideoCapture")
-    def test_run_video_raises_if_cannot_open(self, mock_VideoCapture, runner, tmp_path):
+    def test_run_video_raises_if_cannot_open(
+        self,
+        mock_VideoCapture: Callable[..., VideoCapture],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
+        ):
         """Test run_video() raises ValueError if video cannot be opened."""
         src_file = tmp_path / "video.mp4"
         src_file.touch()
@@ -294,7 +367,10 @@ class TestVideoProcessing:
 
     @patch("cslrtools2.lmpipe.interface.runner.seq_imgs_to_frames")
     def test_run_sequence_images_processes_frames(
-        self, mock_seq_imgs_to_frames, runner, tmp_path
+        self,
+        mock_seq_imgs_to_frames: Callable[[Path], list[MatLike]],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
     ):
         """Test run_sequence_images() processes image sequence."""
         src_dir = tmp_path / "images"
@@ -320,7 +396,10 @@ class TestVideoProcessing:
 
     @patch("cslrtools2.lmpipe.interface.runner.image_file_to_frame")
     def test_run_single_image_processes_frame(
-        self, mock_image_file_to_frame, runner, tmp_path
+        self,
+        mock_image_file_to_frame: Callable[[Path], MatLike],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
     ):
         """Test run_single_image() processes single image."""
         src_file = tmp_path / "image.jpg"
@@ -345,7 +424,11 @@ class TestVideoProcessing:
     @patch("cslrtools2.lmpipe.interface.runner.cv2.VideoCapture")
     @patch("cslrtools2.lmpipe.interface.runner.capture_to_frames")
     def test_run_stream_processes_stream(
-        self, mock_capture_to_frames, mock_VideoCapture, runner, tmp_path
+        self,
+        mock_capture_to_frames: Callable[[VideoCapture], list[MatLike]],
+        mock_VideoCapture: Callable[..., VideoCapture],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
     ):
         """Test run_stream() processes video stream."""
         dst_file = tmp_path / "output"
@@ -371,7 +454,10 @@ class TestVideoProcessing:
 
     @patch("cslrtools2.lmpipe.interface.runner.cv2.VideoCapture")
     def test_run_stream_raises_if_cannot_open(
-        self, mock_VideoCapture, runner, tmp_path
+        self,
+        mock_VideoCapture: Callable[..., VideoCapture],
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
     ):
         """Test run_stream() raises ValueError if stream cannot be opened."""
         dst_file = tmp_path / "output"
@@ -388,7 +474,9 @@ class TestVideoProcessing:
 class TestFrameProcessing:
     """Tests for frame processing methods."""
 
-    def test_call_estimator_first_frame(self, runner):
+    def test_call_estimator_first_frame(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _call_estimator() sets up estimator on first frame."""
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
         estimator = runner.lmpipe_interface.estimator
@@ -403,7 +491,9 @@ class TestFrameProcessing:
         assert "test" in result.headers
         assert "test" in result.landmarks
 
-    def test_call_estimator_subsequent_frames(self, runner):
+    def test_call_estimator_subsequent_frames(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _call_estimator() skips setup on subsequent frames."""
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
         estimator = runner.lmpipe_interface.estimator
@@ -419,7 +509,9 @@ class TestFrameProcessing:
         assert estimator._estimate_called is True
         assert result.frame_id == 1
 
-    def test_call_estimator_returns_process_result(self, runner):
+    def test_call_estimator_returns_process_result(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _call_estimator() returns ProcessResult with correct structure."""
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
 
@@ -435,7 +527,9 @@ class TestFrameProcessing:
         assert np.array_equal(result.landmarks["test"], np.array([[1.0, 2.0, 3.0]]))
         assert result.annotated_frame is frame
 
-    def test_process_frames_yields_results(self, runner):
+    def test_process_frames_yields_results(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test process_frames() yields ProcessResult for each frame."""
         frames = [
             np.zeros((480, 640, 3), dtype=np.uint8),
@@ -453,9 +547,9 @@ class TestFrameProcessing:
                 initializer=runner._default_executor_initializer
             )
             mock_init_executor.return_value.__enter__ = lambda s: mock_executor
-            mock_init_executor.return_value.__exit__ = lambda s, *args: None
-            mock_resources.return_value.__enter__ = lambda s: None
-            mock_resources.return_value.__exit__ = lambda s, *args: None
+            mock_init_executor.return_value.__exit__ = dummy_exit
+            mock_resources.return_value.__enter__ = dummy_enter
+            mock_resources.return_value.__exit__ = dummy_exit
 
             results = list(runner.process_frames(frames))
 
@@ -468,7 +562,9 @@ class TestFrameProcessing:
 class TestCollectorIntegration:
     """Tests for collector integration."""
 
-    def test_collect_results_calls_all_collectors(self, runner, tmp_path):
+    def test_collect_results_calls_all_collectors(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test _collect_results() calls all configured collectors."""
         collector1 = Mock()
         collector2 = Mock()
@@ -479,7 +575,7 @@ class TestCollectorIntegration:
         runspec = RunSpec(src_file, dst_file)
 
         results = [
-            ProcessResult(
+            ProcessResult[Literal["test"]](
                 frame_id=0,
                 headers={"test": np.array(["x", "y", "z"], dtype=str)},
                 landmarks={"test": np.array([[1.0, 2.0, 3.0]])},
@@ -492,7 +588,9 @@ class TestCollectorIntegration:
         collector1.collect_results.assert_called_once()
         collector2.collect_results.assert_called_once()
 
-    def test_collect_results_with_no_collectors(self, runner, tmp_path):
+    def test_collect_results_with_no_collectors(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test _collect_results() handles empty collector list."""
         runner.collectors = []
 
@@ -501,7 +599,7 @@ class TestCollectorIntegration:
         runspec = RunSpec(src_file, dst_file)
 
         results = [
-            ProcessResult(
+            ProcessResult[Literal["test"]](
                 frame_id=0,
                 headers={"test": np.array(["x", "y", "z"], dtype=str)},
                 landmarks={"test": np.array([[1.0, 2.0, 3.0]])},
@@ -516,60 +614,69 @@ class TestCollectorIntegration:
 class TestExecutorConfiguration:
     """Tests for executor configuration."""
 
-    def test_configure_executor_returns_dummy_when_mode_mismatch(self, runner):
+    def test_configure_executor_returns_dummy_when_mode_mismatch(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test configure_executor() returns DummyExecutor when mode doesn't match."""
         from cslrtools2.lmpipe.interface.executor import DummyExecutor
 
         # Options set to batch mode, request frames mode
-        runner.lmpipe_options = {**DEFAULT_LMPIPE_OPTIONS, "executor_mode": "batch"}
+        runner.lmpipe_options = LMPipeOptions({**DEFAULT_LMPIPE_OPTIONS, "executor_mode": "batch"})
 
         executor = runner.configure_executor("frames", lambda: None)
 
         assert isinstance(executor, DummyExecutor)
 
-    def test_configure_executor_returns_dummy_when_max_cpus_zero(self, runner):
+    def test_configure_executor_returns_dummy_when_max_cpus_zero(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test configure_executor() returns DummyExecutor when max_cpus is 0."""
         from cslrtools2.lmpipe.interface.executor import DummyExecutor
 
-        runner.lmpipe_options = {**DEFAULT_LMPIPE_OPTIONS, "max_cpus": 0}
-
+        runner.lmpipe_options = LMPipeOptions({**DEFAULT_LMPIPE_OPTIONS, "max_cpus": 0})
         executor = runner.configure_executor("batch", lambda: None)
 
         assert isinstance(executor, DummyExecutor)
 
-    def test_configure_executor_process_pool(self, runner):
+    def test_configure_executor_process_pool(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test configure_executor() creates ProcessPoolExecutor."""
         from cslrtools2.lmpipe.interface.executor import ProcessPoolExecutor
 
-        runner.lmpipe_options = {
+        runner.lmpipe_options = LMPipeOptions({
             **DEFAULT_LMPIPE_OPTIONS,
             "executor_mode": "batch",
             "executor_type": "process",
             "max_cpus": 4,
             "cpu": 1,
-        }
+        })
 
         executor = runner.configure_executor("batch", lambda: None)
 
         assert isinstance(executor, ProcessPoolExecutor)
 
-    def test_configure_executor_thread_pool(self, runner):
+    def test_configure_executor_thread_pool(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test configure_executor() creates ThreadPoolExecutor."""
         from concurrent.futures import ThreadPoolExecutor
 
-        runner.lmpipe_options = {
+        runner.lmpipe_options = LMPipeOptions({
             **DEFAULT_LMPIPE_OPTIONS,
             "executor_mode": "batch",
             "executor_type": "thread",
             "max_cpus": 4,
             "cpu": 1,
-        }
+        })
 
         executor = runner.configure_executor("batch", lambda: None)
 
         assert isinstance(executor, ThreadPoolExecutor)
 
-    def test_init_executor_caches_executor(self, runner):
+    def test_init_executor_caches_executor(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _init_executor() caches executor instances."""
         # Ensure executors dict is empty
         runner.executors = {}
@@ -597,7 +704,9 @@ class TestExecutorConfiguration:
 class TestEventSystem:
     """Tests for event system."""
 
-    def test_events_ctxmgr_calls_start_and_end(self, runner):
+    def test_events_ctxmgr_calls_start_and_end(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _events_ctxmgr() calls start and end handlers."""
         on_start = Mock()
         on_end = Mock()
@@ -609,7 +718,9 @@ class TestEventSystem:
 
         on_end.assert_called_once_with(*args)
 
-    def test_events_ctxmgr_calls_end_on_exception(self, runner):
+    def test_events_ctxmgr_calls_end_on_exception(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _events_ctxmgr() calls end handler even on exception."""
         on_start = Mock()
         on_end = Mock()
@@ -621,9 +732,11 @@ class TestEventSystem:
         on_start.assert_called_once()
         on_end.assert_called_once()
 
-    def test_submit_with_events_calls_on_submit(self, runner):
+    def test_submit_with_events_calls_on_submit(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _submit_with_events() calls on_submit immediately."""
-        future = Future()
+        future = Future[Any]()
         on_submit = Mock()
         on_success = Mock()
         on_failure = Mock()
@@ -632,13 +745,15 @@ class TestEventSystem:
 
         on_submit.assert_called_once_with("arg1")
 
-    def test_callback_with_events_calls_on_success(self, runner):
+    def test_callback_with_events_calls_on_success(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _CallbackWithEvents calls on_success for successful future."""
         on_success = Mock()
         on_failure = Mock()
         callback = runner._CallbackWithEvents(on_success, on_failure, ("arg1",))
 
-        future = Future()
+        future = Future[str]()
         future.set_result("result")
 
         callback(future)
@@ -646,13 +761,15 @@ class TestEventSystem:
         on_success.assert_called_once_with("arg1", "result")
         on_failure.assert_not_called()
 
-    def test_callback_with_events_calls_on_failure(self, runner):
+    def test_callback_with_events_calls_on_failure(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _CallbackWithEvents calls on_failure for failed future."""
         on_success = Mock()
         on_failure = Mock()
         callback = runner._CallbackWithEvents(on_success, on_failure, ("arg1",))
 
-        future = Future()
+        future = Future[Any]()
         error = RuntimeError("Test error")
         future.set_exception(error)
 
@@ -664,7 +781,9 @@ class TestEventSystem:
         assert isinstance(call_args[1], RuntimeError)
         on_success.assert_not_called()
 
-    def test_task_with_events_calls_handlers(self, runner):
+    def test_task_with_events_calls_handlers(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _task_with_events calls start/end handlers."""
         task = Mock(return_value="result")
         on_start = Mock()
@@ -682,7 +801,9 @@ class TestEventSystem:
 class TestUtilityMethods:
     """Tests for utility methods."""
 
-    def test_get_runspecs_finds_video_files(self, runner, tmp_path):
+    def test_get_runspecs_finds_video_files(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test _get_runspecs() finds video files in directory."""
         src_dir = tmp_path / "input"
         src_dir.mkdir()
@@ -707,7 +828,9 @@ class TestUtilityMethods:
             assert len(runspecs) == 2
             assert all(isinstance(rs, RunSpec) for rs in runspecs)
 
-    def test_get_runspecs_detects_image_sequences(self, runner, tmp_path):
+    def test_get_runspecs_detects_image_sequences(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test _get_runspecs() detects image sequence directories."""
         src_dir = tmp_path / "input"
         images_dir = src_dir / "sequence1"
@@ -733,7 +856,9 @@ class TestUtilityMethods:
             assert len(runspecs) == 1
             assert runspecs[0].src == images_dir
 
-    def test_get_runspecs_skips_hidden_directories(self, runner, tmp_path):
+    def test_get_runspecs_skips_hidden_directories(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test _get_runspecs() skips hidden directories."""
         src_dir = tmp_path / "input"
         src_dir.mkdir()
@@ -751,7 +876,7 @@ class TestUtilityMethods:
             assert len(runspecs) == 0
 
     def test_apply_exist_rule_returns_true_if_any_collector_allows(
-        self, runner, tmp_path
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
     ):
         """Test _apply_exist_rule() returns True if any collector allows processing."""
         collector1 = Mock()
@@ -771,7 +896,7 @@ class TestUtilityMethods:
         collector2.apply_exist_rule.assert_called_once_with(runspec)
 
     def test_apply_exist_rule_returns_false_if_all_collectors_reject(
-        self, runner, tmp_path
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
     ):
         """Test _apply_exist_rule() returns False if all collectors reject."""
         collector1 = Mock()
@@ -792,12 +917,14 @@ class TestUtilityMethods:
 class TestRunnerPublicApiDecorator:
     """Tests for _runner_public_api decorator."""
 
-    def test_decorator_calls_on_complete_on_success(self, runner):
+    def test_decorator_calls_on_complete_on_success(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test decorator calls on_complete() on successful execution."""
         runner.on_complete = Mock()
 
         @_runner_public_api
-        def test_method(self):
+        def test_method(self: Any):
             return "success"
 
         result = test_method(runner)
@@ -805,12 +932,14 @@ class TestRunnerPublicApiDecorator:
         assert result == "success"
         runner.on_complete.assert_called_once()
 
-    def test_decorator_calls_on_keyboard_interrupt(self, runner):
+    def test_decorator_calls_on_keyboard_interrupt(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test decorator calls on_keyboard_interrupt() on KeyboardInterrupt."""
         runner.on_keyboard_interrupt = Mock(side_effect=KeyboardInterrupt)
 
         @_runner_public_api
-        def test_method(self):
+        def test_method(self: Any):
             raise KeyboardInterrupt()
 
         with pytest.raises(KeyboardInterrupt):
@@ -818,12 +947,14 @@ class TestRunnerPublicApiDecorator:
 
         runner.on_keyboard_interrupt.assert_called_once()
 
-    def test_decorator_calls_on_general_exception(self, runner):
+    def test_decorator_calls_on_general_exception(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test decorator calls on_general_exception() on Exception."""
         runner.on_general_exception = Mock(side_effect=RuntimeError)
 
         @_runner_public_api
-        def test_method(self):
+        def test_method(self: Any):
             raise RuntimeError("Test error")
 
         with pytest.raises(RuntimeError):
@@ -831,12 +962,14 @@ class TestRunnerPublicApiDecorator:
 
         runner.on_general_exception.assert_called_once()
 
-    def test_decorator_calls_on_finally(self, runner):
+    def test_decorator_calls_on_finally(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test decorator calls on_finally() in finally block."""
         runner.on_finally = Mock()
 
         @_runner_public_api
-        def test_method(self):
+        def test_method(self: Any):
             raise RuntimeError("Test error")
 
         runner.on_general_exception = Mock(side_effect=RuntimeError)
@@ -846,26 +979,30 @@ class TestRunnerPublicApiDecorator:
 
         runner.on_finally.assert_called_once()
 
-    def test_decorator_shuts_down_executors(self, runner):
+    def test_decorator_shuts_down_executors(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test decorator shuts down executors in finally block."""
         mock_executor = Mock()
         runner.executors["batch"] = mock_executor
 
         @_runner_public_api
-        def test_method(self):
+        def test_method(self: Any):
             return "success"
 
         test_method(runner)
 
         mock_executor.shutdown.assert_called_once_with(wait=False, cancel_futures=True)
 
-    def test_decorator_skips_wrapper_for_non_toplevel_calls(self, runner):
+    def test_decorator_skips_wrapper_for_non_toplevel_calls(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test decorator skips wrapper logic for nested calls."""
         runner.toplevel_call = False
         runner.on_complete = Mock()
 
         @_runner_public_api
-        def test_method(self):
+        def test_method(self: Any):
             return "success"
 
         result = test_method(runner)
@@ -878,10 +1015,12 @@ class TestRunnerPublicApiDecorator:
 class TestLocalRunnerMethod:
     """Tests for _local_runner_method wrapper."""
 
-    def test_local_runner_method_stores_method_info(self, runner):
+    def test_local_runner_method_stores_method_info(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _local_runner_method stores method and runner info."""
 
-        def test_method(self, arg1, arg2):
+        def test_method(self: Any, arg1: Any, arg2: Any):
             return f"{arg1}+{arg2}"
 
         wrapper = LMPipeRunner._local_runner_method(test_method, runner, "val1", "val2")
@@ -889,14 +1028,16 @@ class TestLocalRunnerMethod:
         assert wrapper.method is test_method
         assert wrapper.runner_type is type(runner)
         assert wrapper.runner_id == runner._id
-        assert wrapper.args == ("val1", "val2")
+        assert wrapper.args == ("val1", "val2")  # pyright: ignore[reportUnknownMemberType] # noqa: E501
 
-    def test_local_runner_method_executes_in_local_context(self, runner):
+    def test_local_runner_method_executes_in_local_context(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _local_runner_method executes method with local runner instance."""
         # Register runner in thread-local storage
         LMPipeRunner._local.instances[runner._id] = runner
 
-        def test_method(self, arg1):
+        def test_method(self: Any, arg1: Any):
             return f"executed with {arg1}"
 
         wrapper = LMPipeRunner._local_runner_method(test_method, runner, "test_arg")
@@ -904,13 +1045,15 @@ class TestLocalRunnerMethod:
 
         assert result == "executed with test_arg"
 
-    def test_local_runner_method_validates_runner_type(self, runner):
+    def test_local_runner_method_validates_runner_type(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _local_runner_method validates runner type."""
         # Register wrong type of runner
         wrong_runner = Mock()
         LMPipeRunner._local.instances[runner._id] = wrong_runner
 
-        def test_method(self, arg1):
+        def test_method(self: Any, arg1: Any):
             return arg1
 
         wrapper = LMPipeRunner._local_runner_method(test_method, runner, "arg")
@@ -918,13 +1061,15 @@ class TestLocalRunnerMethod:
         with pytest.raises(TypeError, match="Expected runner of type"):
             wrapper()
 
-    def test_local_runner_method_validates_runner_id(self, runner):
+    def test_local_runner_method_validates_runner_id(
+        self, runner: LMPipeRunner[Literal["test"]]
+    ):
         """Test _local_runner_method validates runner ID."""
         # Create another runner with different ID
         other_runner = LMPipeRunner(runner.lmpipe_interface, DEFAULT_LMPIPE_OPTIONS)
         LMPipeRunner._local.instances[runner._id] = other_runner
 
-        def test_method(self, arg1):
+        def test_method(self: Any, arg1: Any):
             return arg1
 
         wrapper = LMPipeRunner._local_runner_method(test_method, runner, "arg")
@@ -936,7 +1081,9 @@ class TestLocalRunnerMethod:
 class TestLMPipeRunnerBatchProcessing:
     """Tests for LMPipeRunner batch processing with mocked methods."""
 
-    def test_run_batch_calls_required_methods(self, runner, tmp_path):
+    def test_run_batch_calls_required_methods(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test that run_batch calls all required methods in correct order."""
         # Create test video files
         video_dir = tmp_path / "videos"
@@ -962,11 +1109,13 @@ class TestLMPipeRunnerBatchProcessing:
         ):
             # Setup mocks
             mock_executor = MagicMock()
-            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
-            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+            mock_init_executor.return_value.__enter__ = dummy_estimator_enter(
+                mock_executor
+            )
+            mock_init_executor.return_value.__exit__ = dummy_exit
 
-            mock_events_ctx.return_value.__enter__ = lambda self: None
-            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+            mock_events_ctx.return_value.__enter__ = dummy_enter
+            mock_events_ctx.return_value.__exit__ = dummy_exit
 
             # Create mock runspecs for 2 tasks
             task_runspec1 = RunSpec(video_dir / "test1.mp4", output_dir)
@@ -999,7 +1148,9 @@ class TestLMPipeRunnerBatchProcessing:
             # Verify futures were awaited
             assert mock_future.result.call_count == 2
 
-    def test_run_batch_with_single_task(self, runner, tmp_path):
+    def test_run_batch_with_single_task(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test run_batch with a single task."""
         video_file = tmp_path / "test.mp4"
         video_file.touch()
@@ -1018,11 +1169,13 @@ class TestLMPipeRunnerBatchProcessing:
         ):
             # Setup mocks
             mock_executor = MagicMock()
-            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
-            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+            mock_init_executor.return_value.__enter__ = dummy_estimator_enter(
+                mock_executor
+            )
+            mock_init_executor.return_value.__exit__ = dummy_exit
 
-            mock_events_ctx.return_value.__enter__ = lambda self: None
-            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+            mock_events_ctx.return_value.__enter__ = dummy_enter
+            mock_events_ctx.return_value.__exit__ = dummy_exit
 
             mock_get_runspecs.return_value = [runspec]
 
@@ -1039,7 +1192,9 @@ class TestLMPipeRunnerBatchProcessing:
             # Verify single task submitted
             assert mock_submit.call_count == 1
 
-    def test_run_batch_handles_task_failure(self, runner, tmp_path):
+    def test_run_batch_handles_task_failure(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test that run_batch handles task failures gracefully."""
         video_dir = tmp_path / "videos"
         video_dir.mkdir()
@@ -1058,11 +1213,13 @@ class TestLMPipeRunnerBatchProcessing:
         ):
             # Setup mocks
             mock_executor = MagicMock()
-            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
-            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+            mock_init_executor.return_value.__enter__ = dummy_estimator_enter(
+                mock_executor
+            )
+            mock_init_executor.return_value.__exit__ = dummy_exit
 
-            mock_events_ctx.return_value.__enter__ = lambda self: None
-            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+            mock_events_ctx.return_value.__enter__ = dummy_enter
+            mock_events_ctx.return_value.__exit__ = dummy_exit
 
             mock_get_runspecs.return_value = [runspec]
 
@@ -1077,7 +1234,9 @@ class TestLMPipeRunnerBatchProcessing:
             # Verify future.result was called (exception was handled)
             mock_future.result.assert_called_once()
 
-    def test_run_batch_with_no_tasks(self, runner, tmp_path):
+    def test_run_batch_with_no_tasks(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test run_batch with empty task list."""
         video_dir = tmp_path / "videos"
         video_dir.mkdir()
@@ -1095,11 +1254,13 @@ class TestLMPipeRunnerBatchProcessing:
         ):
             # Setup mocks
             mock_executor = MagicMock()
-            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
-            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+            mock_init_executor.return_value.__enter__ = dummy_estimator_enter(
+                mock_executor
+            )
+            mock_init_executor.return_value.__exit__ = dummy_exit
 
-            mock_events_ctx.return_value.__enter__ = lambda self: None
-            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+            mock_events_ctx.return_value.__enter__ = dummy_enter
+            mock_events_ctx.return_value.__exit__ = dummy_exit
 
             # No tasks
             mock_get_runspecs.return_value = []
@@ -1110,7 +1271,9 @@ class TestLMPipeRunnerBatchProcessing:
             # Verify task count is 0
             mock_determined.assert_called_once_with(runspec, 0)
 
-    def test_run_batch_executor_context_management(self, runner, tmp_path):
+    def test_run_batch_executor_context_management(
+        self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
+    ):
         """Test that run_batch properly manages executor context."""
         video_file = tmp_path / "test.mp4"
         video_file.touch()
@@ -1129,7 +1292,7 @@ class TestLMPipeRunnerBatchProcessing:
                 enter_called = True
                 return MagicMock()
 
-            def __exit__(self, *args):
+            def __exit__(self, *args: Any):
                 nonlocal exit_called
                 exit_called = True
                 return None
@@ -1142,8 +1305,8 @@ class TestLMPipeRunnerBatchProcessing:
         ):
             mock_init_executor.return_value = MockContextManager()
 
-            mock_events_ctx.return_value.__enter__ = lambda self: None
-            mock_events_ctx.return_value.__exit__ = lambda self, *args: None
+            mock_events_ctx.return_value.__enter__ = dummy_enter
+            mock_events_ctx.return_value.__exit__ = dummy_exit
 
             mock_get_runspecs.return_value = [runspec]
 
@@ -1158,7 +1321,11 @@ class TestLMPipeRunnerBatchProcessing:
             assert enter_called, "Executor context manager __enter__ was not called"
             assert exit_called, "Executor context manager __exit__ was not called"
 
-    def test_run_batch_events_context_management(self, runner, tmp_path):
+    def test_run_batch_events_context_management(
+        self,
+        runner: LMPipeRunner[Literal["test"]],
+        tmp_path: Path
+    ):
         """Test that run_batch properly manages events context."""
         video_file = tmp_path / "test.mp4"
         video_file.touch()
@@ -1177,7 +1344,7 @@ class TestLMPipeRunnerBatchProcessing:
                 event_enter_called = True
                 return None
 
-            def __exit__(self, *args):
+            def __exit__(self, *args: Any):
                 nonlocal event_exit_called
                 event_exit_called = True
                 return None
@@ -1189,8 +1356,10 @@ class TestLMPipeRunnerBatchProcessing:
             patch.object(runner, "_submit_with_events") as mock_submit,
         ):
             mock_executor = MagicMock()
-            mock_init_executor.return_value.__enter__ = lambda self: mock_executor
-            mock_init_executor.return_value.__exit__ = lambda self, *args: None
+            mock_init_executor.return_value.__enter__ = dummy_estimator_enter(
+                mock_executor
+            )
+            mock_init_executor.return_value.__exit__ = dummy_exit
 
             mock_events_ctx.return_value = MockEventContextManager()
 

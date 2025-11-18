@@ -1,5 +1,7 @@
 """Tests for OpenCV annotated frames collector."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -19,7 +21,7 @@ from cslrtools2.lmpipe.runspec import RunSpec
 @pytest.fixture
 def sample_process_results() -> list[ProcessResult[str]]:
     """Create sample process results with annotated frames."""
-    results = []
+    results: list[ProcessResult[str]] = []
     for idx in range(5):
         # Create 100x100 RGB frame
         frame = np.ones((100, 100, 3), dtype=np.uint8) * (idx * 50)

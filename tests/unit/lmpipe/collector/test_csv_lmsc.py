@@ -4,6 +4,8 @@ Tests for CsvLandmarkMatrixSaveCollector.
 Coverage target: 29% → 85%
 """
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import csv
@@ -24,7 +26,7 @@ from cslrtools2.typings import NDArrayFloat, NDArrayStr
 # Helper function to create headers for testing
 def _make_headers[K: str](landmarks: Mapping[K, NDArrayFloat]) -> dict[K, NDArrayStr]:
     """Create header mappings for landmarks based on their shape."""
-    headers = {}
+    headers: dict[K, NDArrayStr] = {}
     for key, array in landmarks.items():
         arr = np.asarray(array)
         # Calculate flattened width: prod(shape[1:])
@@ -80,7 +82,7 @@ class TestCSVLMSCInitialization:
 
     def test_default_initialization(self):
         """Test default initialization with comma delimiter."""
-        collector = CsvLandmarkMatrixSaveCollector()
+        collector = CsvLandmarkMatrixSaveCollector[str]()
         assert collector.delimiter == ","
         assert collector.encoding == "utf-8"
         assert collector.extension == ".csv"
@@ -89,30 +91,30 @@ class TestCSVLMSCInitialization:
 
     def test_custom_delimiter_csv(self):
         """Test initialization with custom comma delimiter."""
-        collector = CsvLandmarkMatrixSaveCollector(delimiter=",")
+        collector = CsvLandmarkMatrixSaveCollector[str](delimiter=",")
         assert collector.delimiter == ","
         assert collector.extension == ".csv"
 
     def test_tab_delimiter_tsv(self):
         """Test initialization with tab delimiter."""
-        collector = CsvLandmarkMatrixSaveCollector(delimiter="\t")
+        collector = CsvLandmarkMatrixSaveCollector[str](delimiter="\t")
         assert collector.delimiter == "\t"
         assert collector.extension == ".tsv"
 
     def test_semicolon_delimiter_ssv(self):
         """Test initialization with semicolon delimiter."""
-        collector = CsvLandmarkMatrixSaveCollector(delimiter=";")
+        collector = CsvLandmarkMatrixSaveCollector[str](delimiter=";")
         assert collector.delimiter == ";"
         assert collector.extension == ".ssv"
 
     def test_custom_extension_override(self):
         """Test custom extension override."""
-        collector = CsvLandmarkMatrixSaveCollector(delimiter=",", extension=".txt")
+        collector = CsvLandmarkMatrixSaveCollector[str](delimiter=",", extension=".txt")
         assert collector.extension == ".txt"
 
     def test_custom_encoding(self):
         """Test custom encoding."""
-        collector = CsvLandmarkMatrixSaveCollector(encoding="utf-16")
+        collector = CsvLandmarkMatrixSaveCollector[str](encoding="utf-16")
         assert collector.encoding == "utf-16"
 
 

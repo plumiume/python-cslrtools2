@@ -157,7 +157,7 @@ class TestPluginLoading:
         """Test that plugin creators have correct signature."""
         plugins = load_lmpipe_plugins()
 
-        for plugin_type, plugin_dict in plugins.items():
+        for _, plugin_dict in plugins.items():
             for plugin_name, plugin_info in plugin_dict.items():
                 creator = plugin_info["creator"]
 
@@ -220,7 +220,7 @@ class TestPluginNamespaceWrapper:
         """Test that NamespaceWrapper has expected structure."""
         plugins = load_lmpipe_plugins()
 
-        for plugin_type, plugin_dict in plugins.items():
+        for _, plugin_dict in plugins.items():
             for plugin_name, plugin_info in plugin_dict.items():
                 nswrapper = plugin_info["nswrapper"]
 

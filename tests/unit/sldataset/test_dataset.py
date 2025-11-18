@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
+
+from pathlib import Path
 
 import pytest  # pyright: ignore[reportUnusedImport]
 import numpy as np
@@ -24,6 +28,7 @@ from cslrtools2.sldataset.dataset.holder import SLKeyHolder
 from cslrtools2.sldataset.dataset.item import SLDatasetItem
 from cslrtools2.sldataset.dataset.core import (
     SLDataset,
+    DefaultSLDatasetItem,
     IterableSLDataset,
     SLDatasetBatch,
     dataset_to_zarr,
@@ -88,7 +93,9 @@ class TestSLDatasetItem:
             targets={"label": np.array([[1, 2, 3]])},
         )
 
-    def test_initialization(self, sample_item):
+    def test_initialization(
+        self, sample_item: DefaultSLDatasetItem[Any, Any, Any]
+    ):
         """Test SLDatasetItem initialization."""
         assert "rgb" in sample_item.videos
         assert "pose" in sample_item.landmarks
@@ -96,7 +103,9 @@ class TestSLDatasetItem:
         assert sample_item.videos["rgb"].shape == (1, 10, 64, 64, 3)
         assert sample_item.landmarks["pose"].shape == (1, 10, 33, 3)
 
-    def test_to_device_converts_to_tensors(self, sample_item):
+    def test_to_device_converts_to_tensors(
+        self, sample_item: DefaultSLDatasetItem[Any, Any, Any]
+    ):
         """Test to() converts all data to tensors on specified device."""
         device = torch.device("cpu")
         tensor_item = sample_item.to(device)
@@ -106,7 +115,9 @@ class TestSLDatasetItem:
         assert isinstance(tensor_item.targets["label"], torch.Tensor)
         assert tensor_item.videos["rgb"].device.type == "cpu"
 
-    def test_to_zarr_saves_to_group(self, sample_item, tmp_path):
+    def test_to_zarr_saves_to_group(
+        self, sample_item: DefaultSLDatasetItem[Any, Any, Any], tmp_path: Path
+    ):
         """Test to_zarr() saves item to Zarr group."""
         store_path = tmp_path / "item.zarr"
         group = sample_item.to_zarr(str(store_path))
@@ -118,7 +129,9 @@ class TestSLDatasetItem:
         assert "pose" in group["landmarks"]
         assert "label" in group["targets"]
 
-    def test_to_zarr_with_existing_group(self, sample_item):
+    def test_to_zarr_with_existing_group(
+        self, sample_item: DefaultSLDatasetItem[Any, Any, Any]
+    ):
         """Test to_zarr() works with existing Zarr group."""
         root = zarr.group()
         group = sample_item.to_zarr(root)
@@ -128,19 +141,21 @@ class TestSLDatasetItem:
         assert "landmarks" in group
         assert "targets" in group
 
-    def test_from_zarr_loads_item(self, sample_item, tmp_path):
+    def test_from_zarr_loads_item(
+        self, sample_item: DefaultSLDatasetItem[Any, Any, Any], tmp_path: Path
+    ):
         """Test from_zarr() loads item from Zarr group."""
         store_path = tmp_path / "item.zarr"
         saved_group = sample_item.to_zarr(str(store_path))
 
-        loaded_item = SLDatasetItem.from_zarr(saved_group)
+        loaded_item = SLDatasetItem[str, Any, str, Any, str, Any].from_zarr(saved_group)
 
         assert "rgb" in loaded_item.videos
         assert "pose" in loaded_item.landmarks
         assert "label" in loaded_item.targets
         assert isinstance(loaded_item.videos["rgb"], zarr.Array)
 
-    def test_from_file_system_loads_from_directory(self, tmp_path):
+    def test_from_file_system_loads_from_directory(self, tmp_path: Path):
         """Test from_file_system() loads item from directory structure."""
         item_dir = tmp_path / "item"
         videos_dir = item_dir / "videos"
@@ -156,13 +171,15 @@ class TestSLDatasetItem:
         np.save(landmarks_dir / "pose.npy", np.random.rand(1, 10, 33, 3))
         np.save(targets_dir / "label.npy", np.array([[1, 2, 3]]))
 
-        loaded_item = SLDatasetItem.from_file_system(item_dir)
+        loaded_item = SLDatasetItem[
+            str, Any, str, Any, str, Any
+        ].from_file_system(item_dir)
 
         assert "rgb" in loaded_item.videos
         assert "pose" in loaded_item.landmarks
         assert "label" in loaded_item.targets
 
-    def test_from_file_system_loads_container_files(self, tmp_path):
+    def test_from_file_system_loads_container_files(self, tmp_path: Path):
         """Test from_file_system() loads from container files (.npz)."""
         item_dir = tmp_path / "item"
         item_dir.mkdir()
@@ -172,13 +189,15 @@ class TestSLDatasetItem:
         np.savez(item_dir / "landmarks.npz", pose=np.random.rand(1, 10, 33, 3))
         np.savez(item_dir / "targets.npz", label=np.array([[1, 2, 3]]))
 
-        loaded_item = SLDatasetItem.from_file_system(item_dir)
+        loaded_item = SLDatasetItem[
+            str, Any, str, Any, str, Any
+        ].from_file_system(item_dir)
 
         assert "rgb" in loaded_item.videos
         assert "pose" in loaded_item.landmarks
         assert "label" in loaded_item.targets
 
-    def test_load_category_from_fs_filters_by_key_type(self, tmp_path):
+    def test_load_category_from_fs_filters_by_key_type(self, tmp_path: Path):
         """Test _load_category_from_fs() filters keys by type guard."""
         category_dir = tmp_path / "landmarks"
         category_dir.mkdir()
@@ -187,22 +206,25 @@ class TestSLDatasetItem:
         np.save(category_dir / "pose.npy", np.random.rand(10, 33, 3))
         np.save(category_dir / "invalid.npy", np.random.rand(10, 33, 3))
 
-        result = SLDatasetItem._load_category_from_fs(
-            category_dir, SLDatasetItem.is_landmark_key, {".npy": np.load}, {}
+        result = SLDatasetItem[str, Any, str, Any, str, Any]._load_category_from_fs(
+            category_dir,
+            SLDatasetItem[str, Any, str, Any, str, Any].is_landmark_key,
+            {".npy": np.load},
+            {}
         )
 
         # Both should be loaded since type guard accepts all strings
         assert "pose" in result
         assert "invalid" in result
 
-    def test_load_category_from_fs_handles_missing_directory(self, tmp_path):
+    def test_load_category_from_fs_handles_missing_directory(self, tmp_path: Path):
         """Test _load_category_from_fs() handles non-existent directory."""
         category_dir = tmp_path / "nonexistent"
 
         # Should handle missing directory by checking container files
-        result = SLDatasetItem._load_category_from_fs(
+        result = SLDatasetItem[str, Any, str, Any, str, Any]._load_category_from_fs(
             category_dir,
-            SLDatasetItem.is_landmark_key,
+            SLDatasetItem[str, Any, str, Any, str, Any].is_landmark_key,
             {".npy": np.load},
             {".npz": lambda p: dict(np.load(p))},
         )
@@ -211,7 +233,7 @@ class TestSLDatasetItem:
         assert result == {}
 
     def test_load_category_from_fs_loads_container_when_dir_missing(
-        self, tmp_path
+        self, tmp_path: Path
     ):
         """Test _load_category_from_fs() loads container file when directory
         doesn't exist."""
@@ -220,9 +242,9 @@ class TestSLDatasetItem:
         # Save as .npz container file
         np.savez(str(category_path) + ".npz", pose=np.random.rand(10, 33, 3))
 
-        result = SLDatasetItem._load_category_from_fs(
+        result = SLDatasetItem[str, Any, str, Any, str, Any]._load_category_from_fs(
             category_path,
-            SLDatasetItem.is_landmark_key,
+            SLDatasetItem[str, Any, str, Any, str, Any].is_landmark_key,
             {".npy": np.load},
             {".npz": lambda p: dict(np.load(p))},
         )
@@ -237,7 +259,8 @@ class TestSLDatasetItem:
         group.create_array("left_hand", data=np.random.rand(10, 21, 3))
 
         result = SLDatasetItem._load_category_from_zarr(
-            SLDatasetItem.is_landmark_key, group
+            SLDatasetItem[str, Any, str, Any, str, Any].is_landmark_key,
+            group
         )
 
         assert "pose" in result
@@ -252,7 +275,7 @@ class TestSLDataset:
     def sample_dataset(self):
         """Create a sample dataset."""
         items = [
-            SLDatasetItem(
+            SLDatasetItem[str, Any, str, Any, str, Any](
                 videos={"rgb": np.random.rand(1, 10, 64, 64, 3).astype(np.float32)},
                 landmarks={"pose": np.random.rand(1, 10, 33, 3).astype(np.float32)},
                 targets={"label": np.array([[i]])},
@@ -266,17 +289,21 @@ class TestSLDataset:
             items=items,
         )
 
-    def test_initialization(self, sample_dataset):
+    def test_initialization(self, sample_dataset: SLDataset[str, str, str, str, Any]):
         """Test SLDataset initialization."""
         assert len(sample_dataset) == 5
         assert "version" in sample_dataset.metadata
         assert ("pose", "pose") in sample_dataset.connections
 
-    def test_len_returns_item_count(self, sample_dataset):
+    def test_len_returns_item_count(
+        self, sample_dataset: SLDataset[str, str, str, str, Any]
+    ):
         """Test __len__() returns correct item count."""
         assert len(sample_dataset) == 5
 
-    def test_getitem_returns_item(self, sample_dataset):
+    def test_getitem_returns_item(
+        self, sample_dataset: SLDataset[str, str, str, str, Any]
+    ):
         """Test __getitem__() returns correct item."""
         item = sample_dataset[0]
 
@@ -284,7 +311,9 @@ class TestSLDataset:
         assert "pose" in item.landmarks
         assert "label" in item.targets
 
-    def test_getitem_with_different_indices(self, sample_dataset):
+    def test_getitem_with_different_indices(
+        self, sample_dataset: SLDataset[str, str, str, str, Any]
+    ):
         """Test __getitem__() with different indices."""
         item0 = sample_dataset[0]
         item4 = sample_dataset[4]
@@ -292,7 +321,9 @@ class TestSLDataset:
         assert item0.targets["label"][0][0] == 0
         assert item4.targets["label"][0][0] == 4
 
-    def test_to_partially_converts_connections_to_device(self, sample_dataset):
+    def test_to_partially_converts_connections_to_device(
+        self, sample_dataset: SLDataset[str, str, str, str, Any]
+    ):
         """Test to_partially() converts connections to specified device."""
         device = torch.device("cpu")
         partial_dataset = sample_dataset.to_partially(device)
@@ -301,19 +332,25 @@ class TestSLDataset:
         assert isinstance(conn, torch.Tensor)
         assert conn.device.type == "cpu"
 
-    def test_to_partially_preserves_items(self, sample_dataset):
+    def test_to_partially_preserves_items(
+        self, sample_dataset: SLDataset[str, str, str, str, Any]
+    ):
         """Test to_partially() preserves items reference."""
         device = torch.device("cpu")
         partial_dataset = sample_dataset.to_partially(device)
 
         assert partial_dataset.items is sample_dataset.items
 
-    def test_from_zarr_loads_dataset(self, sample_dataset, tmp_path):
+    def test_from_zarr_loads_dataset(
+        self,
+        sample_dataset: SLDataset[str, str, str, str, Any],
+        tmp_path: Path
+    ):
         """Test from_zarr() loads dataset from Zarr group."""
         store_path = tmp_path / "dataset.zarr"
         saved_group = dataset_to_zarr(sample_dataset, str(store_path))
 
-        loaded_dataset = SLDataset.from_zarr(saved_group)
+        loaded_dataset = SLDataset[str, str, str, str, Any].from_zarr(saved_group)
 
         assert len(loaded_dataset) == 5
         assert "version" in loaded_dataset.metadata
@@ -331,8 +368,7 @@ class TestSLDataset:
 
         root.create_group("items")
 
-        loaded_dataset = SLDataset.from_zarr(root)
-
+        loaded_dataset = SLDataset[str, str, str, str, Any].from_zarr(root)
         assert "version" in loaded_dataset.metadata
         assert "fps" in loaded_dataset.metadata
 
@@ -347,7 +383,7 @@ class TestSLDataset:
 
         root.create_group("items")
 
-        loaded_dataset = SLDataset.from_zarr(root)
+        loaded_dataset = SLDataset[str, str, str, str, Any].from_zarr(root)
 
         # Should parse "pose.left_hand" into tuple ("pose", "left_hand")
         assert ("pose", "left_hand") in loaded_dataset.connections
@@ -366,7 +402,7 @@ class TestSLDataset:
 
         root.create_group("items")
 
-        loaded_dataset = SLDataset.from_zarr(root)
+        loaded_dataset = SLDataset[str, str, str, str, Any].from_zarr(root)
 
         # Connection should be loaded (type guard accepts all strings)
         assert ("pose", "left_hand") in loaded_dataset.connections
@@ -395,7 +431,9 @@ class TestIterableSLDataset:
 
         return dataset
 
-    def test_initialization(self, sample_iterable_dataset):
+    def test_initialization(
+        self, sample_iterable_dataset: IterableSLDataset[str, str, str, str, Any]
+    ):
         """Test IterableSLDataset initialization."""
         assert "version" in sample_iterable_dataset.metadata
         assert ("pose", "pose") in sample_iterable_dataset.connections
@@ -411,7 +449,9 @@ class TestIterableSLDataset:
             for i in range(3)
         ]
 
-        dataset: Any = IterableSLDataset(metadata={}, connections={}, items=iter(items))
+        dataset = IterableSLDataset[str, str, str, str, Any](
+            metadata={}, connections={}, items=iter(items)
+        )
 
         collected_items = list(dataset)
         assert len(collected_items) == 3
@@ -426,7 +466,7 @@ class TestIterableSLDataset:
             )
         ]
 
-        dataset: Any = IterableSLDataset(
+        dataset = IterableSLDataset[str, str, str, str, Any](
             metadata={},
             connections={("pose", "pose"): np.array([[0, 1]])},
             items=iter(items),
@@ -445,7 +485,7 @@ class TestSLDatasetBatch:
     @pytest.fixture
     def sample_batch(self):
         """Create a sample batch."""
-        dataset = SLDataset(
+        dataset = SLDataset[str, str, str, str, Any](
             metadata={"version": "1.0"},
             connections={("pose", "pose"): torch.tensor([[0, 1]])},
             items=[],
@@ -459,13 +499,17 @@ class TestSLDatasetBatch:
 
         return SLDatasetBatch(dataset, tensor_item)
 
-    def test_initialization(self, sample_batch):
+    def test_initialization(
+        self, sample_batch: SLDatasetBatch[str, str, str, str]
+    ):
         """Test SLDatasetBatch initialization."""
         assert sample_batch.dataset is not None
         assert sample_batch.item is not None
         assert "rgb" in sample_batch.item.videos
 
-    def test_to_moves_data_to_device(self, sample_batch):
+    def test_to_moves_data_to_device(
+        self, sample_batch: SLDatasetBatch[str, str, str, str]
+    ):
         """Test to() moves all data to specified device."""
         device = torch.device("cpu")
         batch_on_device = sample_batch.to(device)
@@ -475,7 +519,7 @@ class TestSLDatasetBatch:
 
     def test_from_batch_concatenates_items(self):
         """Test from_batch() concatenates batch items."""
-        dataset = SLDataset(
+        dataset = SLDataset[str, str, str, str, Any](
             metadata={"version": "1.0"},
             connections={("pose", "pose"): torch.tensor([[0, 1]])},
             items=[],
@@ -490,7 +534,7 @@ class TestSLDatasetBatch:
             for i in range(3)
         ]
 
-        batch = SLDatasetBatch.from_batch(dataset, batch_items)
+        batch = SLDatasetBatch[str, str, str, str].from_batch(dataset, batch_items)
 
         assert batch.item.videos["rgb"].shape[0] == 3  # Batch size
         assert batch.item.landmarks["pose"].shape[0] == 3
@@ -498,7 +542,7 @@ class TestSLDatasetBatch:
 
     def test_from_batch_preserves_keys(self):
         """Test from_batch() preserves all keys from first item."""
-        dataset = SLDataset(
+        dataset = SLDataset[str, str, str, str, Any](
             metadata={"version": "1.0"},
             connections={("pose", "pose"): torch.tensor([[0, 1]])},
             items=[],
@@ -516,7 +560,7 @@ class TestSLDatasetBatch:
             for i in range(2)
         ]
 
-        batch = SLDatasetBatch.from_batch(dataset, batch_items)
+        batch = SLDatasetBatch[str, str, str, str].from_batch(dataset, batch_items)
 
         assert "rgb" in batch.item.videos
         assert "depth" in batch.item.videos
@@ -525,7 +569,7 @@ class TestSLDatasetBatch:
 class TestDatasetToZarr:
     """Tests for dataset_to_zarr function."""
 
-    def test_saves_dataset_to_zarr_store(self, tmp_path):
+    def test_saves_dataset_to_zarr_store(self, tmp_path: Path):
         """Test dataset_to_zarr() saves dataset to Zarr store."""
         items = [
             SLDatasetItem(
@@ -551,7 +595,7 @@ class TestDatasetToZarr:
         assert group["metadata"].attrs["version"] == "1.0"
         assert "pose.pose" in group["connections"]
 
-    def test_saves_iterable_dataset_to_zarr(self, tmp_path):
+    def test_saves_iterable_dataset_to_zarr(self, tmp_path: Path):
         """Test dataset_to_zarr() works with IterableSLDataset."""
         items = [
             SLDatasetItem(
@@ -598,7 +642,7 @@ class TestDatasetToZarr:
         assert returned_group is existing_group
         assert "metadata" in existing_group
 
-    def test_saves_all_items_to_zarr(self, tmp_path):
+    def test_saves_all_items_to_zarr(self, tmp_path: Path):
         """Test dataset_to_zarr() saves all items."""
         items = [
             SLDatasetItem(
@@ -609,7 +653,9 @@ class TestDatasetToZarr:
             for i in range(5)
         ]
 
-        dataset = SLDataset(metadata={}, connections={}, items=items)
+        dataset = SLDataset[str, str, str, str, Any](
+            metadata={}, connections={}, items=items
+        )
 
         store_path = tmp_path / "dataset.zarr"
         group = dataset_to_zarr(dataset, str(store_path))

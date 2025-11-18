@@ -4,6 +4,8 @@ Tests for SafetensorsLandmarkMatrixSaveCollector (container mode only).
 Coverage target: 51% → 85%+
 """
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import numpy as np
@@ -31,9 +33,9 @@ try:
 
     HAS_SAFETENSORS = True
 except ImportError:
-    HAS_SAFETENSORS = False
+    HAS_SAFETENSORS = False  # pyright: ignore[reportConstantRedefinition]
 
-    def load_file(path: str) -> dict:  # type: ignore[misc]
+    def load_file(path: str) -> dict[str, np.ndarray]:
         """Dummy function for type checking."""
         raise ImportError("safetensors not available")
 

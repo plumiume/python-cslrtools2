@@ -4,6 +4,8 @@ Tests for NpyLandmarkMatrixSaveCollector.
 Coverage target: 39% → 85%+
 """
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import numpy as np

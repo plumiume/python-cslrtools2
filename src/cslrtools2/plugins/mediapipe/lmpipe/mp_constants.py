@@ -150,6 +150,9 @@ Python API. This ensures:
 
 """
 
+# pyright: reportMissingTypeStubs=false
+# pyright: reportUnknownVariableType=false
+
 from __future__ import annotations
 
 # ============================================================================
@@ -157,13 +160,12 @@ from __future__ import annotations
 # ============================================================================
 
 # Pose landmarks (33 landmarks)
-from mediapipe.python.solutions.pose import (  # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.python.solutions.pose import (
     PoseLandmark as _PoseLandmark,
 )
 
 # Hand landmarks (21 landmarks)
 from mediapipe.python.solutions.hands import (
-    # pyright: ignore[reportMissingTypeStubs]
     HandLandmark as _HandLandmark,
 )
 
@@ -211,25 +213,20 @@ Complete list of hand landmarks:
 # ============================================================================
 
 # Pose connections (33 landmarks, 35 connections)
-from mediapipe.python.solutions.pose import (
-    # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.python.solutions.pose import (  # noqa: E402
     POSE_CONNECTIONS as _POSE_CONNECTIONS,
 )
 
 # Hand connections (21 landmarks, 21 connections)
-from mediapipe.python.solutions.hands import (
-    # pyright: ignore[reportMissingTypeStubs]
-    # pyright: ignore[reportUnknownVariableType]
+from mediapipe.python.solutions.hands import (  # noqa: E402
     HAND_CONNECTIONS as _HAND_CONNECTIONS,
 )
 
 # Face mesh connections (468 landmarks without irises, 478 with irises)
-from mediapipe.python.solutions.face_mesh import (
-    # pyright: ignore[reportMissingTypeStubs]
+from mediapipe.python.solutions.face_mesh import (  # noqa: E402
     FACEMESH_TESSELATION as _FACEMESH_TESSELATION,
-    # pyright: ignore[reportUnknownVariableType]
     FACEMESH_CONTOURS as _FACEMESH_CONTOURS,
-    FACEMESH_IRISES as _FACEMESH_IRISES,  # pyright: ignore[reportUnknownVariableType]
+    FACEMESH_IRISES as _FACEMESH_IRISES,
     FACEMESH_FACE_OVAL as _FACEMESH_FACE_OVAL,
     FACEMESH_LEFT_EYE as _FACEMESH_LEFT_EYE,
     FACEMESH_RIGHT_EYE as _FACEMESH_RIGHT_EYE,

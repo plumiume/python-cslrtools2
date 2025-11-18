@@ -112,7 +112,7 @@ def download_all_pexels_videos() -> list[Path]:
     """
     print("\n=== Downloading Pexels Videos ===\n")
 
-    downloaded = []
+    downloaded: list[Path] = []
     for video_info in PEXELS_VIDEOS:
         result = download_pexels_video(
             video_id=video_info["video_id"],

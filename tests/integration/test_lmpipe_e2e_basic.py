@@ -27,6 +27,7 @@ import pytest
 from cslrtools2.lmpipe.collector.landmark_matrix import NpzLandmarkMatrixSaveCollector
 from cslrtools2.lmpipe.interface import LMPipeInterface
 from cslrtools2.plugins.mediapipe.lmpipe.holistic import MediaPipeHolisticEstimator
+from cslrtools2.plugins.mediapipe.lmpipe.holistic import MediaPipeHolisticKey
 
 from .helpers import verify_npz_structure, get_video_info
 
@@ -80,10 +81,10 @@ class TestLMPipeE2EBasic:
         estimator = MediaPipeHolisticEstimator()
 
         # Create NPZ collector
-        npz_collector = NpzLandmarkMatrixSaveCollector()
+        npz_collector = NpzLandmarkMatrixSaveCollector[MediaPipeHolisticKey]()
 
         # Create interface
-        interface = LMPipeInterface(
+        interface = LMPipeInterface[MediaPipeHolisticKey](
             estimator=estimator,
             collectors=[npz_collector],
             max_cpus=1,  # Single-threaded for deterministic testing
@@ -170,9 +171,9 @@ class TestLMPipeE2EBasic:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         estimator = MediaPipeHolisticEstimator()
-        npz_collector = NpzLandmarkMatrixSaveCollector()
+        npz_collector = NpzLandmarkMatrixSaveCollector[MediaPipeHolisticKey]()
 
-        interface = LMPipeInterface(
+        interface = LMPipeInterface[MediaPipeHolisticKey](
             estimator=estimator,
             collectors=[npz_collector],
             max_cpus=1,
@@ -209,9 +210,9 @@ class TestLMPipeE2EBasic:
         expected_frames = video_info["frame_count"]
 
         estimator = MediaPipeHolisticEstimator()
-        npz_collector = NpzLandmarkMatrixSaveCollector()
+        npz_collector = NpzLandmarkMatrixSaveCollector[MediaPipeHolisticKey]()
 
-        interface = LMPipeInterface(
+        interface = LMPipeInterface[MediaPipeHolisticKey](
             estimator=estimator,
             collectors=[npz_collector],
         )
@@ -221,7 +222,7 @@ class TestLMPipeE2EBasic:
 
         # Assert
         npz_file = output_dir / "landmarks.npz"
-        data = np.load(npz_file)
+        data: np.lib.npyio.NpzFile = np.load(npz_file)
 
         # Verify all landmark arrays have correct frame count
         for key in ["pose", "left_hand", "right_hand", "face"]:

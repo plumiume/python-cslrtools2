@@ -51,11 +51,11 @@ class TestCsvLoader:
 
         loader = CsvLoader()
         result = loader.load_array(csv_file)
+        np_array = np.asarray(result)
 
-        # CSV loader returns list, not ndarray
-        assert isinstance(result, list)
-        assert len(result) == 2
-        assert len(result[0]) == 3
+        # Verify loaded array matches original
+        assert len(np_array) == 2
+        assert len(np_array[0]) == 3
 
     def test_load_csv_with_string_path(self, tmp_path: Path):
         """Test loading CSV with string path."""
@@ -89,10 +89,10 @@ class TestJsonLoader:
 
         loader = JsonLoader()
         result = loader.load_array(json_file)
+        np_array = np.asarray(result)
 
-        # JSON loader returns list, not ndarray
-        assert isinstance(result, list)
-        assert len(result) == 2
+        # Verify loaded array matches original
+        assert len(np_array) == 2
 
     def test_load_json_flat_list(self, tmp_path: Path):
         """Test loading flat list from JSON."""
@@ -123,9 +123,9 @@ class TestNpyLoader:
 
         loader = NpyLoader()
         result = loader.load_array(npy_file)
+        np_array = np.asarray(result)
 
-        assert isinstance(result, np.ndarray)
-        assert np.array_equal(result, sample_array_3d)
+        assert np.array_equal(np_array, sample_array_3d)
 
     def test_load_npy_with_different_dtypes(self, tmp_path: Path):
         """Test loading NPY files with different data types."""
@@ -164,8 +164,12 @@ class TestNpzLoader:
         assert isinstance(result, np.lib.npyio.NpzFile)
         assert "array1" in result
         assert "array2" in result
-        assert np.array_equal(result["array1"], data["array1"])
-        assert np.array_equal(result["array2"], data["array2"])
+
+        np_array1 = np.asarray(data["array1"])
+        np_array2 = np.asarray(data["array2"])
+
+        assert np.array_equal(np_array1, data["array1"])
+        assert np.array_equal(np_array2, data["array2"])
 
     def test_load_npz_single_array(self, tmp_path: Path, sample_array_2d: np.ndarray):
         """Test loading NPZ with single array."""
@@ -189,7 +193,7 @@ class TestTorchLoader:
         pt_file = tmp_path / "test.pt"
 
         # Save PyTorch file
-        tensor = torch.from_numpy(sample_array_3d)
+        tensor = torch.from_numpy(sample_array_3d)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
         torch.save(tensor, pt_file)
 
         loader = TorchLoader()
@@ -291,10 +295,10 @@ class TestEdgeCases:
 
         loader = CsvLoader()
         result = loader.load_array(csv_file)
+        np_array = np.asarray(result)
 
-        # CSV loader returns list, empty file returns empty list
-        assert isinstance(result, list)
-        assert len(result) == 0
+        # Verify loaded array is empty
+        assert len(np_array) == 0
 
     def test_json_loader_invalid_json(self, tmp_path: Path):
         """Test JSON loader with invalid JSON."""

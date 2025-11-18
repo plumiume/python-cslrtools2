@@ -142,7 +142,9 @@ class TestAsTensor:
         result = as_tensor(np_array)
         assert isinstance(result, torch.Tensor)
         assert result.shape == (3, 4, 5)
-        assert torch.allclose(result, torch.from_numpy(np_array))
+        assert torch.allclose(
+            result, torch.tensor(np_array)
+        )
 
     def test_preserves_data_type(self):
         """Test that data type is preserved during conversion."""

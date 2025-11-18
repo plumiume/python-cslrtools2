@@ -35,6 +35,7 @@ Example:
 
 from __future__ import annotations
 
+from typing import cast
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest  # pyright: ignore[reportUnusedImport]
@@ -68,8 +69,8 @@ class TestProcessPoolExecutorCompatibility:
 
         with ProcessPoolExecutor(max_workers=2) as executor:
             # Submit single task
-            future = executor.submit(simple_task, 5)
-            result = future.result()
+            future = executor.submit(simple_task, 5)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
+            result = cast(int, future.result())
 
             assert result == 10
 
@@ -86,7 +87,7 @@ class TestProcessPoolExecutorCompatibility:
         inputs = [1, 2, 3, 4, 5]
 
         with ProcessPoolExecutor(max_workers=2) as executor:
-            results = list(executor.map(square, inputs))
+            results = list(executor.map(square, inputs))  # type: ignore[reportUnknownMemberType] # noqa: E501
 
         assert results == [1, 4, 9, 16, 25]
 
@@ -101,8 +102,8 @@ class TestProcessPoolExecutorCompatibility:
             return x * 2
 
         with ProcessPoolExecutor(max_workers=2) as executor:
-            futures = [executor.submit(task, i) for i in range(5)]
-            results = [f.result() for f in futures]
+            futures = [executor.submit(task, i) for i in range(5)]  # pyright: ignore[reportUnknownMemberType] # noqa: E501
+            results = [cast(int, f.result()) for f in futures]
 
         assert results == [0, 2, 4, 6, 8]
 
@@ -242,7 +243,7 @@ class TestExecutorInterfaceConsistency:
 
         # Test ProcessPoolExecutor
         with ProcessPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(simple_task, 5)
+            future = executor.submit(simple_task, 5)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
             assert future.result() == 10
 
         # Test ThreadPoolExecutor
@@ -273,7 +274,7 @@ class TestExecutorInterfaceConsistency:
 
         # Test ProcessPoolExecutor
         with ProcessPoolExecutor(max_workers=2) as executor:
-            results = list(executor.map(simple_task, inputs))
+            results = list(executor.map(simple_task, inputs))  # type: ignore[reportUnknownMemberType] # noqa: E501
             assert results == expected
 
         # Test ThreadPoolExecutor

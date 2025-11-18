@@ -25,8 +25,8 @@ if TYPE_CHECKING:
     # Lazy import for type checking
     import numpy as np
     from numpy._typing import (
-        _ArrayLikeInt_co,
-        _ArrayLikeFloat_co,
+        _ArrayLikeInt_co,  # pyright: ignore[reportPrivateUsage]
+        _ArrayLikeFloat_co,  # pyright: ignore[reportPrivateUsage]
         _ArrayLikeStr_co,  # pyright: ignore[reportPrivateUsage]
     )
     from numpy.typing import (

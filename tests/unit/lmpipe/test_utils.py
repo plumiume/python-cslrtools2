@@ -6,6 +6,7 @@ Coverage target: 31% → 100%
 
 from __future__ import annotations
 
+from typing import Any
 import pytest
 import numpy as np
 from pathlib import Path
@@ -193,7 +194,9 @@ class TestSeqImgsToFrames:
 
     @patch("cv2.imread")
     def test_yields_frames_from_image_sequence(
-        self, mock_imread, temp_images_dir: Path
+        self,
+        mock_imread: Any,
+        temp_images_dir: Path
     ):
         """Test that frames are yielded from image directory."""
         # Mock imread to return fake frames
@@ -207,7 +210,9 @@ class TestSeqImgsToFrames:
         assert mock_imread.call_count == 3
 
     @patch("cv2.imread")
-    def test_sorted_order(self, mock_imread, tmp_path: Path):
+    def test_sorted_order(
+        self, mock_imread: Any, tmp_path: Path
+    ):
         """Test that images are processed in sorted order."""
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -234,7 +239,7 @@ class TestImageFileToFrame:
     """Test image_file_to_frame() function."""
 
     @patch("cv2.imread")
-    def test_loads_single_image(self, mock_imread, temp_image_file: Path):
+    def test_loads_single_image(self, mock_imread: Any, temp_image_file: Path):
         """Test that single image is loaded correctly."""
         fake_frame = np.zeros((480, 640, 3), dtype=np.uint8)
         mock_imread.return_value = fake_frame

@@ -4,6 +4,8 @@ Tests for ZarrLandmarkMatrixSaveCollector (dual mode: per-key and container).
 Coverage target: 35% → 85%+
 """
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import numpy as np

@@ -17,12 +17,14 @@ Test cases to implement:
 
 from __future__ import annotations
 
+from typing import Any, Mapping
+
 import pytest
 import numpy as np
 
 
 @pytest.fixture
-def sample_item_data() -> dict:
+def sample_item_data() -> Mapping[str, Any]:
     """Fixture for sample item data."""
     return {
         "metadata": {"id": "test_001", "duration": 2.5},

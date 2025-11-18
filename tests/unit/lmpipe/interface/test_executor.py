@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import cast
 import time
 from concurrent.futures import Future
 
@@ -18,7 +19,7 @@ class TestDummyExecutor:
 
     def test_initialization(self):
         """Test DummyExecutor initialization with initializer."""
-        init_called = []
+        init_called: list[bool] = []
 
         def initializer():
             init_called.append(True)
@@ -84,7 +85,7 @@ class TestDummyExecutor:
 
         executor = DummyExecutor(max_workers=1, initializer=noop_init)
 
-        execution_order = []
+        execution_order: list[int] = []
 
         def task(task_id: int):
             execution_order.append(task_id)
@@ -114,8 +115,8 @@ class TestProcessPoolExecutor:
         def square(x: int) -> int:
             return x * x
 
-        future = executor.submit(square, 5)
-        result = future.result(timeout=5.0)
+        future: Future[int] = executor.submit(square, 5)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
+        result: int = cast(int, future.result(timeout=5.0))
 
         assert result == 25
         executor.shutdown(wait=True)
@@ -128,7 +129,7 @@ class TestProcessPoolExecutor:
             time.sleep(0.1)
             return "done"
 
-        future = executor.submit(slow_task)
+        future: Future[str] = executor.submit(slow_task)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
         executor.shutdown(wait=True)
 
         # Task should have completed
@@ -143,7 +144,7 @@ class TestProcessPoolExecutor:
             return x * 2
 
         # Submit a task
-        executor.submit(quick_task, 10)
+        executor.submit(quick_task, 10)  # pyright: ignore[reportUnknownMemberType]
 
         # Shutdown with cancel_futures
         executor.shutdown(wait=False, cancel_futures=True)

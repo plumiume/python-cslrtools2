@@ -70,7 +70,12 @@ class SimpleEstimator(Estimator[Literal["test"]]):
             )
         }
 
-    def annotate(self, frame_src: MatLike | None, frame_idx: int, landmarks) -> MatLike:
+    def annotate(
+        self,
+        frame_src: MatLike | None,
+        frame_idx: int,
+        landmarks: Mapping[Literal["test"], NDArrayFloat]
+    ) -> MatLike:
         return (
             frame_src if frame_src is not None else np.zeros((1, 1, 3), dtype=np.uint8)
         )
@@ -93,9 +98,9 @@ class TestLMPipeMultipleCollectors:
         """
         # Arrange
         estimator = SimpleEstimator()
-        csv_collector = CsvLandmarkMatrixSaveCollector()
-        npy_collector = NpyLandmarkMatrixSaveCollector()
-        npz_collector = NpzLandmarkMatrixSaveCollector()
+        csv_collector = CsvLandmarkMatrixSaveCollector[Literal["test"]]()
+        npy_collector = NpyLandmarkMatrixSaveCollector[Literal["test"]]()
+        npz_collector = NpzLandmarkMatrixSaveCollector[Literal["test"]]()
 
         interface = LMPipeInterface(
             estimator=estimator,
@@ -159,8 +164,8 @@ class TestLMPipeMultipleCollectors:
         """
         # Arrange
         estimator = SimpleEstimator()
-        npy_collector = NpyLandmarkMatrixSaveCollector()
-        npz_collector = NpzLandmarkMatrixSaveCollector()
+        npy_collector = NpyLandmarkMatrixSaveCollector[Literal["test"]]()
+        npz_collector = NpzLandmarkMatrixSaveCollector[Literal["test"]]()
 
         interface = LMPipeInterface(
             estimator=estimator,
@@ -224,8 +229,8 @@ class TestLMPipeMultipleCollectors:
         """
         # Arrange
         estimator = SimpleEstimator()
-        npy_collector = NpyLandmarkMatrixSaveCollector()
-        npz_collector = NpzLandmarkMatrixSaveCollector()
+        npy_collector = NpyLandmarkMatrixSaveCollector[Literal["test"]]()
+        npz_collector = NpzLandmarkMatrixSaveCollector[Literal["test"]]()
 
         interface = LMPipeInterface(
             estimator=estimator,

@@ -4,13 +4,16 @@ Tests for TorchLandmarkMatrixSaveCollector (dual mode: per-key and container).
 Coverage target: 33% → 85%+
 """
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
+
+from typing import Any, Literal, Mapping
+from pathlib import Path
 
 import numpy as np
 import pytest  # pyright: ignore[reportUnusedImport]
 import torch
-from pathlib import Path
-from typing import Literal, Mapping
 
 from cslrtools2.lmpipe.collector.landmark_matrix.torch_lmsc import (
     TorchLandmarkMatrixSaveCollector,
@@ -423,6 +426,6 @@ class TestTorchLMSCEmptyBuffer:
         assert pt_file.exists()
 
         # Verify it's a valid empty dict
-        data = torch.load(pt_file, weights_only=False)
+        data: dict[Any, Any] = torch.load(pt_file, weights_only=False)
         assert isinstance(data, dict)
         assert len(data) == 0

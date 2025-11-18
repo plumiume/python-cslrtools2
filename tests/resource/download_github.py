@@ -83,7 +83,7 @@ def download_github_repo_files(repo_info: dict[str, Any]) -> list[Path]:
         f"\n--- {repo_info['owner']}/{repo_info['repo']} ({repo_info['license']}) ---\n"
     )
 
-    downloaded = []
+    downloaded: list[Path] = []
     for file_path in repo_info["files"]:
         result = download_github_file(
             owner=repo_info["owner"],
@@ -104,7 +104,7 @@ def download_all_github_landmarks() -> list[Path]:
     """
     print("\n=== Downloading GitHub Landmark Data ===\n")
 
-    all_downloaded = []
+    all_downloaded: list[Path] = []
     for repo_info in GITHUB_REPOS:
         downloaded = download_github_repo_files(repo_info)
         all_downloaded.extend(downloaded)

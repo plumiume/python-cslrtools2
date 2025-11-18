@@ -77,8 +77,9 @@ def test_pytorch_cuda():
             for i in range(torch.cuda.device_count()):
                 device_name = torch.cuda.get_device_name(i)
                 device_props = cast(
-                    CudaDeviceProperties, torch.cuda.get_device_properties(i)
-                )  # pyright: ignore[reportUnknownMemberType]
+                    CudaDeviceProperties,
+                    torch.cuda.get_device_properties(i)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
+                )
                 print(f"  Device {i}: {device_name}")
                 print(f"    Total Memory: {device_props.total_memory / 1024**3:.2f} GB")
                 print(
@@ -133,8 +134,7 @@ def test_mediapipe():
         print("=" * 70)
         print(
             "MediaPipe Version: "
-            # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
-            f"{mediapipe.__version__}"
+            f"{mediapipe.__version__}"  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue] # noqa: E501
         )
 
         # 簡単な初期化テスト

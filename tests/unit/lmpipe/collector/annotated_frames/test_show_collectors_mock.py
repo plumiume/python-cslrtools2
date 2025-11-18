@@ -1,5 +1,7 @@
 """Tests for annotated frames show collectors using mocks (CI-safe)."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -15,7 +17,7 @@ from cslrtools2.lmpipe.runspec import RunSpec
 @pytest.fixture
 def sample_process_results() -> list[ProcessResult[str]]:
     """Create sample process results with annotated frames."""
-    results = []
+    results: list[ProcessResult[str]] = []
     for idx in range(3):
         frame = np.ones((50, 50, 3), dtype=np.uint8) * (idx * 80)
         result = ProcessResult[str](

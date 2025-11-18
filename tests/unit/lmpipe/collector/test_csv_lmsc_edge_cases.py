@@ -30,10 +30,13 @@ Example:
         >>> pytest tests/unit/lmpipe/collector/test_csv_lmsc_edge_cases.py -v
 """
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
-import pytest  # pyright: ignore[reportUnusedImport]
+from pathlib import Path
 import numpy as np
+import pytest  # pyright: ignore[reportUnusedImport]
 
 from cslrtools2.lmpipe.collector.landmark_matrix.csv_lmsc import (
     CsvLandmarkMatrixSaveCollector,
@@ -49,18 +52,18 @@ class TestCsvLMSCDelimiterDetection:
 
         Covers csv_lmsc.py line 68 (part of _guess_extension).
         """
-        csv_lmsc = CsvLandmarkMatrixSaveCollector(delimiter="\t")
+        csv_lmsc = CsvLandmarkMatrixSaveCollector[str](delimiter="\t")
         # When delimiter is tab, extension should be .tsv
         assert csv_lmsc.extension == ".tsv"
 
     def test_guess_extension_for_semicolon_delimiter(self):
         """Test that semicolon delimiter results in .ssv extension."""
-        csv_lmsc = CsvLandmarkMatrixSaveCollector(delimiter=";")
+        csv_lmsc = CsvLandmarkMatrixSaveCollector[str](delimiter=";")
         assert csv_lmsc.extension == ".ssv"
 
     def test_guess_extension_for_custom_delimiter(self):
         """Test that custom delimiter defaults to .csv extension."""
-        csv_lmsc = CsvLandmarkMatrixSaveCollector(delimiter="|")
+        csv_lmsc = CsvLandmarkMatrixSaveCollector[str](delimiter="|")
         # Unknown delimiters should default to .csv
         assert csv_lmsc.extension == ".csv"
 
@@ -70,14 +73,16 @@ class TestCsvLMSCDelimiterDetection:
         Covers csv_lmsc.py line 133 (extension parameter usage).
         """
         # Even with tab delimiter, explicit extension should be used
-        csv_lmsc = CsvLandmarkMatrixSaveCollector(delimiter="\t", extension=".custom")
+        csv_lmsc = CsvLandmarkMatrixSaveCollector[str](
+            delimiter="\t", extension=".custom"
+        )
         assert csv_lmsc.extension == ".custom"
 
 
 class TestCsvLMSCWriterInitialization:
     """Test CSV writer initialization and error conditions."""
 
-    def test_ensure_writer_without_open_file_raises_error(self, tmp_path):
+    def test_ensure_writer_without_open_file_raises_error(self, tmp_path: Path):
         """Test that ensuring writer without opening file raises error.
 
         Covers csv_lmsc.py line 203-206 (error when base_dir is None).
@@ -88,7 +93,7 @@ class TestCsvLMSCWriterInitialization:
         with pytest.raises(CollectorError, match="CSV landmark directory not prepared"):
             csv_lmsc._ensure_writer("test_key", sample_width=3)
 
-    def test_writer_creation_sets_proper_attributes(self, tmp_path):
+    def test_writer_creation_sets_proper_attributes(self, tmp_path: Path):
         """Test that writer creation initializes all tracking attributes.
 
         Covers csv_lmsc.py lines 207-223 (writer creation and attribute setup).
@@ -121,7 +126,7 @@ class TestCsvLMSCWriterInitialization:
         finally:
             csv_lmsc._close_file()
 
-    def test_inconsistent_sample_width_raises_error(self, tmp_path):
+    def test_inconsistent_sample_width_raises_error(self, tmp_path: Path):
         """Test that inconsistent sample width for same key raises error.
 
         Covers csv_lmsc.py lines 224-229 (sample width validation).
@@ -148,7 +153,7 @@ class TestCsvLMSCWriterInitialization:
 class TestCsvLMSCRowWriting:
     """Test CSV row writing with edge cases."""
 
-    def test_write_rows_with_frame_indexing(self, tmp_path):
+    def test_write_rows_with_frame_indexing(self, tmp_path: Path):
         """Test that row index is properly tracked across multiple writes.
 
         Covers csv_lmsc.py line 180 (row index tracking in _append_with_headers).
@@ -174,7 +179,7 @@ class TestCsvLMSCRowWriting:
         finally:
             csv_lmsc._close_file()
 
-    def test_write_row_creates_proper_dict(self, tmp_path):
+    def test_write_row_creates_proper_dict(self, tmp_path: Path):
         """Test that _append_result creates proper rows in CSV.
 
         Covers csv_lmsc.py line 177
@@ -215,7 +220,7 @@ class TestCsvLMSCRowWriting:
 class TestCsvLMSCCompleteWorkflow:
     """Test complete CSV LMSC workflow with real landmarks."""
 
-    def test_complete_csv_writing_workflow(self, tmp_path):
+    def test_complete_csv_writing_workflow(self, tmp_path: Path):
         """Test complete workflow from open to close with multiple keys.
 
         Ensures all code paths in CSV writing are exercised.
@@ -272,7 +277,7 @@ class TestCsvLMSCCompleteWorkflow:
         finally:
             csv_lmsc._close_file()
 
-    def test_tsv_format_with_tab_delimiter(self, tmp_path):
+    def test_tsv_format_with_tab_delimiter(self, tmp_path: Path):
         """Test TSV format with tab delimiter.
 
         Ensures tab delimiter results in proper TSV files.

@@ -121,7 +121,7 @@ class MatplotlibAnnotatedFramesShowCollector[K: str](AnnotatedFramesShowCollecto
     def _setup(self):
         self._plt.ion()
         self._fig, self._ax = self._plt.subplots(figsize=self.figsize)
-        self._ax.axis("off")  # pyright: ignore[reportAttributeAccessIssue]
+        self._ax.axis("off")  # pyright: ignore[reportUnknownMemberType]
 
     def _update(self, result: ProcessResult[K]):
         if self._ax is not None:

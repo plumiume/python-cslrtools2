@@ -110,7 +110,7 @@ def download_all_zenodo_datasets() -> list[Path]:
     """
     print("\n=== Downloading Zenodo Datasets ===\n")
 
-    downloaded = []
+    downloaded: list[Path] = []
     for dataset_info in ZENODO_DATASETS:
         result = download_zenodo_dataset(dataset_info)
         if result:

@@ -3,7 +3,8 @@
     "executionEnvironments": [
         {
             "root": "./tests",
-            "reportUnusedImport": "warning"
+            "reportUnusedImport": "warning",
+            "reportPrivateUsage": "none"
         }
     ]
 }
