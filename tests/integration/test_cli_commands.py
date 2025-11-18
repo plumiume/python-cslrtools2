@@ -32,6 +32,7 @@ Example:
 
 from __future__ import annotations
 
+from pathlib import Path
 import subprocess
 import sys
 
@@ -42,7 +43,7 @@ import pytest  # pyright: ignore[reportUnusedImport]
 class TestCLIBasicExecution:
     """Test basic CLI command execution."""
 
-    def test_cli_help_command(self):
+    def test_cli_help_command(self) -> None:
         """Test that --help flag works without errors."""
         result = subprocess.run(
             [sys.executable, "-m", "cslrtools2.lmpipe.app.cli", "--help"],
@@ -53,7 +54,7 @@ class TestCLIBasicExecution:
         assert result.returncode == 0
         assert "usage:" in result.stdout.lower() or "lmpipe" in result.stdout.lower()
 
-    def test_cli_version_command(self):
+    def test_cli_version_command(self) -> None:
         """Test that --version flag works."""
         result = subprocess.run(
             [sys.executable, "-m", "cslrtools2.lmpipe.app.cli", "--version"],
@@ -64,7 +65,7 @@ class TestCLIBasicExecution:
         # Version flag may not be implemented, so check for help or error
         assert result.returncode in (0, 1, 2)
 
-    def test_cli_no_arguments(self):
+    def test_cli_no_arguments(self) -> None:
         """Test CLI behavior with no arguments."""
         result = subprocess.run(
             [sys.executable, "-m", "cslrtools2.lmpipe.app.cli"],
@@ -84,7 +85,9 @@ class TestCLIHolisticCommand:
     @pytest.mark.skip(
         reason="MediaPipe API compatibility issue: AttributeError: landmarks"
     )
-    def test_holistic_mediapipe_basic(self, sample_video_stop, tmp_path):
+    def test_holistic_mediapipe_basic(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test basic holistic MediaPipe command."""
         output_dir = tmp_path / "holistic_output"
         output_dir.mkdir()
@@ -116,7 +119,9 @@ class TestCLIHolisticCommand:
     @pytest.mark.skip(
         reason="MediaPipe API compatibility issue: AttributeError: landmarks"
     )
-    def test_holistic_with_csv_collector(self, sample_video_stop, tmp_path):
+    def test_holistic_with_csv_collector(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test holistic command with CSV output."""
         output_dir = tmp_path / "csv_output"
         output_dir.mkdir()
@@ -155,7 +160,9 @@ class TestCLIHolisticCommand:
     @pytest.mark.skip(
         reason="MediaPipe API compatibility issue: AttributeError: landmarks"
     )
-    def test_holistic_with_multiple_collectors(self, sample_video_stop, tmp_path):
+    def test_holistic_with_multiple_collectors(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test holistic command with NPZ output (default)."""
         output_dir = tmp_path / "multi_output"
         output_dir.mkdir()
@@ -189,7 +196,9 @@ class TestCLIPoseCommand:
     @pytest.mark.requires_video
     @pytest.mark.mediapipe
     @pytest.mark.skip(reason="Pose command hangs/times out - investigation needed")
-    def test_pose_mediapipe_basic(self, sample_video_stop, tmp_path):
+    def test_pose_mediapipe_basic(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test basic pose MediaPipe command."""
         output_dir = tmp_path / "pose_output"
         output_dir.mkdir()
@@ -218,7 +227,9 @@ class TestCLIPoseCommand:
     @pytest.mark.requires_video
     @pytest.mark.mediapipe
     @pytest.mark.skip(reason="Pose command hangs/times out - investigation needed")
-    def test_pose_with_model_complexity(self, sample_video_stop, tmp_path):
+    def test_pose_with_model_complexity(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test pose command with model option."""
         output_dir = tmp_path / "pose_complex"
         output_dir.mkdir()
@@ -246,7 +257,7 @@ class TestCLIPoseCommand:
 class TestCLIErrorHandling:
     """Test CLI error handling and validation."""
 
-    def test_cli_nonexistent_input_file(self, tmp_path):
+    def test_cli_nonexistent_input_file(self, tmp_path: Path) -> None:
         """Test CLI behavior with non-existent input file."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
@@ -276,7 +287,7 @@ class TestCLIErrorHandling:
         )
 
     @pytest.mark.skip(reason="Test hangs with holistic/pose MediaPipe commands")
-    def test_cli_invalid_output_directory(self, sample_video_stop):
+    def test_cli_invalid_output_directory(self, sample_video_stop: Path) -> None:
         """Test CLI behavior with invalid output directory."""
         # Try to use a file as output directory (Windows may handle differently)
         result = subprocess.run(
@@ -298,7 +309,7 @@ class TestCLIErrorHandling:
         # Just verify it doesn't crash without output
         assert result.returncode in (0, 1, 2)
 
-    def test_cli_missing_estimator(self):
+    def test_cli_missing_estimator(self) -> None:
         """Test CLI behavior without specifying estimator."""
         result = subprocess.run(
             [
@@ -325,7 +336,9 @@ class TestCLIOutputVerification:
     @pytest.mark.skip(
         reason="MediaPipe API compatibility issue: AttributeError: landmarks"
     )
-    def test_npz_output_structure(self, sample_video_stop, tmp_path):
+    def test_npz_output_structure(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test that NPZ output has correct structure."""
         output_dir = tmp_path / "npz_verify"
         output_dir.mkdir()
@@ -375,7 +388,9 @@ class TestCLIOutputVerification:
     @pytest.mark.skip(
         reason="Pose command hangs/times out - investigation needed"
     )
-    def test_csv_output_format(self, sample_video_stop, tmp_path):
+    def test_csv_output_format(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test that CSV output has correct format."""
         output_dir = tmp_path / "csv_verify"
         output_dir.mkdir()
@@ -431,7 +446,9 @@ class TestCLILogOutput:
     @pytest.mark.skip(
         reason="Pose command hangs/times out - investigation needed"
     )
-    def test_cli_with_log_file(self, sample_video_stop, tmp_path):
+    def test_cli_with_log_file(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test CLI with log file output."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
@@ -474,7 +491,9 @@ class TestCLILogOutput:
     @pytest.mark.requires_video
     @pytest.mark.mediapipe
     @pytest.mark.skip(reason="Pose command hangs/times out - investigation needed")
-    def test_cli_verbose_output(self, sample_video_stop, tmp_path):
+    def test_cli_verbose_output(
+        self, sample_video_stop: Path, tmp_path: Path
+    ) -> None:
         """Test CLI with verbose/debug output."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()

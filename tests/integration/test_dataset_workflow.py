@@ -8,6 +8,9 @@ Tests complete workflows including:
 
 from __future__ import annotations
 
+from typing import Any
+from pathlib import Path
+
 import numpy as np
 import pytest  # pyright: ignore[reportUnusedImport]
 
@@ -15,13 +18,19 @@ from cslrtools2.sldataset.dataset import SLDataset, dataset_to_zarr
 from cslrtools2.sldataset.dataset.item import SLDatasetItem
 
 
+def identity_collate(
+    batch: list[SLDatasetItem[str, Any, str, Any, str, Any]]
+):
+    return batch
+
+
 class TestSLDatasetCreation:
     """Test SLDataset creation from scratch."""
 
-    def test_create_empty_dataset(self, tmp_path):
+    def test_create_empty_dataset(self, tmp_path: Path):
         """Test creating an empty SLDataset."""
         # Create empty dataset
-        dataset = SLDataset(
+        dataset = SLDataset[str, str, str, str, Any](
             metadata={"name": "Empty Dataset"},
             connections={},
             items=[],
@@ -41,7 +50,7 @@ class TestSLDatasetCreation:
         assert "metadata" in saved_group  # type: ignore[operator]
         assert "items" in saved_group  # type: ignore[operator]
 
-    def test_create_dataset_with_metadata(self, tmp_path):
+    def test_create_dataset_with_metadata(self, tmp_path: Path):
         """Test creating a dataset with custom metadata."""
         metadata = {
             "name": "Test Dataset",
@@ -50,7 +59,7 @@ class TestSLDatasetCreation:
             "language": "JSL",
         }
 
-        dataset = SLDataset(
+        dataset = SLDataset[str, str, str, str, Any](
             metadata=metadata,
             connections={},
             items=[],
@@ -61,10 +70,10 @@ class TestSLDatasetCreation:
         assert dataset.metadata["version"] == "1.0"
         assert dataset.metadata["language"] == "JSL"
 
-    def test_add_items_to_dataset(self, tmp_path):
+    def test_add_items_to_dataset(self, tmp_path: Path):
         """Test adding landmark items to dataset."""
         # Create items
-        item1 = SLDatasetItem(
+        item1 = SLDatasetItem[str, Any, str, Any, str, Any](
             videos={},
             landmarks={
                 "pose": np.random.randn(10, 33, 3).astype(np.float32),
@@ -73,7 +82,7 @@ class TestSLDatasetCreation:
             targets={"label": np.array([[0]], dtype=np.int64)},
         )
 
-        item2 = SLDatasetItem(
+        item2 = SLDatasetItem[str, Any, str, Any, str, Any](
             videos={},
             landmarks={
                 "pose": np.random.randn(15, 33, 3).astype(np.float32),
@@ -83,7 +92,7 @@ class TestSLDatasetCreation:
         )
 
         # Create dataset with items
-        dataset = SLDataset(
+        dataset = SLDataset[str, str, str, str, Any](
             metadata={"name": "Multi-item Dataset"},
             connections={},
             items=[item1, item2],
@@ -107,14 +116,14 @@ class TestSLDatasetCreation:
 class TestSLDatasetZarrRoundTrip:
     """Test Zarr storage round-trip for SLDataset."""
 
-    def test_save_and_load_dataset(self, tmp_path):
+    def test_save_and_load_dataset(self, tmp_path: Path):
         """Test saving and loading a complete dataset."""
         dataset_path = tmp_path / "roundtrip_dataset.zarr"
 
         # Create items with varying frame counts
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
         for i in range(5):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={
                     "pose": np.random.randn(10 + i * 2, 33, 3).astype(np.float32),
@@ -133,7 +142,7 @@ class TestSLDatasetZarrRoundTrip:
         saved_group = dataset_to_zarr(original_dataset, str(dataset_path))
 
         # Load dataset
-        loaded_dataset = SLDataset.from_zarr(saved_group)
+        loaded_dataset = SLDataset[str, str, str, str, Any].from_zarr(saved_group)
 
         # Verify dataset properties
         assert len(loaded_dataset) == 5
@@ -141,7 +150,7 @@ class TestSLDatasetZarrRoundTrip:
         assert ("pose", "pose") in loaded_dataset.connections
 
         # Verify items - check labels to identify items
-        labels_found = set()
+        labels_found: set[int] = set()
         for i in range(5):
             item = loaded_dataset[i]
             label = item.targets["label"][0][0]
@@ -154,7 +163,7 @@ class TestSLDatasetZarrRoundTrip:
         # Verify all labels present
         assert labels_found == {0, 1, 2, 3, 4}
 
-    def test_dataset_persistence_with_connections(self, tmp_path):
+    def test_dataset_persistence_with_connections(self, tmp_path: Path) -> None:
         """Test that connections and metadata persist after save/load."""
         dataset_path = tmp_path / "persistent_dataset.zarr"
 
@@ -165,7 +174,7 @@ class TestSLDatasetZarrRoundTrip:
         }
 
         # Create item
-        item = SLDatasetItem(
+        item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
             videos={},
             landmarks={
                 "pose": np.ones((5, 33, 3), dtype=np.float32),
@@ -184,7 +193,7 @@ class TestSLDatasetZarrRoundTrip:
         saved_group = dataset_to_zarr(dataset, str(dataset_path))
 
         # Load and verify
-        loaded_dataset = SLDataset.from_zarr(saved_group)
+        loaded_dataset = SLDataset[str, str, str, str, Any].from_zarr(saved_group)
         assert len(loaded_dataset) == 1
         assert loaded_dataset.metadata["version"] == "1.0"
         assert loaded_dataset.metadata["fps"] == 30
@@ -199,22 +208,22 @@ class TestSLDatasetZarrRoundTrip:
 class TestPyTorchDataLoaderIntegration:
     """Test PyTorch DataLoader integration with SLDataset."""
 
-    def test_dataloader_basic_iteration(self, tmp_path):
+    def test_dataloader_basic_iteration(self, tmp_path: Path) -> None:
         """Test basic DataLoader iteration over dataset."""
         pytest.importorskip("torch", reason="PyTorch not installed")
         from torch.utils.data import DataLoader
 
         # Create dataset with 10 items
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
         for i in range(10):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={"pose": np.random.randn(5, 33, 3).astype(np.float32)},
                 targets={"label": np.array([[i]], dtype=np.int64)},
             )
             items.append(item)
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "DataLoader Test"},
             connections={},
             items=items,
@@ -222,7 +231,7 @@ class TestPyTorchDataLoaderIntegration:
 
         # Create DataLoader with custom collate_fn that returns list
         dataloader = DataLoader(
-            dataset, batch_size=3, shuffle=False, collate_fn=lambda x: x
+            dataset, batch_size=3, shuffle=False, collate_fn=identity_collate
         )
 
         # Verify iteration
@@ -243,22 +252,22 @@ class TestPyTorchDataLoaderIntegration:
         assert total_items == 10
         assert batch_count == 4  # 3 + 3 + 3 + 1
 
-    def test_dataloader_with_shuffle(self, tmp_path):
+    def test_dataloader_with_shuffle(self, tmp_path: Path) -> None:
         """Test DataLoader with shuffling."""
         pytest.importorskip("torch", reason="PyTorch not installed")
         from torch.utils.data import DataLoader
 
         # Create dataset with labeled items
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
         for i in range(20):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={"hand": np.ones((3, 21, 2), dtype=np.float32) * i},
                 targets={"label": np.array([[i]], dtype=np.int64)},
             )
             items.append(item)
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "Shuffle Test"},
             connections={},
             items=items,
@@ -266,19 +275,19 @@ class TestPyTorchDataLoaderIntegration:
 
         # Create two DataLoaders with different random seeds
         dataloader1 = DataLoader(
-            dataset, batch_size=5, shuffle=True, collate_fn=lambda x: x
+            dataset, batch_size=5, shuffle=True, collate_fn=identity_collate
         )
         dataloader2 = DataLoader(
-            dataset, batch_size=5, shuffle=True, collate_fn=lambda x: x
+            dataset, batch_size=5, shuffle=True, collate_fn=identity_collate
         )
 
         # Get labels from both iterations
-        labels1 = []
+        labels1: list[int] = []
         for batch in dataloader1:
             for item in batch:
                 labels1.append(item.targets["label"][0][0])
 
-        labels2 = []
+        labels2: list[int] = []
         for batch in dataloader2:
             for item in batch:
                 labels2.append(item.targets["label"][0][0])
@@ -292,22 +301,22 @@ class TestPyTorchDataLoaderIntegration:
         expected_labels = set(range(20))
         assert set(labels1) == expected_labels
 
-    def test_dataloader_batch_size_one(self, tmp_path):
+    def test_dataloader_batch_size_one(self, tmp_path: Path) -> None:
         """Test DataLoader with batch size of 1."""
         pytest.importorskip("torch", reason="PyTorch not installed")
         from torch.utils.data import DataLoader
 
         # Create dataset with 5 items
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
         for i in range(5):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={"pose": np.random.randn(3, 33, 3).astype(np.float32)},
                 targets={"label": np.array([[i]], dtype=np.int64)},
             )
             items.append(item)
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "Batch Size 1"},
             connections={},
             items=items,
@@ -315,7 +324,7 @@ class TestPyTorchDataLoaderIntegration:
 
         # DataLoader with batch_size=1
         dataloader = DataLoader(
-            dataset, batch_size=1, shuffle=False, collate_fn=lambda x: x
+            dataset, batch_size=1, shuffle=False, collate_fn=identity_collate
         )
 
         batches = list(dataloader)
@@ -329,18 +338,18 @@ class TestPyTorchDataLoaderIntegration:
 class TestDatasetIndexingAndSlicing:
     """Test dataset indexing and slicing operations."""
 
-    def test_positive_indexing(self, tmp_path):
+    def test_positive_indexing(self, tmp_path: Path) -> None:
         """Test positive index access."""
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
         for i in range(10):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={"hand": np.ones((2, 21, 2), dtype=np.float32) * i},
                 targets={"label": np.array([[i]], dtype=np.int64)},
             )
             items.append(item)
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "Indexing Test"},
             connections={},
             items=items,
@@ -351,18 +360,18 @@ class TestDatasetIndexingAndSlicing:
         assert dataset[5].targets["label"][0][0] == 5
         assert dataset[9].targets["label"][0][0] == 9
 
-    def test_negative_indexing(self, tmp_path):
+    def test_negative_indexing(self, tmp_path: Path) -> None:
         """Test negative index access."""
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
         for i in range(10):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={"pose": np.ones((2, 33, 3), dtype=np.float32) * i},
                 targets={"label": np.array([[i]], dtype=np.int64)},
             )
             items.append(item)
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "Negative Index"},
             connections={},
             items=items,
@@ -373,18 +382,18 @@ class TestDatasetIndexingAndSlicing:
         assert dataset[-5].targets["label"][0][0] == 5
         assert dataset[-10].targets["label"][0][0] == 0
 
-    def test_out_of_bounds_indexing(self, tmp_path):
+    def test_out_of_bounds_indexing(self, tmp_path: Path) -> None:
         """Test that out-of-bounds indices raise appropriate errors."""
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
         for i in range(5):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={"hand": np.ones((2, 21, 2), dtype=np.float32)},
                 targets={"label": np.array([[i]], dtype=np.int64)},
             )
             items.append(item)
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "Bounds Test"},
             connections={},
             items=items,
@@ -401,15 +410,15 @@ class TestDatasetIndexingAndSlicing:
 class TestDatasetEdgeCases:
     """Test edge cases in dataset operations."""
 
-    def test_dataset_with_single_item(self, tmp_path):
+    def test_dataset_with_single_item(self, tmp_path: Path) -> None:
         """Test dataset with only one item."""
-        item = SLDatasetItem(
+        item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
             videos={},
             landmarks={"pose": np.random.randn(5, 33, 3).astype(np.float32)},
             targets={"label": np.array([[42]], dtype=np.int64)},
         )
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "Single Item"},
             connections={},
             items=[item],
@@ -420,13 +429,13 @@ class TestDatasetEdgeCases:
         assert retrieved_item.landmarks["pose"].shape == (5, 33, 3)
         assert retrieved_item.targets["label"][0][0] == 42
 
-    def test_dataset_with_variable_frame_counts(self, tmp_path):
+    def test_dataset_with_variable_frame_counts(self, tmp_path: Path) -> None:
         """Test dataset where items have different frame counts."""
         frame_counts = [5, 10, 15, 20, 25]
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
 
         for i, frame_count in enumerate(frame_counts):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={
                     "hand": np.random.randn(frame_count, 21, 2).astype(np.float32)
@@ -435,7 +444,7 @@ class TestDatasetEdgeCases:
             )
             items.append(item)
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "Variable Frames"},
             connections={},
             items=items,
@@ -446,9 +455,9 @@ class TestDatasetEdgeCases:
             item = dataset[i]
             assert item.landmarks["hand"].shape[0] == expected_frames
 
-    def test_dataset_with_multiple_landmark_keys(self, tmp_path):
+    def test_dataset_with_multiple_landmark_keys(self, tmp_path: Path) -> None:
         """Test dataset with multiple landmark types."""
-        item = SLDatasetItem(
+        item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
             videos={},
             landmarks={
                 "pose": np.random.randn(8, 33, 3).astype(np.float32),
@@ -459,7 +468,7 @@ class TestDatasetEdgeCases:
             targets={"label": np.array([[0]], dtype=np.int64)},
         )
 
-        dataset = SLDataset(
+        dataset: SLDataset[str, str, str, str, Any] = SLDataset(
             metadata={"name": "Multi-key Dataset"},
             connections={},
             items=[item],
@@ -472,14 +481,14 @@ class TestDatasetEdgeCases:
         assert retrieved_item.landmarks["pose"].shape == (8, 33, 3)
         assert retrieved_item.landmarks["face"].shape == (8, 468, 3)
 
-    def test_dataset_save_load_preserves_structure(self, tmp_path):
+    def test_dataset_save_load_preserves_structure(self, tmp_path: Path) -> None:
         """Test that save/load cycle preserves complete dataset structure."""
         dataset_path = tmp_path / "complete_structure.zarr"
 
         # Create complex dataset
-        items = []
+        items: list[SLDatasetItem[str, Any, str, Any, str, Any]] = []
         for i in range(3):
-            item = SLDatasetItem(
+            item: SLDatasetItem[str, Any, str, Any, str, Any] = SLDatasetItem(
                 videos={},
                 landmarks={
                     "pose": np.random.randn(10, 33, 3).astype(np.float32),
@@ -497,7 +506,7 @@ class TestDatasetEdgeCases:
 
         # Save and load
         saved_group = dataset_to_zarr(original, str(dataset_path))
-        loaded = SLDataset.from_zarr(saved_group)
+        loaded = SLDataset[str, str, str, str, Any].from_zarr(saved_group)
 
         # Verify everything matches
         assert len(loaded) == len(original)
