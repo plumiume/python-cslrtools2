@@ -37,6 +37,7 @@ docker-compose.override.yaml
 /process_*.py
 /test_output/
 
+.coverage
 *_frame/
 *.mp4
 

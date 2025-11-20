@@ -4,6 +4,11 @@
 **対象**: cslrtools2.lmpipe  
 **評価者**: AI Architecture Analyst
 
+> **関連ドキュメント**: このガイドを使用する際は、以下のドキュメントも併せて参照してください。
+> - [コーディングスタイルガイド](CODING_STYLE_GUIDE.md) - プラグイン実装規約
+> - [統合テスト戦略](INTEGRATION_TEST_STRATEGY.md) - フレームワークテスト方法
+> - [ライブラリ適格性チェック](LIBRARY_CHECKLIST.md) - 品質評価基準
+
 ---
 
 ## 📋 評価対象フレームワーク分類

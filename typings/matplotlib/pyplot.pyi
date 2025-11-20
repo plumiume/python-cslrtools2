@@ -1,5 +1,8 @@
 
-from typing import Any, Callable, Literal, overload, Iterable, Sequence, Hashable, BinaryIO
+from typing import (
+    Any, Callable, Literal, overload,
+    Iterable, Sequence, Hashable, BinaryIO
+)
 from pathlib import Path
 from contextlib import AbstractContextManager, ExitStack
 from os import PathLike
@@ -25,20 +28,18 @@ from matplotlib import rcsetup, rcParamsDefault, rcParamsOrig
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.axes import Subplot
-from matplotlib.axes._base import _AxesBase # pyright: ignore[reportPrivateUsage]
+from matplotlib.axes._base import _AxesBase  # pyright: ignore[reportPrivateUsage]
 from matplotlib.backends.registry import BackendFilter, backend_registry
 from matplotlib.projections.polar import PolarAxes
 from matplotlib.colorizer import ColorizingArtist, Colorizer
 from matplotlib import mlab
 
-def get_scale_names() -> list[str]: ...
-
 from matplotlib.cm import ColormapRegistry
 from matplotlib.colors import Colormap
 
 import matplotlib.axes
-import matplotlib.artist # pyright: ignore[reportUnusedImport]
-import matplotlib.backend_bases # pyright: ignore[reportUnusedImport]
+import matplotlib.artist # pyright: ignore[reportUnusedImport] # noqa: #261
+import matplotlib.backend_bases # pyright: ignore[reportUnusedImport] # noqa: #261
 from matplotlib.axis import Tick
 from matplotlib.backend_bases import Event
 from matplotlib.cm import ScalarMappable
@@ -85,6 +86,9 @@ from matplotlib.ticker import (
     LogFormatterMathtext, Locator, IndexLocator, FixedLocator, NullLocator,
     LinearLocator, LogLocator, AutoLocator, MultipleLocator, MaxNLocator
 )
+
+from matplotlib import rcParams as rcParams
+from matplotlib import get_backend as get_backend
 
 __all__ = [
     # Module-level variables
@@ -334,16 +338,19 @@ __all__ = [
     "broken_barh",
 ]
 
-# Re-exported from matplotlib
-from matplotlib import rcParams as rcParams
-from matplotlib import get_backend as get_backend
+
+def get_scale_names() -> list[str]: ...
+
 
 colormap: ColormapRegistry
 color_sequences: dict[str, list[ColorType]]
 
+
 def install_repl_displayhook() -> None: ...
 
+
 def uninstall_repl_displayhook() -> None: ...
+
 
 def findobj(
     o: Artist | None = None,
@@ -351,7 +358,9 @@ def findobj(
     include_self: bool = True,
     ) -> list[Artist]: ...
 
+
 def switch_backend(newbackend: str) -> None: ...
+
 
 def new_figure_manager(
     num: int | str,
@@ -359,42 +368,61 @@ def new_figure_manager(
     **kwargs: object,
     ) -> FigureCanvasBase: ...
 
+
 def draw_if_interactive(
     *args: object,
     **kwargs: object
     ) -> None: ...
+
 
 def show(
     *args: object,
     **kwargs: object
     ) -> None: ...
 
+
 def isinteractive() -> bool: ...
+
 
 def ioff() -> ExitStack: ...
 
+
 def ion() -> ExitStack: ...
+
 
 def pause(interval: float) -> None: ...
 
+
 def rc(group: str, **kwargs: object) -> AbstractContextManager[None]: ...
+
 
 def rc_context(
     rc: dict[str, object] | None = None,
     fname: str | Path | PathLike[str] | None = None,
     ) -> AbstractContextManager[None]: ...
 
+
 def rcdefaults() -> None: ...
+
 
 def getp(obj: Artist, property: str | None = None) -> object: ...
 
+
 def get(obj: Artist, property: str | None = None) -> object: ...
 
-def setp(obj: Artist, *args: object, file: IOBase = ..., **kwargs: object) -> list[object] | None: ...
+
+def setp(
+    obj: Artist,
+    *args: object,
+    file: IOBase = ...,
+    **kwargs: object
+) -> list[object] | None: ...
+
 
 def xkcd(
     scale: float = 1, length: float = 100, randomness: float = 2
 ) -> ExitStack: ...
+
 
 def figure(
     # autoincrement if None, else integer from 1-N
@@ -414,25 +442,36 @@ def figure(
     **kwargs: object
 ) -> Figure: ...
 
+
 def gcf() -> Figure: ...
+
 
 def fignum_exists(num: int | str) -> bool: ...
 
+
 def get_fignums() -> list[int]: ...
+
 
 def get_figlabels() -> list[Any]: ...
 
+
 def get_current_fig_manager() -> FigureManagerBase | None: ...
+
 
 def connect(s: str, func: Callable[[Event], Any]) -> int: ...
 
+
 def disconnect(cid: int) -> None: ...
+
 
 def close(fig: None | int | str | Figure | Literal["all"] = None) -> None: ...
 
+
 def clf() -> None: ...
 
+
 def draw() -> None: ...
+
 
 def savefig(
     fname: str | PathLike[str] | IOBase | BytesIO | BufferedWriter,
@@ -441,17 +480,27 @@ def savefig(
     **kwargs: object
     ) -> None: ...
 
+
 def figlegend(*args: Any, **kwargs: Any) -> Legend: ...
 
-def axes(arg: tuple[float, float, float, float] | None = None, **kwargs: Any) -> Axes: ...
+
+def axes(
+    arg: tuple[float, float, float, float] | None = None,
+    **kwargs: Any
+) -> Axes: ...
+
 
 def delaxes(ax: Axes | None = None) -> None: ...
 
+
 def sca(ax: Axes) -> None: ...
+
 
 def cla() -> None: ...
 
+
 def subplot(*args: Any, **kwargs: Any) -> Axes: ...
+
 
 @overload
 def subplots(
@@ -468,6 +517,7 @@ def subplots(
     **fig_kw: Any
     ) -> tuple[Figure, Axes]: ...
 
+
 @overload
 def subplots(
     nrows: int = ...,
@@ -482,6 +532,7 @@ def subplots(
     gridspec_kw: dict[str, Any] | None = ...,
     **fig_kw: Any
     ) -> tuple[Figure, np.ndarray]: ...
+
 
 @overload
 def subplots(
@@ -498,6 +549,7 @@ def subplots(
     **fig_kw: Any
     ) -> tuple[Figure, Any]: ...
 
+
 @overload
 def subplot_mosaic(
     mosaic: str,
@@ -513,8 +565,9 @@ def subplot_mosaic(
     **fig_kw: Any
     ) -> tuple[Figure, dict[str, matplotlib.axes.Axes]]: ...
 
+
 @overload
-def subplot_mosaic[_T]( # pyright: ignore[reportOverlappingOverload]
+def subplot_mosaic[_T](  # pyright: ignore[reportOverlappingOverload]
     mosaic: list[HashableList[_T]],
     *,
     sharex: bool = ...,
@@ -544,6 +597,7 @@ def subplot_mosaic(
     **fig_kw: Any
 ) -> tuple[Figure, dict[Hashable, matplotlib.axes.Axes]]: ...
 
+
 def subplot2grid(
     shape: tuple[int, int], loc: tuple[int, int],
     rowspan: int = 1, colspan: int = 1,
@@ -551,13 +605,18 @@ def subplot2grid(
     **kwargs: Any
     ) -> Axes: ...
 
+
 def twinx(ax: matplotlib.axes.Axes | None = None) -> _AxesBase: ...
+
 
 def twiny(ax: matplotlib.axes.Axes | None = None) -> _AxesBase: ...
 
+
 def subplot_tool(targetfig: Figure | None = None) -> SubplotTool | None: ...
 
+
 def box(on: bool | None = None) -> None: ...
+
 
 @overload
 def xlim(
@@ -568,6 +627,8 @@ def xlim(
     xmin: float = ...,
     xmax: float = ...
     ) -> tuple[float, float]: ...
+
+
 @overload
 def xlim(
     left: float | np.datetime64 | None = ...,
@@ -579,6 +640,7 @@ def xlim(
     xmax: float = ...
     ) -> tuple[float, float]: ...
 
+
 def ylim(
     bottom: float = ...,
     top: float = ...,
@@ -589,6 +651,7 @@ def ylim(
     ymax: float = ...
     ) -> tuple[float, float]: ...
 
+
 def xticks(
     ticks: ArrayLike | None = None,
     labels: Sequence[str] | None = None,
@@ -596,6 +659,7 @@ def xticks(
     minor: bool = False,
     **kwargs: Any
     ) -> tuple[list[Tick] | np.ndarray, list[Text]]: ...
+
 
 def yticks(
     ticks: ArrayLike | None = None,
@@ -605,6 +669,7 @@ def yticks(
     **kwargs: Any
     ) -> tuple[list[Tick] | np.ndarray, list[Text]]: ...
 
+
 def rgrids(
     radii: ArrayLike | None = None,
     labels: Sequence[str | Text] | None = None,
@@ -613,12 +678,14 @@ def rgrids(
     **kwargs: Any
     ) -> tuple[list[Line2D], list[Text]]: ...
 
+
 def thetagrids(
     angles: ArrayLike | None = None,
     labels: Sequence[str | Text] | None = None,
     fmt: str | None = None,
     **kwargs: Any
     ) -> tuple[list[Line2D], list[Text]]: ...
+
 
 def get_plot_commands() -> list[str]: ...
 
@@ -630,23 +697,34 @@ def colorbar(
     **kwargs: Any
     ) -> Colorbar: ...
 
+
 def clim(vmin: float | None = None, vmax: float | None = None) -> None: ...
 
-def get_cmap(name: Colormap | str | None = None, lut: int | None = None) -> Colormap: ...
+
+def get_cmap(
+    name: Colormap | str | None = None,
+    lut: int | None = None
+) -> Colormap: ...
+
 
 def set_cmap(cmap: Colormap | str) -> None: ...
+
 
 def imread(
     fname: str | Path | BinaryIO, format: str | None = None
     ) -> np.ndarray: ...
 
+
 def imsave(
     fname: str | PathLike[str] | BinaryIO, arr: ArrayLike, **kwargs: Any
     ) -> None: ...
 
+
 def matshow(A: ArrayLike, fignum: None | int = None, **kwargs: Any) -> AxesImage: ...
 
+
 def polar(*args: Any, **kwargs: Any) -> list[Line2D]: ...
+
 
 def figimage(
     X: ArrayLike,
@@ -664,13 +742,17 @@ def figimage(
     **kwargs: Any,
 ) -> FigureImage: ...
 
+
 def figtext(
     x: float, y: float, s: str, fontdict: dict[str, Any] | None = None, **kwargs: Any
     ) -> Text: ...
 
+
 def gca() -> Axes: ...
 
+
 def gci() -> ColorizingArtist | None: ...
+
 
 def ginput(
     n: int = 1,
@@ -681,6 +763,7 @@ def ginput(
     mouse_stop: MouseButton = MouseButton.MIDDLE,
     ) -> list[tuple[int, int]]: ...
 
+
 def subplots_adjust(
     left: float | None = None,
     bottom: float | None = None,
@@ -690,7 +773,9 @@ def subplots_adjust(
     hspace: float | None = None,
     ) -> None: ...
 
+
 def suptitle(t: str, **kwargs: Any) -> Text: ...
+
 
 def tight_layout(
     *,
@@ -700,11 +785,14 @@ def tight_layout(
     rect: tuple[float, float, float, float] | None = None,
     ) -> None: ...
 
+
 def waitforbuttonpress(timeout: float = -1) -> None | bool: ...
+
 
 def acorr(
     x: ArrayLike, *, data: Any = None, **kwargs: Any
     ) -> tuple[np.ndarray, np.ndarray, LineCollection | Line2D, Line2D | None]: ...
+
 
 def angle_spectrum(
     x: ArrayLike,
@@ -718,6 +806,7 @@ def angle_spectrum(
     **kwargs: Any,
     ) -> tuple[np.ndarray, np.ndarray, Line2D]: ...
 
+
 def annotate(
     text: str,
     xy: tuple[float, float],
@@ -729,7 +818,9 @@ def annotate(
     **kwargs: Any,
     ) -> Annotation: ...
 
+
 def arrow(x: float, y: float, dx: float, dy: float, **kwargs: Any) -> FancyArrow: ...
+
 
 def autoscale(
     enable: bool = True,
@@ -737,11 +828,19 @@ def autoscale(
     tight: bool | None = None,
     ) -> None: ...
 
-def axhline(y: float = 0, xmin: float = 0, xmax: float = 1, **kwargs: Any) -> Line2D: ...
+
+def axhline(
+    y: float = 0,
+    xmin: float = 0,
+    xmax: float = 1,
+    **kwargs: Any
+) -> Line2D: ...
+
 
 def axhspan(
     ymin: float, ymax: float, xmin: float = 0, xmax: float = 1, **kwargs: Any
     ) -> Rectangle: ...
+
 
 def axis(
     arg: tuple[float, float, float, float] | bool | str | None = None,
@@ -751,6 +850,7 @@ def axis(
     **kwargs: Any,
     ) -> tuple[float, float, float, float]: ...
 
+
 def axline(
     xy1: tuple[float, float],
     xy2: tuple[float, float] | None = None,
@@ -759,11 +859,19 @@ def axline(
     **kwargs: Any,
     ) -> Line2D: ...
 
-def axvline(x: float = 0, ymin: float = 0, ymax: float = 1, **kwargs: Any) -> Line2D: ...
+
+def axvline(
+    x: float = 0,
+    ymin: float = 0,
+    ymax: float = 1,
+    **kwargs: Any
+) -> Line2D: ...
+
 
 def axvspan(
     xmin: float, xmax: float, ymin: float = 0, ymax: float = 1, **kwargs: Any
     ) -> Rectangle: ...
+
 
 def bar(
     x: float | ArrayLike,
@@ -776,7 +884,9 @@ def bar(
     **kwargs: Any,
     ) -> BarContainer: ...
 
+
 def barbs(*args: Any, data: Any = None, **kwargs: Any) -> Barbs: ...
+
 
 def barh(
     y: float | ArrayLike,
@@ -789,6 +899,7 @@ def barh(
     **kwargs: Any,
     ) -> BarContainer: ...
 
+
 def bar_label(
     container: BarContainer,
     labels: ArrayLike | None = None,
@@ -798,6 +909,7 @@ def bar_label(
     padding: float = 0,
     **kwargs: Any,
     ) -> list[Annotation]: ...
+
 
 def boxplot(
     x: ArrayLike | Sequence[ArrayLike],
@@ -833,6 +945,7 @@ def boxplot(
     data: Any = None,
     ) -> dict[str, Any]: ...
 
+
 def broken_barh(
     xranges: Sequence[tuple[float, float]],
     yrange: tuple[float, float],
@@ -841,7 +954,13 @@ def broken_barh(
     **kwargs: Any,
     ) -> PolyCollection: ...
 
-def clabel(CS: ContourSet, levels: ArrayLike | None = None, **kwargs: Any) -> list[Text]: ...
+
+def clabel(
+    CS: ContourSet,
+    levels: ArrayLike | None = None,
+    **kwargs: Any
+) -> list[Text]: ...
+
 
 def cohere(
     x: ArrayLike,
@@ -862,9 +981,12 @@ def cohere(
     **kwargs: Any,
     ) -> tuple[np.ndarray, np.ndarray]: ...
 
+
 def contour(*args: Any, data: Any = None, **kwargs: Any) -> QuadContourSet: ...
 
+
 def contourf(*args: Any, data: Any = None, **kwargs: Any) -> QuadContourSet: ...
+
 
 def csd(
     x: ArrayLike,
@@ -886,6 +1008,7 @@ def csd(
     **kwargs: Any,
     ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, Line2D]: ...
 
+
 def ecdf(
     x: ArrayLike,
     weights: ArrayLike | None = None,
@@ -896,6 +1019,7 @@ def ecdf(
     data: Any = None,
     **kwargs: Any,
 ) -> Line2D: ...
+
 
 def errorbar(
     x: float | ArrayLike,
@@ -918,6 +1042,7 @@ def errorbar(
     **kwargs: Any,
 ) -> ErrorbarContainer: ...
 
+
 def eventplot(
     positions: ArrayLike | Sequence[ArrayLike],
     orientation: Literal["horizontal", "vertical"] = "horizontal",
@@ -932,7 +1057,9 @@ def eventplot(
     **kwargs: Any,
 ) -> EventCollection: ...
 
+
 def fill(*args: Any, data: Any = None, **kwargs: Any) -> list[Polygon]: ...
+
 
 def fill_between(
     x: ArrayLike,
@@ -946,6 +1073,7 @@ def fill_between(
     **kwargs: Any,
 ) -> PolyCollection: ...
 
+
 def fill_betweenx(
     y: ArrayLike,
     x1: ArrayLike | float,
@@ -958,12 +1086,14 @@ def fill_betweenx(
     **kwargs: Any,
 ) -> PolyCollection: ...
 
+
 def grid(
     visible: bool | None = None,
     which: Literal["major", "minor", "both"] = "major",
     axis: Literal["both", "x", "y"] = "both",
     **kwargs: Any,
 ) -> None: ...
+
 
 def hexbin(
     x: ArrayLike,
@@ -990,6 +1120,7 @@ def hexbin(
     **kwargs: Any,
 ) -> PolyCollection: ...
 
+
 def hist(
     x: ArrayLike | Sequence[ArrayLike],
     bins: int | Sequence[float] | str | None = None,
@@ -1015,6 +1146,7 @@ def hist(
     BarContainer | Polygon | list[BarContainer | Polygon],
 ]: ...
 
+
 def stairs(
     values: ArrayLike,
     edges: ArrayLike | None = None,
@@ -1025,6 +1157,7 @@ def stairs(
     data: Any = None,
     **kwargs: Any,
 ) -> StepPatch: ...
+
 
 def hist2d(
     x: ArrayLike,
@@ -1040,6 +1173,7 @@ def hist2d(
     **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, QuadMesh]: ...
 
+
 def hlines(
     y: float | ArrayLike,
     xmin: float | ArrayLike,
@@ -1051,6 +1185,7 @@ def hlines(
     data: Any = None,
     **kwargs: Any,
 ) -> LineCollection: ...
+
 
 def imshow(
     X: ArrayLike | PIL.Image.Image,
@@ -1074,13 +1209,17 @@ def imshow(
     **kwargs: Any,
 ) -> AxesImage: ...
 
+
 def legend(*args: Any, **kwargs: Any) -> Legend: ...
+
 
 def locator_params(
     axis: Literal["both", "x", "y"] = "both", tight: bool | None = None, **kwargs: Any
 ) -> None: ...
 
+
 def loglog(*args: Any, **kwargs: Any) -> list[Line2D]: ...
+
 
 def magnitude_spectrum(
     x: ArrayLike,
@@ -1095,6 +1234,7 @@ def magnitude_spectrum(
     **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray, Line2D]: ...
 
+
 def margins(
     *margins: float,
     x: float | None = None,
@@ -1102,9 +1242,12 @@ def margins(
     tight: bool | None = True,
 ) -> tuple[float, float] | None: ...
 
+
 def minorticks_off() -> None: ...
 
+
 def minorticks_on() -> None: ...
+
 
 def pcolor(
     *args: ArrayLike,
@@ -1118,6 +1261,7 @@ def pcolor(
     data: Any = None,
     **kwargs: Any,
 ) -> Collection: ...
+
 
 def pcolormesh(
     *args: ArrayLike,
@@ -1133,6 +1277,7 @@ def pcolormesh(
     **kwargs: Any,
 ) -> QuadMesh: ...
 
+
 def phase_spectrum(
     x: ArrayLike,
     Fs: float | None = None,
@@ -1144,6 +1289,7 @@ def phase_spectrum(
     data: Any = None,
     **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray, Line2D]: ...
+
 
 def pie(
     x: ArrayLike,
@@ -1168,6 +1314,7 @@ def pie(
     data: Any = None,
 ) -> tuple[list[Wedge], list[Text]] | tuple[list[Wedge], list[Text], list[Text]]: ...
 
+
 def plot(
     *args: float | ArrayLike | str,
     scalex: bool = True,
@@ -1175,6 +1322,7 @@ def plot(
     data: Any = None,
     **kwargs: Any,
 ) -> list[Line2D]: ...
+
 
 def plot_date(
     x: ArrayLike,
@@ -1187,6 +1335,7 @@ def plot_date(
     data: Any = None,
     **kwargs: Any,
 ) -> list[Line2D]: ...
+
 
 def psd(
     x: ArrayLike,
@@ -1207,11 +1356,14 @@ def psd(
     **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, Line2D]: ...
 
+
 def quiver(*args: Any, data: Any = None, **kwargs: Any) -> Quiver: ...
+
 
 def quiverkey(
     Q: Quiver, X: float, Y: float, U: float, label: str, **kwargs: Any
 ) -> QuiverKey: ...
+
 
 def scatter(
     x: float | ArrayLike,
@@ -1233,9 +1385,12 @@ def scatter(
     **kwargs: Any,
 ) -> PathCollection: ...
 
+
 def semilogx(*args: Any, **kwargs: Any) -> list[Line2D]: ...
 
+
 def semilogy(*args: Any, **kwargs: Any) -> list[Line2D]: ...
+
 
 def specgram(
     x: ArrayLike,
@@ -1261,6 +1416,7 @@ def specgram(
     **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, AxesImage]: ...
 
+
 def spy(
     Z: ArrayLike,
     precision: float | Literal["present"] = 0,
@@ -1270,6 +1426,7 @@ def spy(
     origin: Literal["upper", "lower"] = "upper",
     **kwargs: Any,
 ) -> AxesImage: ...
+
 
 def stackplot(
     x: ArrayLike,
@@ -1282,6 +1439,7 @@ def stackplot(
     **kwargs: Any,
 ) -> list[PolyCollection]: ...
 
+
 def stem(
     *args: ArrayLike | str,
     linefmt: str | None = None,
@@ -1293,6 +1451,7 @@ def stem(
     data: Any = None,
 ) -> StemContainer: ...
 
+
 def step(
     x: ArrayLike,
     y: ArrayLike,
@@ -1301,6 +1460,7 @@ def step(
     data: Any = None,
     **kwargs: Any,
 ) -> list[Line2D]: ...
+
 
 def streamplot(
     x: ArrayLike,
@@ -1325,6 +1485,7 @@ def streamplot(
     data: Any = None,
 ) -> Any: ...
 
+
 def table(
     cellText: Sequence[Sequence[str]] | None = None,
     cellColours: Sequence[Sequence[ColorType]] | None = None,
@@ -1342,11 +1503,14 @@ def table(
     **kwargs: Any,
 ) -> Any: ...
 
+
 def text(
     x: float, y: float, s: str, fontdict: dict[str, Any] | None = None, **kwargs: Any
 ) -> Text: ...
 
+
 def tick_params(axis: Literal["both", "x", "y"] = "both", **kwargs: Any) -> None: ...
+
 
 def ticklabel_format(
     *,
@@ -1358,9 +1522,12 @@ def ticklabel_format(
     useMathText: bool | None = None,
 ) -> None: ...
 
+
 def tricontour(*args: Any, **kwargs: Any) -> QuadContourSet: ...
 
+
 def tricontourf(*args: Any, **kwargs: Any) -> QuadContourSet: ...
+
 
 def tripcolor(
     *args: Any,
@@ -1374,7 +1541,12 @@ def tripcolor(
     **kwargs: Any,
 ) -> PolyCollection: ...
 
-def triplot(*args: Any, **kwargs: Any) -> list[Line2D] | tuple[list[Line2D], list[Line2D]]: ...
+
+def triplot(
+    *args: Any,
+    **kwargs: Any
+) -> list[Line2D] | tuple[list[Line2D], list[Line2D]]: ...
+
 
 def violinplot(
     dataset: ArrayLike | Sequence[ArrayLike],
@@ -1395,6 +1567,7 @@ def violinplot(
     data: Any = None,
 ) -> dict[str, Collection]: ...
 
+
 def vlines(
     x: float | ArrayLike,
     ymin: float | ArrayLike,
@@ -1406,6 +1579,7 @@ def vlines(
     data: Any = None,
     **kwargs: Any,
 ) -> LineCollection: ...
+
 
 def xcorr(
     x: ArrayLike,
@@ -1419,7 +1593,9 @@ def xcorr(
     **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray, LineCollection | Line2D, Line2D | None]: ...
 
+
 def sci(im: ColorizingArtist) -> None: ...
+
 
 def title(
     label: str,
@@ -1431,6 +1607,7 @@ def title(
     **kwargs: Any,
 ) -> Text: ...
 
+
 def xlabel(
     xlabel: str,
     fontdict: dict[str, Any] | None = None,
@@ -1439,6 +1616,7 @@ def xlabel(
     loc: Literal["left", "center", "right"] | None = None,
     **kwargs: Any,
 ) -> Text: ...
+
 
 def ylabel(
     ylabel: str,
@@ -1449,9 +1627,12 @@ def ylabel(
     **kwargs: Any,
 ) -> Text: ...
 
+
 def xscale(value: str | ScaleBase, **kwargs: Any) -> None: ...
 
+
 def yscale(value: str | ScaleBase, **kwargs: Any) -> None: ...
+
 
 # Colormap setter functions
 def autumn() -> None: ...
@@ -1473,9 +1654,3 @@ def inferno() -> None: ...
 def plasma() -> None: ...
 def viridis() -> None: ...
 def nipy_spectral() -> None: ...
-
-
-
-
-
-

@@ -309,8 +309,8 @@ class TestVideoProcessing:
     @patch("cslrtools2.lmpipe.interface.runner.capture_to_frames")
     def test_run_video_processes_frames(
         self,
-        mock_capture_to_frames: Callable[[MagicMock], list[MatLike]],
-        mock_VideoCapture: Callable[..., VideoCapture],
+        mock_capture_to_frames: MagicMock,
+        mock_VideoCapture: MagicMock,
         runner: LMPipeRunner[Literal["test"]],
         tmp_path: Path
     ):
@@ -323,10 +323,11 @@ class TestVideoProcessing:
         # Mock video capture
         mock_capture = MagicMock(spec=VideoCapture)
         mock_capture.isOpened.return_value = True
-        mock_capture.get.side_effect = lambda prop: {
-            2: 100,  # cv2.CAP_PROP_FRAME_COUNT
-            5: 30.0,  # cv2.CAP_PROP_FPS
-        }.get(prop, 0)
+
+        def get_side_effect(prop: int) -> int | float:
+            return {2: 100, 5: 30.0}.get(prop, 0)
+
+        mock_capture.get.side_effect = get_side_effect
         mock_VideoCapture.return_value = mock_capture
 
         # Mock frames
@@ -348,10 +349,10 @@ class TestVideoProcessing:
     @patch("cslrtools2.lmpipe.interface.runner.cv2.VideoCapture")
     def test_run_video_raises_if_cannot_open(
         self,
-        mock_VideoCapture: Callable[..., VideoCapture],
+        mock_VideoCapture: MagicMock,
         runner: LMPipeRunner[Literal["test"]],
         tmp_path: Path
-        ):
+    ):
         """Test run_video() raises ValueError if video cannot be opened."""
         src_file = tmp_path / "video.mp4"
         src_file.touch()
@@ -368,7 +369,7 @@ class TestVideoProcessing:
     @patch("cslrtools2.lmpipe.interface.runner.seq_imgs_to_frames")
     def test_run_sequence_images_processes_frames(
         self,
-        mock_seq_imgs_to_frames: Callable[[Path], list[MatLike]],
+        mock_seq_imgs_to_frames: MagicMock,
         runner: LMPipeRunner[Literal["test"]],
         tmp_path: Path
     ):
@@ -397,7 +398,7 @@ class TestVideoProcessing:
     @patch("cslrtools2.lmpipe.interface.runner.image_file_to_frame")
     def test_run_single_image_processes_frame(
         self,
-        mock_image_file_to_frame: Callable[[Path], MatLike],
+        mock_image_file_to_frame: MagicMock,
         runner: LMPipeRunner[Literal["test"]],
         tmp_path: Path
     ):
@@ -425,8 +426,8 @@ class TestVideoProcessing:
     @patch("cslrtools2.lmpipe.interface.runner.capture_to_frames")
     def test_run_stream_processes_stream(
         self,
-        mock_capture_to_frames: Callable[[VideoCapture], list[MatLike]],
-        mock_VideoCapture: Callable[..., VideoCapture],
+        mock_capture_to_frames: MagicMock,
+        mock_VideoCapture: MagicMock,
         runner: LMPipeRunner[Literal["test"]],
         tmp_path: Path
     ):
@@ -455,7 +456,7 @@ class TestVideoProcessing:
     @patch("cslrtools2.lmpipe.interface.runner.cv2.VideoCapture")
     def test_run_stream_raises_if_cannot_open(
         self,
-        mock_VideoCapture: Callable[..., VideoCapture],
+        mock_VideoCapture: MagicMock,
         runner: LMPipeRunner[Literal["test"]],
         tmp_path: Path
     ):
@@ -480,6 +481,7 @@ class TestFrameProcessing:
         """Test _call_estimator() sets up estimator on first frame."""
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
         estimator = runner.lmpipe_interface.estimator
+        assert isinstance(estimator, DummyEstimator), "not DummyEstimator"
 
         result = runner._call_estimator(frame, 0)
 
@@ -497,6 +499,7 @@ class TestFrameProcessing:
         """Test _call_estimator() skips setup on subsequent frames."""
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
         estimator = runner.lmpipe_interface.estimator
+        assert isinstance(estimator, DummyEstimator), "not DummyEstimator"
 
         # First frame to trigger setup
         runner._call_estimator(frame, 0)
@@ -546,7 +549,11 @@ class TestFrameProcessing:
             mock_executor = DummyExecutor(
                 initializer=runner._default_executor_initializer
             )
-            mock_init_executor.return_value.__enter__ = lambda s: mock_executor
+
+            def enter_mock(s: Any) -> Any:
+                return mock_executor
+
+            mock_init_executor.return_value.__enter__ = enter_mock
             mock_init_executor.return_value.__exit__ = dummy_exit
             mock_resources.return_value.__enter__ = dummy_enter
             mock_resources.return_value.__exit__ = dummy_exit
@@ -566,8 +573,10 @@ class TestCollectorIntegration:
         self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
     ):
         """Test _collect_results() calls all configured collectors."""
-        collector1 = Mock()
-        collector2 = Mock()
+        collector1 = cast(Collector[Literal["test"]], Mock())
+        collector1.collect_results = MagicMock()
+        collector2 = cast(Collector[Literal["test"]], Mock())
+        collector2.collect_results = MagicMock()
         runner.collectors = [collector1, collector2]
 
         src_file = tmp_path / "input.mp4"
@@ -621,7 +630,9 @@ class TestExecutorConfiguration:
         from cslrtools2.lmpipe.interface.executor import DummyExecutor
 
         # Options set to batch mode, request frames mode
-        runner.lmpipe_options = LMPipeOptions({**DEFAULT_LMPIPE_OPTIONS, "executor_mode": "batch"})
+        runner.lmpipe_options = LMPipeOptions(
+            {**DEFAULT_LMPIPE_OPTIONS, "executor_mode": "batch"}
+        )
 
         executor = runner.configure_executor("frames", lambda: None)
 
@@ -741,7 +752,9 @@ class TestEventSystem:
         on_success = Mock()
         on_failure = Mock()
 
-        runner._submit_with_events(future, on_submit, on_success, on_failure, "arg1")
+        runner._submit_with_events(  # pyright: ignore[reportArgumentType]
+            future, on_submit, on_success, on_failure, "arg1"
+        )
 
         on_submit.assert_called_once_with("arg1")
 
@@ -751,7 +764,9 @@ class TestEventSystem:
         """Test _CallbackWithEvents calls on_success for successful future."""
         on_success = Mock()
         on_failure = Mock()
-        callback = runner._CallbackWithEvents(on_success, on_failure, ("arg1",))
+        callback = runner._CallbackWithEvents(
+            on_success, on_failure, ("arg1",)  # pyright: ignore[reportArgumentType]
+        )
 
         future = Future[str]()
         future.set_result("result")
@@ -767,7 +782,9 @@ class TestEventSystem:
         """Test _CallbackWithEvents calls on_failure for failed future."""
         on_success = Mock()
         on_failure = Mock()
-        callback = runner._CallbackWithEvents(on_success, on_failure, ("arg1",))
+        callback = runner._CallbackWithEvents(
+            on_success, on_failure, ("arg1",)  # pyright: ignore[reportArgumentType]
+        )
 
         future = Future[Any]()
         error = RuntimeError("Test error")
@@ -821,7 +838,10 @@ class TestUtilityMethods:
                 "cslrtools2.lmpipe.interface.runner.is_image_file", return_value=False
             ),
         ):
-            mock_is_video.side_effect = lambda p: p.suffix in [".mp4", ".avi"]
+            def is_video_check(p: Path) -> bool:
+                return p.suffix in [".mp4", ".avi"]
+
+            mock_is_video.side_effect = is_video_check
 
             runspecs = list(runner._get_runspecs(runspec))
 
@@ -879,10 +899,10 @@ class TestUtilityMethods:
         self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
     ):
         """Test _apply_exist_rule() returns True if any collector allows processing."""
-        collector1 = Mock()
-        collector1.apply_exist_rule.return_value = False
-        collector2 = Mock()
-        collector2.apply_exist_rule.return_value = True
+        collector1 = cast(Collector[Literal["test"]], Mock())
+        collector1.apply_exist_rule = MagicMock(return_value=False)
+        collector2 = cast(Collector[Literal["test"]], Mock())
+        collector2.apply_exist_rule = MagicMock(return_value=True)
         runner.collectors = [collector1, collector2]
 
         src_file = tmp_path / "input.mp4"
@@ -899,10 +919,10 @@ class TestUtilityMethods:
         self, runner: LMPipeRunner[Literal["test"]], tmp_path: Path
     ):
         """Test _apply_exist_rule() returns False if all collectors reject."""
-        collector1 = Mock()
-        collector1.apply_exist_rule.return_value = False
-        collector2 = Mock()
-        collector2.apply_exist_rule.return_value = False
+        collector1 = cast(Collector[Literal["test"]], Mock())
+        collector1.apply_exist_rule = MagicMock(return_value=False)
+        collector2 = cast(Collector[Literal["test"]], Mock())
+        collector2.apply_exist_rule = MagicMock(return_value=False)
         runner.collectors = [collector1, collector2]
 
         src_file = tmp_path / "input.mp4"

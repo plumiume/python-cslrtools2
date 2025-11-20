@@ -4,6 +4,12 @@
 **現在のスコア**: 100/130 🎉  
 **ステータス**: EXCELLENT（PyPI公開準備完了）
 
+> **関連ドキュメント**: このガイドを使用する際は、以下のドキュメントも併せて参照してください。
+> - [コーディングスタイルガイド](CODING_STYLE_GUIDE.md) - コード品質基準
+> - [Docstringスタイルガイド](DOCSTRING_STYLE_GUIDE.md) - ドキュメント要件
+> - [統合テスト戦略](INTEGRATION_TEST_STRATEGY.md) - テストカバレッジ要件
+> - [LMPipeフレームワーク分類](LMPIPE_FRAMEWORK_CLASSIFICATION.md) - アーキテクチャ理解
+
 **最新の成果**:
 - ✅ Apache 2.0ライセンス完全適用（56ファイル）
 - ✅ 基本テストスイート作成完了（14テストすべてPASS）

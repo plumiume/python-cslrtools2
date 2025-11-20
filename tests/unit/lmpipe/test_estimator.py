@@ -24,6 +24,7 @@ import pytest
 from cslrtools2.lmpipe.estimator import (
     Estimator,
     ProcessResult,
+    KeyOptions,
     shape,
     headers,
     estimate,
@@ -285,7 +286,7 @@ class TestDecoratorUsage:
 
         class SingleShapeEstimator(Estimator[Literal["data"]]):
             @property
-            @shape
+            @shape({"key": "data"})
             def shape(self) -> tuple[int, int]:
                 return (10, 2)
 
@@ -313,7 +314,7 @@ class TestDecoratorUsage:
             def shape(self) -> tuple[int, int]:
                 return (5, 3)
 
-            @estimate
+            @estimate(KeyOptions[Literal["test"]]({"key": "test"}))
             def estimate(self, frame_src: MatLike | None, frame_idx: int) -> None:
                 return None
 
@@ -339,7 +340,7 @@ class TestDecoratorUsage:
                 return (3, 2)
 
             @property
-            @headers
+            @headers({"key": "coords"})
             def headers(self) -> list[str]:
                 return ["x", "y"]
 

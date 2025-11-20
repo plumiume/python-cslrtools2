@@ -90,29 +90,20 @@ class SLDatasetItem[
         Vlm: Array-like type for landmark data values.
         Ktgt: String type for target/label keys.
         Vtgt: Array-like type for target/label values.
-
-    Attributes:
-        videos (:class:`~typing.Mapping`\\[:obj:`Kvid`, :obj:`Vvid`\\]):
-            Video data mapping. Each value has shape ``[N, T, H, W, C]``
-            where N is batch size, T is time, H is height, W is width, C is channels.
-        landmarks (:class:`~typing.Mapping`\\[:obj:`Klm`, :obj:`Vlm`\\]):
-            Landmark data mapping. Each value has shape ``[N, T, V, A]``
-            where N is batch size, T is time, V is vertices, A is attributes.
-        targets (:class:`~typing.Mapping`\\[:obj:`Ktgt`, :obj:`Vtgt`\\]):
-            Target/label data mapping. Each value has shape ``[N, S]``
-            where N is batch size, S is sequence length.
     """
 
     def __init__(
         self,
-        videos: Mapping[Kvid, Vvid],  # (Kvid, [N, T, H, W, C])
-        landmarks: Mapping[Klm, Vlm],  # (Klm, [N, T, V, A])
-        targets: Mapping[Ktgt, Vtgt],  # (Ktgt, [N, S])
-    ):  # N = 1 or Batch size
+        videos: Mapping[Kvid, Vvid],
+        landmarks: Mapping[Klm, Vlm],
+        targets: Mapping[Ktgt, Vtgt],
+    ):  # N = 1 or Batch siz
         self.videos = videos
+        "Mapping[Kvid, Vvid] with shape: [N, T, C, H, W]"
         self.landmarks = landmarks
+        "Mapping[Klm, Vlm] with shape: [N, T, V, C]"
         self.targets = targets
-
+        "Mapping[Ktgt, Vtgt] with shape: [N, S]"
         sldataset_logger.debug(
             f"Initialized SLDatasetItem with {len(videos)} videos, "
             f"{len(landmarks)} landmark types, {len(targets)} targets"
@@ -199,10 +190,13 @@ class SLDatasetItem[
             path / "landmarks",
             cls.is_landmark_key,
             prekey_load_funcs,
-            container_load_funcs,
+            container_load_funcs
         )
         targets = cls._load_category_from_fs(
-            path / "targets", cls.is_target_key, prekey_load_funcs, container_load_funcs
+            path / "targets",
+            cls.is_target_key,
+            prekey_load_funcs,
+            container_load_funcs
         )
 
         sldataset_logger.debug(

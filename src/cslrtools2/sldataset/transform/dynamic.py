@@ -18,6 +18,17 @@
 
 from __future__ import annotations
 
+from typing import (
+    Sequence,
+    Callable
+)
+
+import torch
+import torchvision.transforms.v2 as transforms_v2
+
+from ..dataset.core import SLDatasetItem, TensorSLDatasetItem
+from .core import Transform
+
 
 def return_true() -> bool:
     return True
@@ -26,12 +37,6 @@ def return_true() -> bool:
 if return_true():
     raise NotImplementedError("This module is under construction.")
 
-from typing import *  # pyright: ignore[reportWildcardImportFromLibrary]
-
-import torch
-
-from ..dataset.core import SLDatasetItem, TensorSLDatasetItem
-from .core import Transform
 
 ### see DATA_AUGMENTATION.md
 ### ランドマーク用を優先して実装
@@ -58,6 +63,19 @@ class UniformSpeedChange[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Kt
         mode: str = "nearest",
         gen: torch.Generator | None = None,
     ):
+
+        # Validate scale parameters
+        if min_scale <= 0 or max_scale <= 0:
+            raise ValueError(
+                f"Scale values must be positive, "
+                f"got min_scale={min_scale}, max_scale={max_scale}"
+            )
+        if min_scale > max_scale:
+            raise ValueError(
+                f"min_scale must be <= max_scale, "
+                f"got min_scale={min_scale}, max_scale={max_scale}"
+            )
+
         self.video_keys = video_keys
         self.landmark_keys = landmark_keys
 
@@ -77,48 +95,69 @@ class UniformSpeedChange[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Kt
         videos = {**item.videos}
 
         for kvid in self.video_keys:
-            vvid = item.videos[kvid]
+
+            vvid = item.videos[kvid]  # NameError?
+            "with shape [N, T, C, H, W]"
 
             time_indices = torch.arange(0, vvid.shape[1] * scale) / scale
 
+            vvid_ncthw = vvid.permute(0, 2, 1, 3, 4)  # [N, C, T, H, W]
             videos[kvid] = torch.nn.functional.interpolate(
-                vvid.permute(0, 2, 1, 3, 4),  # NCTHW
+                vvid_ncthw,
                 size=(
-                    time_indices.shape[0],
-                    vvid.shape[2],
-                    vvid.shape[3],
-                    vvid.shape[4],
+                    time_indices.shape[0],  # T
+                    vvid_ncthw.shape[3],    # H
+                    vvid_ncthw.shape[4],    # W
                 ),
                 mode=self.mode,
-                align_corners=False,
-            ).permute(0, 2, 1, 3, 4)  # Back to NCTHW
+            ).permute(0, 2, 1, 3, 4)  # [N, T, C, H, W]
 
         landmarks = {**item.landmarks}
 
         for klm in self.landmark_keys:
-            vlm = item.landmarks[klm]
+
+            vlm = item.landmarks[klm]  # NameError?
+            "with shape [N, T, V, C]"
 
             time_indices = torch.arange(0, vlm.shape[1] * scale) / scale
 
+            vlm_ncth = vlm.permute(0, 3, 1, 2)  # [N, C, T, V]
             landmarks[klm] = torch.nn.functional.interpolate(
-                vlm.permute(0, 2, 1, 3),  # NTVC
-                size=(time_indices.shape[0], vlm.shape[2]),
+                vlm_ncth,
+                size=(
+                    time_indices.shape[0],  # T
+                    vlm_ncth.shape[3],      # V
+                ),
                 mode=self.mode,
-                align_corners=False,
-            ).permute(0, 2, 1, 3)  # Back to NTVC
+            ).permute(0, 2, 3, 1)  # [N, T, V, C]
 
         return SLDatasetItem(videos=videos, landmarks=landmarks, targets=item.targets)
 
 
-class RondomResizeCrop[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Ktgt]):
+class RandomResizePaddingCrop[
+    Kvid: str, Klm: str, Ktgt: str
+](Transform[Kvid, Klm, Ktgt]):
     def __init__(
         self,
         video_keys: Sequence[Kvid],
         landmark_keys: Sequence[Klm],
         min_scale: float = 0.8,
-        max_scale: float = 1.0,
+        max_scale: float = 1.2,
         gen: torch.Generator | None = None,
     ):
+
+        # Validate scale parameters
+        if min_scale <= 0 or max_scale <= 0:
+            raise ValueError(
+                f"Scale values must be positive, "
+                f"got min_scale={min_scale}, max_scale={max_scale}"
+            )
+        if min_scale > max_scale:
+            raise ValueError(
+                f"min_scale must be <= max_scale, "
+                f"got min_scale={min_scale}, max_scale={max_scale}"
+            )
+
         self.video_keys = video_keys
         self.landmark_keys = landmark_keys
 
@@ -130,6 +169,7 @@ class RondomResizeCrop[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Ktgt
         self,
         item: TensorSLDatasetItem[Kvid, Klm, Ktgt],
     ) -> TensorSLDatasetItem[Kvid, Klm, Ktgt]:
+
         scale = (
             torch.empty(1)
             .uniform_(self.min_scale, self.max_scale, generator=self.gen)
@@ -139,25 +179,38 @@ class RondomResizeCrop[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Ktgt
         videos = {**item.videos}
 
         for kvid in self.video_keys:
-            vvid = item.videos[kvid]
 
-            t_new = int(vvid.shape[1] * scale)
-            start_idx = torch.randint(
-                0, vvid.shape[1] - t_new + 1, (1,), generator=self.gen
-            ).item()
+            vvid = item.videos[kvid]  # NameError?
+            "with shape [N, T, C, H, W]"
 
-            videos[kvid] = vvid[:, start_idx : start_idx + t_new]
+            # transforms_v2.functional.affine behavior:
+            # - Input: [..., C, H, W] with arbitrary leading batch dimensions
+            # - Output: Same shape as input (tensor size unchanged)
+            # - scale > 1.0: Image zooms in → crop effect (outer regions cut off)
+            # - scale < 1.0: Image zooms out → padding effect (filled with fill value)
+            # - Transform is center-invariant by default
+            # See: torchvision/transforms/v2/functional/_geometry.py::affine()
+            vvid = transforms_v2.functional.affine(
+                inpt=vvid,
+                angle=0.0,
+                translate=[0.0, 0.0],
+                scale=scale,
+                shear=[0.0, 0.0],
+            )
+
+            videos[kvid] = vvid
 
         landmarks = {**item.landmarks}
 
         for klm in self.landmark_keys:
-            vlm = item.landmarks[klm]
 
-            t_new = int(vlm.shape[1] * scale)
-            start_idx = torch.randint(
-                0, vlm.shape[1] - t_new + 1, (1,), generator=self.gen
-            ).item()
+            vlm = item.landmarks[klm]  # NameError?
+            "with shape [N, T, V, C]"
+            vlm_xy = vlm[..., :2]
+            vlm_other = vlm[..., 2:]
 
-            landmarks[klm] = vlm[:, start_idx : start_idx + t_new]
+            # simple impletementation
+            vlm_xy = (vlm_xy - 0.5) * scale + 0.5
+            landmarks[klm] = torch.cat([vlm_xy, vlm_other], dim=-1)
 
         return SLDatasetItem(videos=videos, landmarks=landmarks, targets=item.targets)

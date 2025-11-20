@@ -59,7 +59,8 @@ class CubicSplineInterpolateMissingLandmarks[Kvid: str, Klm: str, Ktgt: str](
         self.extrapolation = extrapolation
 
     def __call__(
-        self, item: TensorSLDatasetItem[Kvid, Klm, Ktgt]
+        self,
+        item: TensorSLDatasetItem[Kvid, Klm, Ktgt]
     ) -> TensorSLDatasetItem[Kvid, Klm, Ktgt]:
         landmarks = {**item.landmarks}
 
