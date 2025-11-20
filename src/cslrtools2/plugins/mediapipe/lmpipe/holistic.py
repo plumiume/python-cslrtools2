@@ -84,6 +84,12 @@ class MediaPipeHolisticEstimator(MediaPipeEstimator[MediaPipeHolisticKey]):
             enable_segmentation=self.holistic_args.enable_segmentation,
             smooth_segmentation=self.holistic_args.smooth_segmentation,
             refine_face_landmarks=self.holistic_args.refine_face_landmarks,
+            min_detection_confidence=(
+                self.holistic_args.min_holistic_detection_confidence
+            ),
+            min_tracking_confidence=(
+                self.holistic_args.min_holistic_tracking_confidence
+            ),
         )
 
     def configure_estimator_name(self) -> MediaPipeHolisticKey:

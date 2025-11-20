@@ -39,6 +39,12 @@ class MediaPipeHolisticArgs(MediaPipeBaseArgs, mixin.ReprMixin):
     "Whether to smooth the segmentation mask."
     refine_face_landmarks: bool = False
     "Whether to refine the face landmarks around the eyes and lips."
+    min_holistic_detection_confidence: float = 0.5
+    """Minimum confidence value ([0.0, 1.0])
+        for the holistic detection to be considered successful."""
+    min_holistic_tracking_confidence: float = 0.5
+    """Minimum confidence value ([0.0, 1.0])
+        for the holistic landmarks to be considered tracked successfully."""
 
 
 def get_holistic_estimator(ns: MediaPipeHolisticArgs.T):
