@@ -25,16 +25,6 @@ import numpy as np
 from mediapipe.tasks.python.core.base_options import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     BaseOptions,
 )
-<<<<<<< HEAD
-from mediapipe.tasks.python.vision.hand_landmarker import (
-    HandLandmarker,
-    HandLandmarkerOptions,
-)
-from mediapipe.tasks.python.components.containers.category import (
-    Category,
-)
-from mediapipe.tasks.python.components.containers.landmark import (
-=======
 from mediapipe.tasks.python.vision.hand_landmarker import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     HandLandmarker,
     HandLandmarkerOptions,
@@ -43,7 +33,6 @@ from mediapipe.tasks.python.components.containers.category import (  # pyright: 
     Category,
 )
 from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
->>>>>>> origin/dev-ai/work-main-ai-251121
     NormalizedLandmark,
 )
 from mediapipe import Image, ImageFormat

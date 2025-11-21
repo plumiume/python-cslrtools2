@@ -25,19 +25,11 @@ import numpy as np
 from mediapipe.tasks.python.core.base_options import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     BaseOptions,
 )
-<<<<<<< HEAD
-from mediapipe.tasks.python.vision.face_landmarker import (
-    FaceLandmarker,
-    FaceLandmarkerOptions,
-)
-from mediapipe.tasks.python.components.containers.landmark import (
-=======
 from mediapipe.tasks.python.vision.face_landmarker import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     FaceLandmarker,
     FaceLandmarkerOptions,
 )
 from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
->>>>>>> origin/dev-ai/work-main-ai-251121
     NormalizedLandmark,
 )
 from mediapipe import Image, ImageFormat
@@ -112,13 +104,7 @@ class MediaPipeFaceEstimator(
             image_format=ImageFormat.SRGB, data=np.ascontiguousarray(frame_src)
         )
 
-<<<<<<< HEAD
-        detection_result = self.landmarker.detect(  # pyright: ignore[reportUnknownMemberType] # noqa: E501
-            mp_image
-        )
-=======
         detection_result = self.landmarker.detect(mp_image)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
->>>>>>> origin/dev-ai/work-main-ai-251121
         landmarks: list[list[NormalizedLandmark]] = (  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa: E501
             detection_result.face_landmarks
         )

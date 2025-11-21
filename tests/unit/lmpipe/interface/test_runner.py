@@ -25,8 +25,9 @@ import numpy as np
 from cv2 import VideoCapture
 from unittest.mock import Mock, MagicMock, patch
 
+from cslrtools2.lmpipe.interface import LMPipeInterface
 from cslrtools2.lmpipe.interface.runner import (
-    LMPipeInterface, LMPipeRunner, _runner_public_api
+    LMPipeRunner, _runner_public_api
 )
 from cslrtools2.lmpipe.collector import Collector
 from cslrtools2.lmpipe.estimator import Estimator, ProcessResult

@@ -105,10 +105,13 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-n auto --dist=loadscope"
+# Note: -n auto disabled due to torch/Triton TORCH_LIBRARY conflicts
+# Use: pytest -n auto --dist=loadscope for non-torch tests
+addopts = ""
 markers = [
     "mediapipe: tests that require MediaPipe to be installed",
     "integration: integration tests that test multiple components together",
     "requires_video: tests that require actual video files to be present",
     "slow: tests that take a long time to run (> 5 seconds)",
+    "torch: tests that use PyTorch (incompatible with pytest-xdist)",
 ]
