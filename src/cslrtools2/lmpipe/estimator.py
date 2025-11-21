@@ -210,7 +210,7 @@ def _get_key_from_options_or_estimator[K: str](
     options: KeyOptions[K] | None,
 ) -> K:
     key_from_options: K | None = None if options is None else options.get("key")
-    
+
     try:
         key_from_estimator: K = estimater.configure_estimator_name()
     except (TypeError, ValueError, AttributeError) as e:
@@ -234,7 +234,7 @@ def _get_key_from_options_or_estimator[K: str](
             f"  ✅ return Key.PRIMARY     # Correct: single key value\n\n"
             f"See {estimator_class}.configure_estimator_name() implementation."
         ) from e
-    
+
     return key_from_options or key_from_estimator
 
 
