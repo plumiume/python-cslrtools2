@@ -12,7 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Data augmentation and transformation utilities for sign language datasets."""
+"""Data augmentation and transformation utilities for sign language datasets.
+
+This module provides dynamic (runtime) transformations for continuous sign language
+recognition (CSLR) datasets. All transforms operate on TensorSLDatasetItem with
+the following tensor shapes:
+    - videos: [N, T, C, H, W] (batch, time, channel, height, width)
+    - landmarks: [N, T, V, C] (batch, time, vertices, coordinates)
+    - targets: [N, S] (batch, sequence_length)
+
+Implementation philosophy:
+    - Lightweight transforms only (heavy preprocessing in frozen.py)
+    - Missing values handled separately (see transform/frozen.py)
+    - Error handling via NameError/KeyError for missing keys
+    - Shape validation delegated to item constructor
+
+For transform selection rationale and CSLR-specific considerations, see:
+    guides/DATA_AUGUMENTATION.md
+"""
 
 # INFO: this module is under construction
 
@@ -38,21 +55,77 @@ if return_true():
     raise NotImplementedError("This module is under construction.")
 
 
-### see DATA_AUGMENTATION.md
-### ランドマーク用を優先して実装
-### video: [N, T, C, H, W]
-### landmark: [N, T, V, C]
-### target: [N, S]
-### dynamicでは計算コストが高い変換は避ける
-### missing_valueはこのモジュールでは扱わず、
-### transform/frozen.pyで補完しておくことを想定
+# ==============================================================================
+# Random Value Factories
+# ==============================================================================
 
 
 def uniform_rand_factory(gen: torch.Generator) -> torch.Tensor:
+    """Default random value factory using uniform distribution.
+
+    Factory function for transforms that require random values in ``[0, 1]``.
+
+    Args:
+        gen (`torch.Generator`): Random number generator for reproducibility.
+
+    Returns:
+        :class:`torch.Tensor`: Scalar tensor with value sampled from U(0, 1).
+
+    Example::
+
+        >>> gen = torch.Generator()
+        >>> gen.manual_seed(42)
+        >>> value = uniform_rand_factory(gen)
+        >>> value.shape
+        torch.Size([])
+    """
     return torch.rand([], generator=gen)
 
 
 class UniformSpeedChange[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Ktgt]):
+    """Apply uniform temporal scaling to simulate speed variations.
+
+    Simulates speed variations in sign language videos by temporal scaling.
+
+    This transform uniformly stretches or compresses the temporal dimension of
+    videos and landmarks using interpolation, changing the number of frames while
+    preserving spatial structure. Useful for augmenting sign language datasets
+    without breaking temporal grammar.
+
+    Args:
+        video_keys (`Sequence[Kvid]`): Keys of videos to transform.
+        landmark_keys (`Sequence[Klm]`): Keys of landmarks to transform.
+        min_scale (`float`): Minimum scale factor (default: 0.5).
+            Scale < 1.0 slows down motion (increases frame count).
+        max_scale (`float`): Maximum scale factor (default: 2.0).
+            Scale > 1.0 speeds up motion (decreases frame count).
+        rand_factory (`Callable`): Function to generate random values in [0, 1].
+            Returns :class:`torch.Tensor` with scalar value sampled from U(0, 1).
+        mode (`str`): Interpolation mode for
+            :func:`torch.nn.functional.interpolate` (default: "nearest").
+        gen (`torch.Generator` | :obj:`None`): Random number generator for
+            reproducibility. If :obj:`None`, uses default RNG.
+
+    Raises:
+        :exc:`ValueError`: If scale values are non-positive or
+            ``min_scale > max_scale``.
+
+    Note:
+        - Input shapes: videos ``[N, T, C, H, W]``, landmarks ``[N, T, V, C]``
+        - Output frame count T' is determined by: ``T' = int(T * scale)``
+        - Extreme scale values may disrupt linguistic structure; use with caution
+        - Uses :func:`torch.nn.functional.interpolate` for temporal resizing
+
+    Example::
+
+        >>> transform = UniformSpeedChange(
+        ...     video_keys=["rgb"],
+        ...     landmark_keys=["pose", "hand"],
+        ...     min_scale=0.8,
+        ...     max_scale=1.2
+        ... )
+        >>> transformed_item = transform(item)
+    """
     def __init__(
         self,
         video_keys: Sequence[Kvid],
@@ -89,6 +162,20 @@ class UniformSpeedChange[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Kt
         self,
         item: TensorSLDatasetItem[Kvid, Klm, Ktgt],
     ) -> TensorSLDatasetItem[Kvid, Klm, Ktgt]:
+        """Apply uniform speed change to the input item.
+
+        Args:
+            item (`TensorSLDatasetItem`): Input dataset item with videos and
+                landmarks.
+
+        Returns:
+            :class:`TensorSLDatasetItem`: Transformed item with scaled temporal
+                dimension. Frame count changes according to sampled scale.
+
+        Raises:
+            :exc:`KeyError`: If specified :attr:`video_keys` or
+                :attr:`landmark_keys` not found in item.
+        """
         rand_val = self.rand_factory(self.gen).clamp(0, 1).item()
         scale = self.min_scale + (self.max_scale - self.min_scale) * rand_val
 
@@ -137,6 +224,51 @@ class UniformSpeedChange[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Kt
 class RandomResizePaddingCrop[
     Kvid: str, Klm: str, Ktgt: str
 ](Transform[Kvid, Klm, Ktgt]):
+    """Apply random spatial scaling with automatic padding or cropping.
+
+    This transform applies center-based affine scaling to videos and
+    corresponding coordinate transformations to landmarks. The tensor shape
+    remains unchanged:
+
+    - ``scale > 1.0``: zoom in (crop effect - outer regions cut off)
+    - ``scale < 1.0``: zoom out (padding effect - filled with zeros)
+
+    The class name reflects both behaviors: ResizePaddingCrop handles both
+    cases depending on the randomly sampled scale value.
+
+    Args:
+        video_keys (`Sequence[Kvid]`): Keys of videos to transform.
+        landmark_keys (`Sequence[Klm]`): Keys of landmarks to transform.
+        min_scale (`float`): Minimum scale factor (default: 0.8).
+        max_scale (`float`): Maximum scale factor (default: 1.2).
+        gen (`torch.Generator | None`): Random number generator for
+            reproducibility. If :obj:`None`, uses default RNG.
+
+    Raises:
+        :exc:`ValueError`: If scale values are non-positive or
+            ``min_scale > max_scale``.
+
+    Note:
+        - Input/output shapes: videos ``[N, T, C, H, W]``,
+          landmarks ``[N, T, V, C]``
+        - Tensor dimensions do NOT change (only content is transformed)
+        - Uses :func:`torchvision.transforms.v2.functional.affine` for videos
+        - Landmark coordinates ``(x, y)`` are transformed:
+          ``(xy - 0.5) * scale + 0.5``
+        - Other landmark dimensions (z, visibility, etc.) remain unchanged
+        - Transform is center-invariant (pivot point at image center)
+        - See :mod:`torchvision.transforms.v2.functional` for affine details
+
+    Example::
+
+        >>> transform = RandomResizePaddingCrop(
+        ...     video_keys=["rgb"],
+        ...     landmark_keys=["pose"],
+        ...     min_scale=0.9,
+        ...     max_scale=1.1
+        ... )
+        >>> transformed_item = transform(item)
+    """
     def __init__(
         self,
         video_keys: Sequence[Kvid],
@@ -169,7 +301,21 @@ class RandomResizePaddingCrop[
         self,
         item: TensorSLDatasetItem[Kvid, Klm, Ktgt],
     ) -> TensorSLDatasetItem[Kvid, Klm, Ktgt]:
+        """Apply random spatial scaling to the input item.
 
+        Args:
+            item (`TensorSLDatasetItem`): Input dataset item with videos and
+                landmarks.
+
+        Returns:
+            :class:`TensorSLDatasetItem`: Transformed item with scaled spatial
+                content. Tensor shapes remain unchanged (only content is
+                transformed via :func:`torchvision.transforms.v2.functional.affine`).
+
+        Raises:
+            :exc:`KeyError`: If specified :attr:`video_keys` or
+                :attr:`landmark_keys` not found in item.
+        """
         scale = (
             torch.empty(1)
             .uniform_(self.min_scale, self.max_scale, generator=self.gen)
@@ -214,3 +360,95 @@ class RandomResizePaddingCrop[
             landmarks[klm] = torch.cat([vlm_xy, vlm_other], dim=-1)
 
         return SLDatasetItem(videos=videos, landmarks=landmarks, targets=item.targets)
+
+
+# ==============================================================================
+# Planned Implementations (see guides/DATA_AUGUMENTATION.md)
+# ==============================================================================
+
+# class RandomTemporalCrop[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Ktgt]):
+#     """Random temporal cropping with linguistic structure preservation.
+#
+#     Priority: Mid
+#     Implementation: Extract random time window from [N, T, ...] tensors
+#     Constraint: Window size must not break linguistic structure (sentence boundaries)
+#     Reference: DATA_AUGUMENTATION.md - "Random Temporal Crop"
+#     """
+
+
+# class ColorJitter[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Ktgt]):
+#     """Random color jittering for RGB videos (landmark-independent).
+#
+#     Priority: Mid
+#     Implementation: Wrapper for torchvision.transforms.v2.ColorJitter
+#     Applies to: video_keys only (landmarks unaffected)
+#     Parameters: brightness, contrast, saturation, hue
+#     Reference: DATA_AUGUMENTATION.md - "Color Jitter"
+#     """
+
+
+# class RandomGrayscale[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Ktgt]):
+#     """Randomly convert RGB videos to grayscale.
+#
+#     Priority: Low
+#     Implementation: Wrapper for torchvision.transforms.v2.RandomGrayscale
+#     Applies to: video_keys only (landmarks unaffected)
+#     Reference: DATA_AUGUMENTATION.md - "Random Grayscale"
+#     """
+
+
+# class JointCoordinateNoise[
+#     Kvid: str, Klm: str, Ktgt: str
+# ](Transform[Kvid, Klm, Ktgt]):
+#     """Add Gaussian noise to landmark coordinates for robustness.
+#
+#     Priority: Mid
+#     Implementation: Sample noise ~ N(0, sigma^2), add to landmark coordinates
+#     Applies to: landmark_keys only (videos unaffected)
+#     Parameters: sigma (noise standard deviation)
+#     Reference: DATA_AUGUMENTATION.md - "Joint Coordinate Noise"
+#     """
+
+
+# class DropJoint[Kvid: str, Klm: str, Ktgt: str](Transform[Kvid, Klm, Ktgt]):
+#     """Randomly drop (mask) specific joints to simulate occlusion.
+#
+#     Priority: Low
+#     Implementation: Set landmark coordinates to missing_value or NaN
+#     Applies to: landmark_keys only
+#     Use case: Evaluate model robustness to missing joints
+#     Reference: DATA_AUGUMENTATION.md - "Drop Joint / Mask Joint"
+#     """
+
+
+# class SymmetricAdjacencyNormalization[
+#     Kvid: str, Klm: str, Ktgt: str
+# ](Transform[Kvid, Klm, Ktgt]):
+#     """Normalize adjacency matrix for GCN (D^{-1/2} A D^{-1/2}).
+#
+#     Priority: Mid
+#     Implementation: Compute symmetric normalization of adjacency matrix
+#     Applies to: graph_keys (if using dense GCN, not PyG sparse)
+#     Note: Only useful for naive GCN implementations (PyG handles this internally)
+#     Reference: DATA_AUGUMENTATION.md - "Symmetric Adjacency Normalization"
+#     """
+
+
+# ==============================================================================
+# Future Implementations (High Complexity)
+# ==============================================================================
+
+# class BoneLengthConstrainedPerturbation[
+#     Kvid: str, Klm: str, Ktgt: str
+# ](Transform[Kvid, Klm, Ktgt]):
+#     """Perturb bone lengths while respecting anatomical constraints.
+#
+#     Priority: Low (Future Goal)
+#     Complexity: Very High
+#     Requirements:
+#       - Physical constraints: joint angles, bone length ratios
+#       - Optimization solver to satisfy constraints
+#       - Significant computational cost
+#     Expected benefit: Enhanced landmark robustness
+#     Reference: DATA_AUGUMENTATION.md - "Bone-Length Constrained Perturbation"
+#     """

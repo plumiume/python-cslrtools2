@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyright: reportUnknownVariableType=false
+
 """MediaPipe constants for landmarks and connections.
 
 This module provides centralized access to MediaPipe's official landmark and
@@ -165,9 +167,45 @@ from mediapipe.python.solutions.pose import (
 )
 
 # Hand landmarks (21 landmarks)
+<<<<<<< HEAD
 from mediapipe.python.solutions.hands import (
+=======
+from mediapipe.python.solutions.hands import (  # pyright: ignore[reportMissingTypeStubs] # noqa: E501
+>>>>>>> origin/dev-ai/work-main-ai-251121
     HandLandmark as _HandLandmark,
 )
+
+
+# ============================================================================
+# Connection Sets
+# ============================================================================
+
+# Pose connections (33 landmarks, 35 connections)
+from mediapipe.python.solutions.pose import (  # pyright: ignore[reportMissingTypeStubs] # noqa: E501
+    POSE_CONNECTIONS as _POSE_CONNECTIONS,
+)
+
+# Hand connections (21 landmarks, 21 connections)
+from mediapipe.python.solutions.hands import (  # pyright: ignore[reportMissingTypeStubs] # noqa: E501
+    HAND_CONNECTIONS as _HAND_CONNECTIONS,
+)
+
+# Face mesh connections (468 landmarks without irises, 478 with irises)
+from mediapipe.python.solutions.face_mesh import (  # pyright: ignore[reportMissingTypeStubs] # noqa: E501
+    FACEMESH_TESSELATION as _FACEMESH_TESSELATION,
+    FACEMESH_CONTOURS as _FACEMESH_CONTOURS,
+    FACEMESH_IRISES as _FACEMESH_IRISES,
+    FACEMESH_FACE_OVAL as _FACEMESH_FACE_OVAL,
+    FACEMESH_LEFT_EYE as _FACEMESH_LEFT_EYE,
+    FACEMESH_RIGHT_EYE as _FACEMESH_RIGHT_EYE,
+    FACEMESH_LEFT_EYEBROW as _FACEMESH_LEFT_EYEBROW,
+    FACEMESH_RIGHT_EYEBROW as _FACEMESH_RIGHT_EYEBROW,
+    FACEMESH_LEFT_IRIS as _FACEMESH_LEFT_IRIS,
+    FACEMESH_RIGHT_IRIS as _FACEMESH_RIGHT_IRIS,
+    FACEMESH_LIPS as _FACEMESH_LIPS,
+    FACEMESH_NOSE as _FACEMESH_NOSE,
+)
+
 
 # Re-export landmark enums with proper types
 PoseLandmark = _PoseLandmark
@@ -208,6 +246,7 @@ Complete list of hand landmarks:
 """
 
 
+<<<<<<< HEAD
 # ============================================================================
 # Connection Sets
 # ============================================================================
@@ -239,6 +278,8 @@ from mediapipe.python.solutions.face_mesh import (  # noqa: E402
 )
 
 
+=======
+>>>>>>> origin/dev-ai/work-main-ai-251121
 # Type alias for connection sets
 ConnectionSet = frozenset[tuple[int, int]]
 """Type alias for skeleton connection sets.

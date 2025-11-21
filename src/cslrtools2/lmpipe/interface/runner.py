@@ -70,6 +70,9 @@ if TYPE_CHECKING:
     from . import LMPipeInterface
 
 
+__all__ = ["LMPipeRunner", "_runner_public_api"]
+
+
 def _runner_public_api[S: LMPipeRunner[Any], **P, R](
     func: Callable[Concatenate[S, P], R]
 ) -> Callable[Concatenate[S, P], R | None]:
@@ -301,7 +304,9 @@ class LMPipeRunner[K: str]:
                     ftr.result()  # Propagate exceptions
                     lmpipe_logger.debug(f"Batch task completed successfully: {ftr}")
                 except Exception as e:
+                    import traceback
                     lmpipe_logger.error(f"Batch task failed: {ftr} with exception: {e}")
+                    lmpipe_logger.error(f"Traceback:\n{traceback.format_exc()}")
                     pass  # Handled in on_failure_batch_task
                     pass  # Handled in on_failure_batch_task
 
@@ -693,7 +698,9 @@ class LMPipeRunner[K: str]:
             collector.collect_results(runspec, results)
         lmpipe_logger.debug("Result collection completed")
 
-    ###### Events ######
+    # ============================================================
+    # Event Handlers
+    # ============================================================
 
     def on_start_batch_job(self, runspec: RunSpec[Path]):
         """Event handler called when a batch job starts.
@@ -893,7 +900,9 @@ class LMPipeRunner[K: str]:
         """Event handler called in the finally block after processing."""
         ...
 
-    ###### Executor Configuration ######
+    # ============================================================
+    # Executor Configuration
+    # ============================================================
 
     @contextmanager
     def _events_ctxmgr[*Ts](
@@ -1191,6 +1200,10 @@ class LMPipeRunner[K: str]:
             # Re-raise KeyboardInterrupt in the main process
             os.kill(self._main_pid, signal.SIGINT)
 
+    # ============================================================
+    # Batch Processing Configuration
+    # ============================================================
+
     def _get_runspecs(self, runspec: RunSpec[Path]) -> Iterable[RunSpec[Path]]:
         """Generate run specifications for batch processing.
 
@@ -1316,6 +1329,3 @@ class LMPipeRunner[K: str]:
                 f"Skipping existing file per collector rules: {runspec.src}"
             )
         return result
-
-
-__all__ = ["LMPipeRunner", "_runner_public_api"]

@@ -12,6 +12,98 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Estimator framework with automatic type normalization decorators.
+
+This module provides the :class:`Estimator` base class and decorators that
+automatically normalize return types to :class:`Mapping` format, enabling
+uniform handling of both single-key and multi-key estimators.
+
+Decorator Type Normalization
+-----------------------------
+
+The :func:`@shape <shape>`, :func:`@headers <headers>`, and :func:`@estimate <estimate>`
+decorators automatically convert return types to :class:`Mapping` format:
+
+**@shape decorator**:
+    - Input: ``Mapping[K, tuple[int, int]] | tuple[int, int]``
+    - Output: **Always** ``Mapping[K, tuple[int, int]]``
+    - Single value ``(V, C)`` → ``{key: (V, C)}``
+
+**@headers decorator**:
+    - Input: ``Mapping[K, NDArrayStr] | NDArrayStr``
+    - Output: **Always** ``Mapping[K, NDArrayStr]``
+    - Single array → ``{key: array}``
+
+**@estimate decorator**:
+    - Input: ``Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None``
+    - Output: **Always** ``Mapping[K, NDArrayFloat]``
+    - Single value → ``{key: value}``
+    - ``None`` values → replaced with ``configure_missing_array(key)``
+
+This means that even if an estimator's implementation returns a single value,
+the decorated property/method will always return a :class:`Mapping`, allowing
+code to uniformly access results via ``.keys()``, ``.values()``, and ``.items()``.
+
+Single-Key Estimator Example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    class PoseEstimator(Estimator["mediapipe.pose"]):
+        @property
+        @shape
+        def shape(self) -> tuple[int, int]:
+            return (33, 4)  # Returns tuple
+
+        # After decoration, shape property returns:
+        # {"mediapipe.pose": (33, 4)}  # Mapping!
+
+Multi-Key Estimator Example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    class HolisticEstimator(
+        Estimator[Literal["pose", "left_hand", "right_hand", "face"]]
+    ):
+        @property
+        @shape
+        def shape(self) -> Mapping[str, tuple[int, int]]:
+            return {
+                "pose": (33, 4),
+                "left_hand": (21, 4),
+                "right_hand": (21, 4),
+                "face": (468, 4),
+            }
+
+        # After decoration, shape property returns the same Mapping
+        # No conversion needed, but type is guaranteed
+
+Key Benefits
+~~~~~~~~~~~~
+
+1. **Uniform Access**: All estimators expose :class:`Mapping` interface
+2. **Simplified Logic**: Framework code can use ``.keys()`` without type checking
+3. **Automatic ``None`` Handling**: Missing landmarks replaced with configured arrays
+4. **Type Safety**: Decorators ensure consistent return types
+
+Implementation Notes
+~~~~~~~~~~~~~~~~~~~~
+
+When implementing estimators:
+    - Return natural types (single values or Mappings) from implementations
+    - Decorators handle normalization automatically
+    - Access ``self.shape[key]``, ``self.headers[key]`` safely in all methods
+    - ``configure_missing_array(key)`` works correctly for both single and multi-key
+
+See Also
+--------
+:class:`Estimator` : Base class for landmark estimators
+:func:`shape` : Shape decorator with type normalization
+:func:`headers` : Headers decorator with type normalization
+:func:`estimate` : Estimate decorator with type normalization and None handling
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -67,7 +159,9 @@ class ProcessResult[K: str]:
     annotated_frame: MatLike
 
 
-############################# Estimator Decorators #############################
+# ============================================================
+# Estimator Base Class
+# ============================================================
 
 type EstimatorWithKey = Estimator[Any]
 
@@ -116,17 +210,48 @@ def _get_key_from_options_or_estimator[K: str](
     options: KeyOptions[K] | None,
 ) -> K:
     key_from_options: K | None = None if options is None else options.get("key")
-    key_from_estimator: K = estimater.configure_estimator_name()
+
+    try:
+        key_from_estimator: K = estimater.configure_estimator_name()
+    except (TypeError, ValueError, AttributeError) as e:
+        # Runtime error detecting implementation mistakes in subclasses
+        estimator_class = estimater.__class__.__name__
+        raise TypeError(
+            f"Error calling configure_estimator_name() on "
+            f"{estimator_class}: {e}\n\n"
+            f"IMPLEMENTATION CHECK REQUIRED:\n"
+            f"  1. Verify {estimator_class}.configure_estimator_name() "
+            f"returns a SINGLE key value\n"
+            f"  2. Do NOT return tuple, list, or collection - "
+            f"only one key of type K\n"
+            f"  3. For multi-key estimators, return a representative "
+            f"primary name\n"
+            f"  4. Check the method signature matches: "
+            f"def configure_estimator_name(self) -> K\n\n"
+            f"Common mistakes:\n"
+            f"  ❌ return (Key.A, Key.B)  # Wrong: tuple of keys\n"
+            f"  ❌ return [Key.A, Key.B]  # Wrong: list of keys\n"
+            f"  ✅ return Key.PRIMARY     # Correct: single key value\n\n"
+            f"See {estimator_class}.configure_estimator_name() implementation."
+        ) from e
+
     return key_from_options or key_from_estimator
 
 
-### shape decorator ###
+# ============================================================
+# shape decorator
+# ============================================================
 
 # Decorator Information
 # External Function
-# (E) -> Mapping[K, NDArrayStr]
+# (E) -> Mapping[K, tuple[int, int]]  # ALWAYS returns Mapping
 # Internal Function
-# (E) -> Mapping[K, ArrayLikeStr] | ArrayLikeStr | None
+# (E) -> Mapping[K, tuple[int, int]] | tuple[int, int]  # Can return either
+#
+# TYPE NORMALIZATION:
+# - If internal returns tuple[int, int] → wrapped as {key: tuple}
+# - If internal returns Mapping → returned as-is
+# - Result is ALWAYS Mapping, so .keys() is always available
 
 # override1: with key options
 # override2: without key options
@@ -227,14 +352,22 @@ def shape[E: EstimatorWithKey, K: str](
     return wrapper
 
 
-### headers decorator ###
+# ============================================================
+# headers decorator
+# ============================================================
 
 # Decorator Information
 
 # External Function
-# (E) -> Mapping[K, NDArrayStr]
+# (E) -> Mapping[K, NDArrayStr]  # ALWAYS returns Mapping
 # Internal Function
-# (E) -> Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None
+# (E) -> Mapping[K, ArrayLikeStr | None] | ArrayLikeStr | None  # Can return either
+#
+# TYPE NORMALIZATION:
+# - If internal returns ArrayLikeStr → wrapped as {key: np.array(value)}
+# - If internal returns Mapping → each value converted to NDArrayStr
+# - None values → replaced with empty array
+# - Result is ALWAYS Mapping, so .keys() is always available
 
 # override1: with key options
 # override2: without key options
@@ -350,14 +483,28 @@ def headers[E: EstimatorWithKey, K: str](
     return wrapper
 
 
-### estimate decorator ###
+# ============================================================
+# estimate decorator
+# ============================================================
 
 # Decorator Information
 
 # External Function
-# (E, MatLike | None, int) -> Mapping[K, NDArrayFloat]
+# (E, MatLike | None, int) -> Mapping[K, NDArrayFloat]  # ALWAYS returns Mapping
 # Internal Function
 # (E, MatLike, int) -> Mapping[K, ArrayLikeFloat | None] | ArrayLikeFloat | None
+#
+# TYPE NORMALIZATION AND NONE HANDLING:
+# - If internal returns ArrayLikeFloat → wrapped as {key: np.array(value)}
+# - If internal returns Mapping → each value processed individually:
+#   * None values → replaced with configure_missing_array(key)
+#   * Non-None values → converted to NDArrayFloat
+# - If frame_src is None → returns missing arrays for all keys in shape
+# - Result is ALWAYS Mapping with NO None values
+#
+# CRITICAL: configure_missing_array(key) is called with individual keys,
+# so it works correctly for both single-key and multi-key estimators.
+# For multi-key: self.shape[key] returns the specific shape for that key.
 
 # override1: with key options
 # override2: without key options
@@ -492,7 +639,9 @@ def estimate[E: EstimatorWithKey, K: str](
     return wrapper
 
 
-### annotate decorator ###
+# ============================================================
+# annotate decorator
+# ============================================================
 
 # Decorator Information
 
@@ -601,8 +750,9 @@ def annotate[E: EstimatorWithKey, K: str](
     return wrapper
 
 
-########################## Estimator Class Definition ##########################
-
+# ============================================================
+# Estimator Base Class
+# ============================================================
 
 class Estimator[K: str](ABC):
     """Abstract base class for landmark estimation models.
@@ -627,7 +777,9 @@ class Estimator[K: str](ABC):
     missing_value: float = np.nan
     "Default missing value used in missing arrays."
 
-    ### Core (Abstract) Methods ###
+    # ===========================================================
+    # Core (Abstract) Methods
+    # ===========================================================
 
     @property
     @abstractmethod
@@ -683,7 +835,9 @@ class Estimator[K: str](ABC):
               key :obj:`K` to its corresponding :class:`ArrayLikeFloat`.
         """
 
-    ### Core (Non-Abstract) Methods ###
+    # ===========================================================
+    # Core (Non-Abstract) Methods
+    # ===========================================================
 
     @property
     @headers
@@ -732,7 +886,9 @@ class Estimator[K: str](ABC):
 
         return None
 
-    ### Configuration Methods ###
+    # ===========================================================
+    # Configuration Methods
+    # ===========================================================
 
     lmpipe_options: LMPipeOptions = DEFAULT_LMPIPE_OPTIONS
 
@@ -751,13 +907,61 @@ class Estimator[K: str](ABC):
         # because the key K is not determined at Estimator definition time.
         """Configures and returns the estimator name used as key K.
 
+        CRITICAL: This method ALWAYS returns a SINGLE key value, never a collection.
+
+        For single-key estimators (where @estimate returns a single value),
+        this name identifies that one output.
+
+        For multi-key estimators (where @estimate returns Mapping[K, ...]),
+        this name serves as the estimator's identifier or primary name, but
+        does NOT represent all output keys. The actual output keys come from
+        the Mapping returned by @estimate.
+
+        Common Mistake:
+            # WRONG: Trying to return multiple keys
+            def configure_estimator_name(self) -> MyEnum:
+                return (MyEnum.POSE, MyEnum.HAND)  # ❌ Type error!
+
+            # CORRECT: Return a single representative key
+            def configure_estimator_name(self) -> MyEnum:
+                return MyEnum.HOLISTIC  # ✅ Single identifier
+
+        Example - Single Key Estimator:
+            class PoseEstimator(Estimator[PoseKey]):
+                def configure_estimator_name(self) -> PoseKey:
+                    return PoseKey.POSE  # Only one output
+
+                @estimate
+                def estimate_landmark(self, frame):
+                    # Returns single array, auto-wrapped to {PoseKey.POSE: array}
+                    return pose_array
+
+        Example - Multi-Key Estimator:
+            class HolisticEstimator(Estimator[HolisticKey]):
+                def configure_estimator_name(self) -> HolisticKey:
+                    # Return primary identifier, not all keys
+                    return HolisticKey.HOLISTIC
+
+                @estimate
+                def estimate_landmark(self, frame):
+                    # Returns multiple keys explicitly
+                    return {
+                        HolisticKey.POSE: pose_array,
+                        HolisticKey.LEFT_HAND: left_hand_array,
+                        HolisticKey.RIGHT_HAND: right_hand_array,
+                    }
+
         Returns:
             key (`K@Estimator`):
-                The key used to identify the estimator.
+                A single key value identifying this estimator. For multi-key
+                estimators, this is typically the estimator's primary name
+                or category, not the collection of all output keys.
 
         Override Guidelines:
-            - This method must be overridden in subclasses to provide the
-              appropriate key K.
+            - MUST be overridden in subclasses to provide the appropriate key K.
+            - MUST return exactly one key value (type K), never a tuple or list.
+            - For multi-key estimators, choose a representative primary name.
+            - The return type matches the K type parameter of Estimator[K].
         """
         ...
 

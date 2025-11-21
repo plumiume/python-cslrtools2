@@ -42,5 +42,5 @@ docker-compose.override.yaml
 *.mp4
 
 # Temporary documentation
-github-issue-*.md
+# github-issue-*.md
 src/cslrtools2/_version.py

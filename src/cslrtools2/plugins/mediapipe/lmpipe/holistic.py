@@ -23,15 +23,26 @@ from itertools import product
 import numpy as np
 import cv2
 
+<<<<<<< HEAD
 from mediapipe.python.solutions.holistic import (
+=======
+from mediapipe.python.solutions.holistic import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
+>>>>>>> origin/dev-ai/work-main-ai-251121
     Holistic,
     PoseLandmark,
     HandLandmark,
 )
+<<<<<<< HEAD
 from mediapipe.tasks.python.vision.core.vision_task_running_mode import (
     VisionTaskRunningMode,
 )
 from mediapipe.tasks.python.components.containers.landmark import (
+=======
+from mediapipe.tasks.python.vision.core.vision_task_running_mode import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
+    VisionTaskRunningMode,
+)
+from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
+>>>>>>> origin/dev-ai/work-main-ai-251121
     Landmark,
     NormalizedLandmark,
 )
@@ -45,7 +56,7 @@ from .holistic_args import MediaPipeHolisticKey, MediaPipeHolisticArgs
 
 
 class Landmarks[L: Landmark | NormalizedLandmark]:
-    landmarks: list[L]
+    landmark: list[L]  # MediaPipe uses 'landmark', not 'landmarks'
 
 
 class DetectionResults(NamedTuple):
@@ -99,13 +110,13 @@ class MediaPipeHolisticEstimator(MediaPipeEstimator[MediaPipeHolisticKey]):
     @property
     @shape
     @cache
-    def shape(self) -> tuple[int, int]:
-        num_landmarks = (
-            len(PoseLandmark)  # pose landmarks
-            + 2 * len(HandLandmark)  # left and right hand landmarks
-            + FACE_LANDMARKS_NUM  # face landmarks
-        )
-        return (num_landmarks, self.channels)
+    def shape(self) -> Mapping[MediaPipeHolisticKey, tuple[int, int]]:
+        return {
+            "mediapipe.pose": (len(PoseLandmark), self.channels),
+            "mediapipe.left_hand": (len(HandLandmark), self.channels),
+            "mediapipe.right_hand": (len(HandLandmark), self.channels),
+            "mediapipe.face": (FACE_LANDMARKS_NUM, self.channels),
+        }
 
     @property
     @headers
@@ -159,7 +170,7 @@ class MediaPipeHolisticEstimator(MediaPipeEstimator[MediaPipeHolisticKey]):
                 else np.array(
                     [
                         self._get_array_from_landmarks(lm)
-                        for lm in detection_results.pose_landmarks.landmarks
+                        for lm in detection_results.pose_landmarks.landmark
                     ]
                 )
             ),
@@ -169,7 +180,7 @@ class MediaPipeHolisticEstimator(MediaPipeEstimator[MediaPipeHolisticKey]):
                 else np.array(
                     [
                         self._get_array_from_landmarks(lm)
-                        for lm in detection_results.left_hand_landmarks.landmarks
+                        for lm in detection_results.left_hand_landmarks.landmark
                     ]
                 )
             ),
@@ -179,7 +190,7 @@ class MediaPipeHolisticEstimator(MediaPipeEstimator[MediaPipeHolisticKey]):
                 else np.array(
                     [
                         self._get_array_from_landmarks(lm)
-                        for lm in detection_results.right_hand_landmarks.landmarks
+                        for lm in detection_results.right_hand_landmarks.landmark
                     ]
                 )
             ),
@@ -189,7 +200,7 @@ class MediaPipeHolisticEstimator(MediaPipeEstimator[MediaPipeHolisticKey]):
                 else np.array(
                     [
                         self._get_array_from_landmarks(lm)
-                        for lm in detection_results.face_landmarks.landmarks
+                        for lm in detection_results.face_landmarks.landmark
                     ]
                 )
             ),
