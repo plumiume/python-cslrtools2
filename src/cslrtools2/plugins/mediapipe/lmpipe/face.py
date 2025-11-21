@@ -21,16 +21,16 @@ from itertools import product
 
 import numpy as np
 
-from mediapipe.tasks.python.core.base_options import (
+from mediapipe.tasks.python.core.base_options import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     BaseOptions,
-)  # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.vision.face_landmarker import (
+)
+from mediapipe.tasks.python.vision.face_landmarker import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     FaceLandmarker,
     FaceLandmarkerOptions,
-)  # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.components.containers.landmark import (
+)
+from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     NormalizedLandmark,
-)  # pyright: ignore[reportMissingTypeStubs]
+)
 from mediapipe import Image, ImageFormat
 
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
@@ -102,11 +102,9 @@ class MediaPipeFaceEstimator(
             image_format=ImageFormat.SRGB, data=np.ascontiguousarray(frame_src)
         )
 
-        # pyright: ignore[reportUnknownMemberType]
-        detection_result = self.landmarker.detect(mp_image)
-        landmarks: list[list[NormalizedLandmark]] = (
+        detection_result = self.landmarker.detect(mp_image)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
+        landmarks: list[list[NormalizedLandmark]] = (  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa: E501
             detection_result.face_landmarks
-            # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         )
 
         self._disable_suppress_stderr()

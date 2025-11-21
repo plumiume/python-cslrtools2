@@ -21,19 +21,19 @@ from itertools import product
 
 import numpy as np
 
-from mediapipe.tasks.python.core.base_options import (
+from mediapipe.tasks.python.core.base_options import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     BaseOptions,
-)  # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.vision.hand_landmarker import (
+)
+from mediapipe.tasks.python.vision.hand_landmarker import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     HandLandmarker,
     HandLandmarkerOptions,
-)  # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.components.containers.category import (
+)
+from mediapipe.tasks.python.components.containers.category import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     Category,
-)  # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.components.containers.landmark import (
+)
+from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     NormalizedLandmark,
-)  # pyright: ignore[reportMissingTypeStubs]
+)
 from mediapipe import Image, ImageFormat
 
 from ....typings import MatLike, NDArrayFloat, NDArrayStr
@@ -144,16 +144,14 @@ class MediaPipeHandEstimator(
     ) -> NDArrayFloat | None | Mapping[MediaPipeHandKey, NDArrayFloat | None]:
         mp_image = Image(image_format=ImageFormat.SRGB, data=frame_src)
 
-        detection_result = self.landmarker.detect(
+        detection_result = self.landmarker.detect(  # pyright: ignore[reportUnknownMemberType] # noqa: E501
             mp_image
-        )  # pyright: ignore[reportUnknownMemberType]
-        handedness: list[list[Category]] = (
-            detection_result.handedness
-            # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         )
-        landmarks: list[list[NormalizedLandmark]] = (
+        handedness: list[list[Category]] = (  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa: E501
+            detection_result.handedness
+        )
+        landmarks: list[list[NormalizedLandmark]] = (  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa: E501
             detection_result.hand_landmarks
-            # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         )
 
         self._disable_suppress_stderr()

@@ -23,16 +23,16 @@ from itertools import product
 import numpy as np
 import cv2
 
-from mediapipe.tasks.python.core.base_options import (
+from mediapipe.tasks.python.core.base_options import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     BaseOptions,
-)  # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.vision.pose_landmarker import (
+)
+from mediapipe.tasks.python.vision.pose_landmarker import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     PoseLandmarker,
     PoseLandmarkerOptions,
-)  # pyright: ignore[reportMissingTypeStubs]
-from mediapipe.tasks.python.components.containers.landmark import (
+)
+from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     NormalizedLandmark,
-)  # pyright: ignore[reportMissingTypeStubs]
+)
 from mediapipe import Image, ImageFormat
 
 
@@ -446,11 +446,9 @@ class MediaPipePoseEstimator(
             image_format=ImageFormat.SRGB, data=np.ascontiguousarray(frame_src)
         )
 
-        # pyright: ignore[reportUnknownMemberType]
-        detection_result = self.landmarker.detect(mp_image)
-        landmarks: list[list[NormalizedLandmark]] = (
+        detection_result = self.landmarker.detect(mp_image)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
+        landmarks: list[list[NormalizedLandmark]] = (  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa: E501
             detection_result.pose_landmarks
-            # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         )
 
         self._disable_suppress_stderr()

@@ -1,4 +1,18 @@
 #!/usr/bin/env python
+# Copyright 2025 cslrtools2 contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """PyTorch CUDA環境検証スクリプト
 
 使い方:
@@ -77,8 +91,9 @@ def test_pytorch_cuda():
             for i in range(torch.cuda.device_count()):
                 device_name = torch.cuda.get_device_name(i)
                 device_props = cast(
-                    CudaDeviceProperties, torch.cuda.get_device_properties(i)
-                )  # pyright: ignore[reportUnknownMemberType]
+                    CudaDeviceProperties,
+                    torch.cuda.get_device_properties(i)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
+                )
                 print(f"  Device {i}: {device_name}")
                 print(f"    Total Memory: {device_props.total_memory / 1024**3:.2f} GB")
                 print(
@@ -125,16 +140,14 @@ def test_mediapipe():
     """MediaPipeの動作確認（オプション）"""
     try:
         import mediapipe  # pyright: ignore[reportMissingTypeStubs]
-        # pyright: ignore[reportMissingTypeStubs]
-        import mediapipe.python.solutions.pose as mp_pose
+        import mediapipe.python.solutions.pose as mp_pose  # pyright: ignore[reportMissingTypeStubs] # noqa: E501
 
         print("\n" + "=" * 70)
         print("MediaPipe環境情報")
         print("=" * 70)
         print(
             "MediaPipe Version: "
-            # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
-            f"{mediapipe.__version__}"
+            f"{mediapipe.__version__}"  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue] # noqa: E501
         )
 
         # 簡単な初期化テスト
