@@ -35,9 +35,9 @@ from .helpers import verify_npz_structure, get_video_info
 @pytest.mark.integration
 @pytest.mark.requires_video
 @pytest.mark.slow
-@pytest.mark.skip(
-    reason="MediaPipe Holistic API compatibility issue - AttributeError: landmarks"
-)
+# @pytest.mark.skip(
+#     reason="MediaPipe Holistic API compatibility issue - AttributeError: landmarks"
+# )
 class TestLMPipeE2EBasic:
     """Test basic end-to-end LMPipe processing.
 
@@ -100,48 +100,49 @@ class TestLMPipeE2EBasic:
 
         # 2. Verify NPZ structure has expected keys
         expected_keys = [
-            "pose",
-            "pose_world",
-            "left_hand",
-            "right_hand",
-            "face",
+            "mediapipe.pose",
+            "mediapipe.left_hand",
+            "mediapipe.right_hand",
+            "mediapipe.face",
         ]
         verify_npz_structure(npz_file, expected_keys)
 
         # 3. Verify landmark data shape
         data = np.load(npz_file)
 
-        # Check pose landmarks (33 points, 3 coords)
-        pose = data["pose"]
+        # Check pose landmarks
+        # (33 points, 4 coords: x, y, z, visibility*presence)
+        pose = data["mediapipe.pose"]
         assert pose.ndim == 3, f"Expected 3D array, got {pose.ndim}D"
         frames, points, coords = pose.shape
         assert (
             frames == expected_frame_count
         ), f"Frame count mismatch: expected {expected_frame_count}, got {frames}"
         assert points == 33, f"Expected 33 pose points, got {points}"
-        assert coords == 3, f"Expected 3 coordinates, got {coords}"
+        assert coords == 4, f"Expected 4 coordinates, got {coords}"
 
-        # Check hand landmarks (21 points, 3 coords)
-        left_hand = data["left_hand"]
+        # Check hand landmarks
+        # (21 points, 4 coords: x, y, z, visibility * confidence)
+        left_hand = data["mediapipe.left_hand"]
         assert left_hand.shape == (
             expected_frame_count,
             21,
-            3,
+            4,
         ), f"Left hand shape mismatch: {left_hand.shape}"
 
-        right_hand = data["right_hand"]
+        right_hand = data["mediapipe.right_hand"]
         assert right_hand.shape == (
             expected_frame_count,
             21,
-            3,
+            4,
         ), f"Right hand shape mismatch: {right_hand.shape}"
 
-        # Check face landmarks (468 points, 3 coords)
-        face = data["face"]
+        # Check face landmarks (468 points, 4 coords: x, y, z, visibility * confidence)
+        face = data["mediapipe.face"]
         assert face.shape == (
             expected_frame_count,
             468,
-            3,
+            4,
         ), f"Face shape mismatch: {face.shape}"
 
         # 4. Verify data is not all zeros (actual landmarks detected)
@@ -225,7 +226,12 @@ class TestLMPipeE2EBasic:
         data: np.lib.npyio.NpzFile = np.load(npz_file)
 
         # Verify all landmark arrays have correct frame count
-        for key in ["pose", "left_hand", "right_hand", "face"]:
+        for key in [
+            "mediapipe.pose",
+            "mediapipe.left_hand",
+            "mediapipe.right_hand",
+            "mediapipe.face",
+        ]:
             assert key in data, f"Missing key: {key}"
             frames = data[key].shape[0]
             assert (

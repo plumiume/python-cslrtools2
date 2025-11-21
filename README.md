@@ -1,10 +1,12 @@
 # cslrtools2
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue.svg)](https://www.python.org/downloads/)
 [![Status](https://img.shields.io/badge/status-alpha-orange.svg)](https://github.com/yourusername/python-cslrtools2)
 
 **Comprehensive toolkit for Continuous Sign Language Recognition (CSLR) research**, providing landmark extraction pipelines, dataset management utilities, and PyTorch helpers for sign language video analysis.
+
+> **Note:** Currently supports Python 3.12 and 3.13. Python 3.14 is not supported due to dependency limitations (MediaPipe requires protobuf 4.x which has compatibility issues with Python 3.14).
 
 ---
 

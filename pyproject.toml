@@ -3,7 +3,7 @@ name = "cslrtools2"
 dynamic = ["version"]
 description = "Comprehensive toolkit for Continuous Sign Language Recognition research with landmark extraction and dataset utilities"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 license = { text = "Apache-2.0" }
 authors = [
     { name = "plumiume", email = "plumiume@gmail.com" }
