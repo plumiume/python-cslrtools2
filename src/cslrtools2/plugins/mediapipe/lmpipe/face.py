@@ -21,6 +21,7 @@ from functools import cache
 from itertools import product
 
 import numpy as np
+import cv2
 
 from mediapipe.tasks.python.core.base_options import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     BaseOptions,
@@ -39,6 +40,7 @@ from ....lmpipe.estimator import shape, headers, estimate, annotate
 from ....lmpipe.app.holistic.estimator import HolisticPartEstimator
 from .base import MediaPipeEstimator, get_mediapipe_model
 from .face_args import MediaPipeFaceKey, MediaPipeFaceArgs
+from .mp_constants import FACEMESH_FACE_OVAL
 
 
 MEDIA_PIPE_FACE_KEY = "mediapipe.face"
@@ -127,5 +129,39 @@ class MediaPipeFaceEstimator(
         frame_idx: int,
         landmarks: Mapping[MediaPipeFaceKey, NDArrayFloat],
     ) -> MatLike:
-        # TODO: Implement face annotation
+
+        face_landmarks = landmarks.get(MEDIA_PIPE_FACE_KEY, None)
+
+        if face_landmarks is None:
+            return frame_src
+
+        for point in range(FACE_LANDMARKS_NUM):
+
+            x_px = int(face_landmarks[point][0] * frame_src.shape[1])
+            y_px = int(face_landmarks[point][1] * frame_src.shape[0])
+
+            cv2.drawMarker(
+                frame_src,
+                (x_px, y_px),
+                color=(0, 255, 0),  # TODO: pointごとに色を変える
+                # TODO: markerType= pointごとに形を変える
+                # TODO: markerSize= pointごとに大きさを変える
+            )
+
+        for start, stop in FACEMESH_FACE_OVAL:
+
+            start_x_px = int(face_landmarks[start][0] * frame_src.shape[1])
+            start_y_px = int(face_landmarks[start][1] * frame_src.shape[0])
+
+            stop_x_px = int(face_landmarks[stop][0] * frame_src.shape[1])
+            stop_y_px = int(face_landmarks[stop][1] * frame_src.shape[0])
+
+            cv2.line(
+                frame_src,
+                (start_x_px, start_y_px),
+                (stop_x_px, stop_y_px),
+                (0, 255, 0),  # TODO: connectionごとに色を変える
+                # TODO: thickness= connectionごとに太さを変える
+            )
+
         return frame_src
