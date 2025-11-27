@@ -2,7 +2,30 @@
 
 このディレクトリには、複数のコンポーネントを組み合わせた統合テストを配置します。
 
-## 実装済みテスト (53 tests)
+## ⚠️ 実行上の注意
+
+### Transform Tests のメモリ問題
+
+`test_transform_dynamic.py` は torchvision を使用するため、並列実行でメモリ不足エラーが発生する場合があります:
+
+```powershell
+# ❌ 並列実行 (メモリ不足の可能性)
+uv run pytest tests/integration/test_transform_dynamic.py -n auto
+
+# ✅ 推奨: 並列数を制限
+uv run pytest tests/integration/test_transform_dynamic.py -n 2
+
+# ✅ または: 並列実行を無効化
+uv run pytest tests/integration/test_transform_dynamic.py
+```
+
+**エラー例**:
+- `OSError: [WinError 1455] ページング ファイルが小さすぎる`
+- `ERROR gw* - Different tests were collected between workers`
+
+**原因**: 各ワーカープロセスが独立に torchvision をインポートし、メモリを大量消費
+
+## 実装済みテスト (79 tests)
 
 ### ✅ 1. エンドツーエンド基本フロー (`test_lmpipe_e2e_basic.py`)
 **3 tests** - LMPipeの基本的なE2Eワークフローを検証
@@ -123,6 +146,47 @@
 
 **注意**: CLI tests中、一部のテスト（`test_cli_no_arguments`等）が無限待機する問題が確認されています。
 
+### ✅ 7. Transform Dynamic (`test_transform_dynamic.py`)
+**26 tests** - Data Augmentation Transformsの統合テストを検証
+
+**UniformSpeedChange** (14 tests):
+- `test_uniform_speed_change_reduces_frame_count_when_scale_greater_than_one` - スピードアップ（フレーム削減）
+- `test_uniform_speed_change_increases_frame_count_when_scale_less_than_one` - スローダウン（フレーム増加）
+- `test_uniform_speed_change_preserves_spatial_dimensions` - 空間次元の保持
+- `test_uniform_speed_change_applies_to_multiple_video_keys` - 複数ビデオキー対応
+- `test_uniform_speed_change_applies_to_multiple_landmark_keys` - 複数ランドマークキー対応
+- Parameter validation tests (3 tests) - 負の値、ゼロ、min > max
+- Reproducibility tests (2 tests) - 同一seed、異なるseed
+- `test_uniform_speed_change_handles_single_frame_video` - 単一フレーム処理
+- `test_uniform_speed_change_with_scale_exactly_one` - scale=1.0（変更なし）
+- `test_uniform_speed_change_works_with_various_spatial_sizes` - 様々な解像度対応
+
+**RandomResizePaddingCrop** (10 tests):
+- `test_random_resize_padding_crop_preserves_tensor_shape` - テンソル形状不変性
+- `test_random_resize_padding_crop_scale_greater_than_one_crops` - Zoom in（クロップ）
+- `test_random_resize_padding_crop_scale_less_than_one_pads` - Zoom out（パディング）
+- `test_random_resize_padding_crop_transforms_landmark_coordinates` - 座標変換
+- `test_random_resize_padding_crop_preserves_landmark_other_dimensions` - 他次元の保持
+- Parameter validation tests (2 tests) - 負の値、min > max
+- `test_random_resize_padding_crop_is_reproducible_with_same_generator` - 再現性
+- `test_random_resize_padding_crop_affine_handles_5d_tensors` - 5Dテンソル対応
+- `test_random_resize_padding_crop_center_invariant_transformation` - 中心不変性
+- `test_random_resize_padding_crop_works_with_various_coordinate_dimensions` - 可変次元対応
+
+**Error Handling** (2 tests):
+- `test_transform_raises_key_error_for_missing_video_key` - 存在しないビデオキー
+- `test_transform_raises_key_error_for_missing_landmark_key` - 存在しないランドマークキー
+
+**検証内容**:
+- 時間軸/空間軸のデータ拡張動作
+- パラメータバリデーション
+- 再現性の確保
+- エッジケース処理
+
+**カバレッジ**: `transform/dynamic.py` - **100%** (67 statements)
+
+**⚠️ メモリ注意**: torchvision使用により並列実行でメモリ不足の可能性あり。`-n 2`推奨。
+
 ## インフラストラクチャ
 
 ### Fixtures (`conftest.py`)
@@ -165,6 +229,9 @@ uv run pytest tests/integration/ -v
 
 # 特定のテストファイルのみ
 uv run pytest tests/integration/test_lmpipe_e2e_basic.py -v
+
+# Transform tests (メモリ節約のため並列数制限推奨)
+uv run pytest tests/integration/test_transform_dynamic.py -n 2
 
 # すべてのテスト実行
 uv run pytest tests/ -v

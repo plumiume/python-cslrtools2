@@ -30,14 +30,6 @@ from ..dataset.core import SLDatasetItem, TensorSLDatasetItem
 from .core import Transform
 
 
-def return_true() -> bool:
-    return True
-
-
-if return_true():
-    raise NotImplementedError("This module is under construction.")
-
-
 ### see DATA_AUGMENTATION.md
 ### ランドマーク用を優先して実装
 ### video: [N, T, C, H, W]
@@ -191,7 +183,7 @@ class RandomResizePaddingCrop[
             # - Transform is center-invariant by default
             # See: torchvision/transforms/v2/functional/_geometry.py::affine()
             vvid = transforms_v2.functional.affine(
-                inpt=vvid,
+                vvid,
                 angle=0.0,
                 translate=[0.0, 0.0],
                 scale=scale,

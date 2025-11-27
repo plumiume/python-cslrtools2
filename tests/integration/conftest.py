@@ -21,6 +21,26 @@ from pathlib import Path
 import pytest
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    """Configure pytest for integration tests.
+
+    Limits parallel execution for transform tests to avoid:
+    - OSError: Paging file too small (torchvision memory usage)
+    - Test collection mismatches between workers
+    """
+    # Check if running transform tests
+    test_paths = config.args if config.args else []
+    is_transform_test = any(
+        "test_transform_dynamic" in str(p) for p in test_paths
+    )
+
+    if is_transform_test and hasattr(config.option, "numprocesses"):
+        numprocs = config.option.numprocesses
+        # Limit to 2 workers for transform tests (reduce memory pressure)
+        if numprocs is not None and (numprocs == "auto" or numprocs > 2):
+            config.option.numprocesses = 2
+
+
 @pytest.fixture(scope="session")
 def test_videos_dir() -> Path:
     """Return path to test videos directory.
