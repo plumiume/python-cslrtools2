@@ -391,69 +391,80 @@ def calculate_all_samples_metrics(zarr_path: Path) -> None:
         }
 
         print("Calculating NaN rates for all samples...\n")
+        failed_count = 0
         for i in range(num_items):
             if i % 1000 == 0:
                 print(f"  Processing sample {i}/{num_items}...")
 
-            landmarks_dict = load_all_landmarks_from_zarr(
-                zarr_path, item_index=i
-            )
-            if not landmarks_dict:
-                continue
+            try:
+                landmarks_dict = load_all_landmarks_from_zarr(
+                    zarr_path, item_index=i
+                )
+                if not landmarks_dict:
+                    continue
 
-            # Categorize parts
-            part_categories: dict[str, list[str]] = {
-                "Pose": [],
-                "L-Hand": [],
-                "R-Hand": [],
-            }
+                # Categorize parts
+                part_categories: dict[str, list[str]] = {
+                    "Pose": [],
+                    "L-Hand": [],
+                    "R-Hand": [],
+                }
 
-            for key in landmarks_dict.keys():
-                key_lower = key.lower()
-                if "pose" in key_lower:
-                    part_categories["Pose"].append(key)
-                elif "left" in key_lower or "l_hand" in key_lower:
-                    part_categories["L-Hand"].append(key)
-                elif "right" in key_lower or "r_hand" in key_lower:
-                    part_categories["R-Hand"].append(key)
+                for key in landmarks_dict.keys():
+                    key_lower = key.lower()
+                    if "pose" in key_lower:
+                        part_categories["Pose"].append(key)
+                    elif "left" in key_lower or "l_hand" in key_lower:
+                        part_categories["L-Hand"].append(key)
+                    elif "right" in key_lower or "r_hand" in key_lower:
+                        part_categories["R-Hand"].append(key)
 
-            # Calculate for each category
-            for category, keys in part_categories.items():
-                if keys:
-                    key = keys[0]
-                    result = metric_nan.calculate(landmarks_dict[key])
-                    all_results[category].append(
-                        result["values"]["nan_rate"]
-                    )
+                # Calculate for each category
+                for category, keys in part_categories.items():
+                    if keys:
+                        key = keys[0]
+                        result = metric_nan.calculate(landmarks_dict[key])
+                        all_results[category].append(
+                            result["values"]["nan_rate"]
+                        )
 
-            # Calculate Hands (combined)
-            if "L-Hand" in part_categories and "R-Hand" in part_categories:
-                lhand_keys = part_categories["L-Hand"]
-                rhand_keys = part_categories["R-Hand"]
-                if lhand_keys and rhand_keys:
-                    hands_combined = np.concatenate(
-                        [
-                            landmarks_dict[lhand_keys[0]],
-                            landmarks_dict[rhand_keys[0]],
-                        ],
-                        axis=1,
-                    )
-                    result_hands = metric_nan.calculate(hands_combined)
-                    all_results["Hands"].append(
-                        result_hands["values"]["nan_rate"]
-                    )
+                # Calculate Hands (combined)
+                if "L-Hand" in part_categories and "R-Hand" in part_categories:
+                    lhand_keys = part_categories["L-Hand"]
+                    rhand_keys = part_categories["R-Hand"]
+                    if lhand_keys and rhand_keys:
+                        hands_combined = np.concatenate(
+                            [
+                                landmarks_dict[lhand_keys[0]],
+                                landmarks_dict[rhand_keys[0]],
+                            ],
+                            axis=1,
+                        )
+                        result_hands = metric_nan.calculate(hands_combined)
+                        all_results["Hands"].append(
+                            result_hands["values"]["nan_rate"]
+                        )
 
-            # Calculate All (combined)
-            all_landmarks: list[np.ndarray] = []
-            for key in landmarks_dict.keys():
-                all_landmarks.append(landmarks_dict[key])
-            if all_landmarks:
-                all_combined = np.concatenate(all_landmarks, axis=1)
-                result_all = metric_nan.calculate(all_combined)
-                all_results["All"].append(result_all["values"]["nan_rate"])
+                # Calculate All (combined)
+                all_landmarks: list[np.ndarray] = []
+                for key in landmarks_dict.keys():
+                    all_landmarks.append(landmarks_dict[key])
+                if all_landmarks:
+                    all_combined = np.concatenate(all_landmarks, axis=1)
+                    result_all = metric_nan.calculate(all_combined)
+                    all_results["All"].append(result_all["values"]["nan_rate"])
+
+            except Exception as e:
+                # Skip samples with errors (e.g., all NaN frames)
+                failed_count += 1
+                if i % 1000 == 0 or failed_count <= 10:
+                    print(f"    ⚠️ Sample {i} skipped: {e}")
 
         # Display summary statistics
-        print(f"\n✓ Processed {num_items} samples\n")
+        print(
+            f"\n✓ Processed {num_items} samples "
+            f"(skipped {failed_count} with errors)\n"
+        )
         print_header("NaN Rate Statistics (All Samples)")
 
         for category, rates in all_results.items():
