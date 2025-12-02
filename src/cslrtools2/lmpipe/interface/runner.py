@@ -67,6 +67,8 @@ from ..utils import (
 )
 
 if TYPE_CHECKING:
+    # このファイルからはエクスポートされていないため、
+    # これを別のファイルからインポートしたら違反
     from . import LMPipeInterface
 
 
@@ -661,7 +663,6 @@ class LMPipeRunner[K: str]:
             This is a placeholder for future resource allocation logic.
         """
         yield  # TODO: implement resource allocation logic
-        yield  # TODO: implement resource allocation logic
 
     def _collect_results(
         self,
@@ -692,10 +693,14 @@ class LMPipeRunner[K: str]:
         lmpipe_logger.debug(
             f"Collecting results with {len(self.collectors)} collectors"
         )
+
+        # Consume the iterable to allow multiple passes
+        collected_results = list(results)
+
         for collector in self.collectors:
             collector_name = type(collector).__name__
             lmpipe_logger.debug(f"Running collector: {collector_name}")
-            collector.collect_results(runspec, results)
+            collector.collect_results(runspec, collected_results)
         lmpipe_logger.debug("Result collection completed")
 
     # ============================================================

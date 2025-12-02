@@ -21,20 +21,11 @@ from functools import cache
 from itertools import product
 
 import numpy as np
+import cv2
 
 from mediapipe.tasks.python.core.base_options import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     BaseOptions,
 )
-<<<<<<< HEAD
-from mediapipe.tasks.python.vision.hand_landmarker import (
-    HandLandmarker,
-    HandLandmarkerOptions,
-)
-from mediapipe.tasks.python.components.containers.category import (
-    Category,
-)
-from mediapipe.tasks.python.components.containers.landmark import (
-=======
 from mediapipe.tasks.python.vision.hand_landmarker import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     HandLandmarker,
     HandLandmarkerOptions,
@@ -43,7 +34,6 @@ from mediapipe.tasks.python.components.containers.category import (  # pyright: 
     Category,
 )
 from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
->>>>>>> origin/dev-ai/work-main-ai-251121
     NormalizedLandmark,
 )
 from mediapipe import Image, ImageFormat
@@ -54,7 +44,11 @@ from ....lmpipe.estimator import shape, headers, estimate, annotate
 from ....lmpipe.app.holistic.estimator import HolisticPartEstimator
 from .base import MediaPipeEstimator, get_mediapipe_model
 from .hand_args import MediaPipeHandKey, MediaPipeHandCategory, MediaPipeHandArgs
-from .mp_constants import HandLandmark
+from .mp_constants import HandLandmark, HAND_CONNECTIONS
+
+
+MEDIA_PIPE_LEFT_HAND_KEY = "mediapipe.left_hand"
+MEDIA_PIPE_RIGHT_HAND_KEY = "mediapipe.right_hand"
 
 
 # Deprecated: Use HandLandmark from constants module instead
@@ -191,8 +185,8 @@ class MediaPipeHandEstimator(
 
         if self.category == "both":
             return {
-                "mediapipe.left_hand": left_hand_landmarks,
-                "mediapipe.right_hand": right_hand_landmarks,
+                MEDIA_PIPE_LEFT_HAND_KEY: left_hand_landmarks,
+                MEDIA_PIPE_RIGHT_HAND_KEY: right_hand_landmarks,
             }
 
         if self.category == "left":
@@ -208,5 +202,58 @@ class MediaPipeHandEstimator(
         frame_idx: int,
         landmarks: Mapping[MediaPipeHandKey, NDArrayFloat],
     ) -> MatLike:
-        # TODO: Implement hand annotation
+
+        left_hand_landmarks = landmarks.get(MEDIA_PIPE_LEFT_HAND_KEY, None)
+        if left_hand_landmarks is not None:
+            self._annotate_hand(
+                frame_src, frame_idx,
+                MEDIA_PIPE_LEFT_HAND_KEY,
+                left_hand_landmarks,
+            )
+
+        right_hand_landmarks = landmarks.get(MEDIA_PIPE_RIGHT_HAND_KEY, None)
+        if right_hand_landmarks is not None:
+            self._annotate_hand(
+                frame_src, frame_idx,
+                MEDIA_PIPE_RIGHT_HAND_KEY,
+                right_hand_landmarks,
+            )
+
         return frame_src
+
+    def _annotate_hand(
+        self,
+        frame_src: MatLike,
+        frame_idx: int,
+        hand_key: MediaPipeHandKey,
+        hand_landmarks: NDArrayFloat,
+    ):
+
+        for point in HandLandmark:
+
+            x_px = int(hand_landmarks[point.value][0] * frame_src.shape[1])
+            y_px = int(hand_landmarks[point.value][1] * frame_src.shape[0])
+
+            cv2.drawMarker(
+                frame_src,
+                (x_px, y_px),
+                color=(0, 255, 0),  # TODO: pointごとに色を変える
+                # TODO: markerType= pointごとに形を変える
+                # TODO: markerSize= pointごとに大きさを変える
+            )
+
+        for start, stop in HAND_CONNECTIONS:
+
+            start_x_px = int(hand_landmarks[start][0] * frame_src.shape[1])
+            start_y_px = int(hand_landmarks[start][1] * frame_src.shape[0])
+
+            stop_x_px = int(hand_landmarks[stop][0] * frame_src.shape[1])
+            stop_y_px = int(hand_landmarks[stop][1] * frame_src.shape[0])
+
+            cv2.line(
+                frame_src,
+                (start_x_px, start_y_px),
+                (stop_x_px, stop_y_px),
+                color=(255, 0, 0),  # TODO: connectionごとに色を変える
+                # TODO: thickness= connectionごとに太さを変える
+            )

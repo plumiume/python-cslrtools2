@@ -7,6 +7,16 @@ from __future__ import annotations
 
 import pytest
 
+# Import torch at module level to prevent Triton TORCH_LIBRARY conflicts
+# This ensures torch is initialized before any worker processes spawn
+try:
+    import torch
+
+    # Force early initialization of torch internals
+    _ = torch.zeros(1)
+except ImportError:
+    pass
+
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_torch_once():

@@ -94,16 +94,11 @@ class TestPluginImports:
         # plugins module exists but may be empty if optional deps not installed
         assert plugins is not None
 
-    @pytest.mark.skipif(
-        condition=True,
-        reason="MediaPipe is optional dependency - skip if not installed",
-    )
+    @pytest.mark.mediapipe
     def test_import_mediapipe_plugin(self) -> None:
         """Test that the MediaPipe plugin can be imported (optional)."""
-        try:
-            # noqa: F401
-            import cslrtools2.plugins.mediapipe as mediapipe
+        pytest.importorskip("mediapipe")
+        # noqa: F401
+        import cslrtools2.plugins.mediapipe as mediapipe
 
-            assert mediapipe is not None
-        except ImportError:
-            pytest.skip("MediaPipe plugin not installed")
+        assert mediapipe is not None

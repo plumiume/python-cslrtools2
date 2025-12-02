@@ -23,26 +23,15 @@ from itertools import product
 import numpy as np
 import cv2
 
-<<<<<<< HEAD
-from mediapipe.python.solutions.holistic import (
-=======
 from mediapipe.python.solutions.holistic import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
->>>>>>> origin/dev-ai/work-main-ai-251121
     Holistic,
     PoseLandmark,
     HandLandmark,
 )
-<<<<<<< HEAD
-from mediapipe.tasks.python.vision.core.vision_task_running_mode import (
-    VisionTaskRunningMode,
-)
-from mediapipe.tasks.python.components.containers.landmark import (
-=======
 from mediapipe.tasks.python.vision.core.vision_task_running_mode import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     VisionTaskRunningMode,
 )
 from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
->>>>>>> origin/dev-ai/work-main-ai-251121
     Landmark,
     NormalizedLandmark,
 )

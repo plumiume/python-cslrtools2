@@ -27,19 +27,11 @@ import cv2
 from mediapipe.tasks.python.core.base_options import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     BaseOptions,
 )
-<<<<<<< HEAD
-from mediapipe.tasks.python.vision.pose_landmarker import (
-    PoseLandmarker,
-    PoseLandmarkerOptions,
-)
-from mediapipe.tasks.python.components.containers.landmark import (
-=======
 from mediapipe.tasks.python.vision.pose_landmarker import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
     PoseLandmarker,
     PoseLandmarkerOptions,
 )
 from mediapipe.tasks.python.components.containers.landmark import (  # pyright: ignore[reportMissingTypeStubs] # noqa: #501
->>>>>>> origin/dev-ai/work-main-ai-251121
     NormalizedLandmark,
 )
 from mediapipe import Image, ImageFormat
@@ -51,7 +43,7 @@ from ....lmpipe.app.holistic.estimator import HolisticPoseEstimator
 from ....lmpipe.app.holistic.roi import BaseROI
 from .base import MediaPipeEstimator, get_mediapipe_model
 from .pose_args import MediaPipePoseKey, MediaPipePoseArgs
-from .mp_constants import PoseLandmark
+from .mp_constants import PoseLandmark, POSE_CONNECTIONS
 
 
 MEDIA_PIPE_POSE_KEY: MediaPipePoseKey = "mediapipe.pose"
@@ -455,14 +447,7 @@ class MediaPipePoseEstimator(
             image_format=ImageFormat.SRGB, data=np.ascontiguousarray(frame_src)
         )
 
-<<<<<<< HEAD
-        detection_result = self.landmarker.detect(  # pyright: ignore[reportUnknownMemberType] # noqa: E501
-            mp_image
-        )
-
-=======
         detection_result = self.landmarker.detect(mp_image)  # pyright: ignore[reportUnknownMemberType] # noqa: E501
->>>>>>> origin/dev-ai/work-main-ai-251121
         landmarks: list[list[NormalizedLandmark]] = (  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa: E501
             detection_result.pose_landmarks
         )
@@ -481,7 +466,40 @@ class MediaPipePoseEstimator(
         frame_idx: int,
         landmarks: Mapping[MediaPipePoseKey, NDArrayFloat],
     ) -> MatLike:
-        # TODO: implement annotation drawing
+
+        pose_landmarks = landmarks.get(MEDIA_PIPE_POSE_KEY, None)
+        if pose_landmarks is None:
+            return frame_src
+
+        for point in PoseLandmark:
+
+            x_px = int(pose_landmarks[point][0] * frame_src.shape[1])
+            y_px = int(pose_landmarks[point][1] * frame_src.shape[0])
+
+            cv2.drawMarker(
+                frame_src,
+                (x_px, y_px),
+                (0, 255, 0),  # TODO: pointごとに色を変える
+                # TODO: markerType= pointごとに形を変える
+                # TODO: markerSize= pointごとに大きさを変える
+            )
+
+        for start, stop in POSE_CONNECTIONS:
+
+            start_x_px = int(pose_landmarks[start][0] * frame_src.shape[1])
+            start_y_px = int(pose_landmarks[start][1] * frame_src.shape[0])
+
+            stop_x_px = int(pose_landmarks[stop][0] * frame_src.shape[1])
+            stop_y_px = int(pose_landmarks[stop][1] * frame_src.shape[0])
+
+            cv2.line(
+                frame_src,
+                (start_x_px, start_y_px),
+                (stop_x_px, stop_y_px),
+                (0, 255, 0),  # TODO: connectionごとに色を変える
+                # TODO: thickness= connectionごとに太さを変える
+            )
+
         return frame_src
 
     def configure_left_hand_roi(
