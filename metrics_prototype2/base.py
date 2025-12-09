@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Base classes and types for metrics evaluation system (PROTOTYPE).
+"""Base classes and types for metrics evaluation system (PROTOTYPE v2).
 
 **STATUS**: This is a prototype demonstrating the plugin architecture for
 metrics. This code is NOT part of the main cslrtools2 package and serves
-as a design reference for future implementation in `src/cslrtools2/sldataset/metrics/`.
+as a design reference for future implementation in
+``src/cslrtools2/sldataset/metrics/``.
 
 Key Design Principles
 ---------------------
@@ -31,6 +32,8 @@ Key Design Principles
    third-party extensions.
 
 4. **Type Safety**: Strict typing with PEP 695 generics and Pyright compatibility.
+
+5. **SLDataset Integration**: Works seamlessly with cslrtools2.sldataset loading system.
 
 Architecture
 ------------
@@ -50,12 +53,12 @@ Architecture
 Example
 -------
 
-Implementing a custom metric::
+Implementing a custom landmark metric::
 
-    >>> from metrics_prototype.base import Metric, MetricResult
+    >>> from metrics_prototype2.base import LandmarkMetric, MetricResult
     >>> import numpy as np
-    >>> 
-    >>> class MyMetric(Metric):
+    >>>
+    >>> class MyMetric(LandmarkMetric):
     ...     def calculate(self, data: np.ndarray, **kwargs) -> MetricResult:
     ...         # data shape: (frames, keypoints, coordinates)
     ...         value = np.mean(data)
@@ -64,7 +67,7 @@ Implementing a custom metric::
     ...             values={"mean": float(value)},
     ...             metadata={"shape": data.shape}
     ...         )
-    ...     
+    ...
     ...     def get_description(self) -> str:
     ...         return "Example metric calculating mean"
 """
@@ -80,7 +83,7 @@ from numpy.typing import NDArray
 
 class MetricResult(TypedDict):
     """Result dictionary returned by metric calculations.
-    
+
     Attributes:
         metric_name: Identifier for the metric (e.g., "nan_rate").
         values: Computed metric values. Keys are sub-metric names, values are scores.
@@ -93,24 +96,69 @@ class MetricResult(TypedDict):
 
 
 class Metric(ABC):
-    """Abstract base class for all landmark quality metrics.
-    
-    All metrics in the plugin system must inherit from this class and implement
-    the abstract methods. This ensures a consistent interface across different
-    metric implementations.
-    
+    """Abstract base class for all metrics in the system.
+
+    This is the root class for all metric types. Specific metric categories
+    (landmarks, RGB frames, connections, targets, etc.) should inherit from
+    this base class.
+
+    Future Extensions
+    -----------------
+    - :class:`LandmarkMetric`: For pose/hand/face landmark quality
+    - :class:`RGBMetric`: For RGB frame quality analysis
+    - :class:`ConnectionMetric`: For connection/relationship metrics
+    - :class:`TargetMetric`: For target/annotation quality metrics
+    """
+
+    @abstractmethod
+    def calculate(self, data: Any, **kwargs: Any) -> MetricResult:
+        """Calculate the metric on the given data.
+
+        Args:
+            data: Input data (type depends on metric category).
+            **kwargs: Additional metric-specific parameters.
+
+        Returns:
+            Dictionary containing metric name, computed values, and metadata.
+
+        Raises:
+            ValueError: If input data has invalid format.
+            TypeError: If input type is incorrect.
+        """
+        pass
+
+    @abstractmethod
+    def get_description(self) -> str:
+        """Return a human-readable description of the metric.
+
+        Returns:
+            Description of the metric purpose and interpretation.
+        """
+        pass
+
+    def __repr__(self) -> str:
+        """Return string representation of the metric."""
+        return f"{self.__class__.__name__}()"
+
+
+class LandmarkMetric(Metric):
+    """Abstract base class for landmark quality metrics.
+
+    All landmark-specific metrics should inherit from this class.
+    This class specializes :class:`Metric` for landmark data analysis.
+
     Expected Input Format
     ---------------------
-    
+
     Landmark data should be a NumPy array with shape:
         ``(frames, keypoints, coordinates)``
-    
+
     Where:
         - frames: Number of video frames (T)
         - keypoints: Number of body landmarks (K), e.g., 33 for MediaPipe Pose
         - coordinates: Dimension of each landmark (D), typically 3 for (x, y, z)
           or 4 for (x, y, z, visibility)
-    
+
     Example shapes:
         - (300, 33, 3): 300 frames, 33 keypoints, xyz coordinates
         - (150, 21, 4): 150 frames, 21 hand keypoints, xyz + visibility
@@ -119,15 +167,15 @@ class Metric(ABC):
     @abstractmethod
     def calculate(self, data: NDArray[np.float32], **kwargs: Any) -> MetricResult:
         """Calculate the metric on the given landmark data.
-        
+
         Args:
             data: Landmark data array with shape (frames, keypoints, coordinates).
                 May contain NaN values for missing landmarks.
             **kwargs: Additional metric-specific parameters.
-        
+
         Returns:
             Dictionary containing metric name, computed values, and metadata.
-        
+
         Raises:
             ValueError: If input data has invalid shape or all values are NaN.
             TypeError: If input is not a NumPy array.
@@ -136,15 +184,15 @@ class Metric(ABC):
 
     def validate_inputs(self, data: NDArray[np.float32]) -> bool:
         """Validate input data format and shape.
-        
+
         Default implementation checks:
             - Data is a NumPy array
             - Data has 3 dimensions: (frames, keypoints, coordinates)
             - Data has at least 1 frame
-        
+
         Args:
             data: Input landmark data to validate.
-        
+
         Returns:
             True if input is valid, False otherwise.
         """
@@ -160,7 +208,7 @@ class Metric(ABC):
     @abstractmethod
     def get_description(self) -> str:
         """Return a human-readable description of the metric.
-        
+
         Returns:
             Description of the metric purpose and interpretation.
         """

@@ -241,7 +241,6 @@ Complete list of hand landmarks:
     - PINKY_MCP (17), PINKY_PIP (18), PINKY_DIP (19), PINKY_TIP (20)
 """
 
-
 # Type alias for connection sets
 ConnectionSet = frozenset[tuple[int, int]]
 """Type alias for skeleton connection sets.

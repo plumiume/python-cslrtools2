@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Temporal consistency metrics for landmark quality evaluation.
+"""Temporal consistency metrics for landmark quality evaluation (PROTOTYPE v2).
 
 This module implements metrics that evaluate the temporal coherence of
 landmark trajectories across frames. These metrics are engine-agnostic
@@ -40,19 +40,19 @@ Given landmark data X with shape (T, K, D):
 
 We compute:
     1. **Velocity** (frame-to-frame displacement)::
-    
+
         V[t] = X[t+1] - X[t]
         shape: (T-1, K, D)
-    
+
     2. **Acceleration** (velocity change)::
-    
+
         A[t] = V[t+1] - V[t]
         shape: (T-2, K, D)
-    
+
     3. **Smoothness** (acceleration standard deviation)::
-    
+
         smoothness = std(A)
-        
+
         Lower values indicate smoother motion.
 
 Usage
@@ -61,15 +61,15 @@ Usage
 Basic usage::
 
     >>> import numpy as np
-    >>> from metrics_prototype.plugins.temporal import TemporalConsistencyMetric
-    >>> 
+    >>> from metrics_prototype2.plugins.temporal import TemporalConsistencyMetric
+    >>>
     >>> # Create sample data with smooth motion
     >>> landmarks = np.random.rand(100, 33, 3)
-    >>> 
+    >>>
     >>> # Calculate metric
     >>> metric = TemporalConsistencyMetric()
     >>> result = metric.calculate(landmarks)
-    >>> 
+    >>>
     >>> print(f"Mean velocity: {result['values']['mean_velocity']:.4f}")
     Mean velocity: 0.0523
     >>> print(f"Smoothness: {result['values']['smoothness']:.4f}")
@@ -77,15 +77,15 @@ Basic usage::
 
 References
 ----------
-.. [1] Liu & Yuan, "Recognizing Human Actions as the Evolution of Pose 
+.. [1] Liu & Yuan, "Recognizing Human Actions as the Evolution of Pose
        Estimation Maps", CVPR 2018
-.. [2] Güler et al., "DensePose: Dense Human Pose Estimation In The Wild", 
+.. [2] Güler et al., "DensePose: Dense Human Pose Estimation In The Wild",
        CVPR 2018
 
 See Also
 --------
-:class:`~metrics_prototype.base.Metric` : Base class for all metrics
-:class:`~metrics_prototype.plugins.completeness.NaNRateMetric` : Completeness metric
+:class:`~metrics_prototype2.base.Metric` : Base class for all metrics
+:class:`~metrics_prototype2.plugins.completeness.NaNRateMetric` : Completeness metric
 
 Notes
 -----
@@ -101,44 +101,44 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from metrics_prototype.base import Metric, MetricResult
+from metrics_prototype2.base import LandmarkMetric, MetricResult
 
 
-class TemporalConsistencyMetric(Metric):
+class TemporalConsistencyMetric(LandmarkMetric):
     """Calculate temporal consistency of landmark trajectories.
-    
+
     This metric evaluates motion smoothness by analyzing frame-to-frame
     velocity and acceleration patterns. Smooth, stable tracking produces
     low acceleration variance, while jittery or unstable tracking shows
     high variance.
-    
+
     Formula:
         velocity = X[t+1] - X[t]
         acceleration = velocity[t+1] - velocity[t]
         smoothness = std(acceleration)
-    
+
     Attributes:
         None (stateless metric)
-    
+
     Notes:
         - Requires minimum 3 frames (for acceleration calculation)
         - NaN values in input data affect output statistics
         - Higher smoothness values indicate more jitter
         - Metric is scale-dependent (units of landmark coordinates)
-    
+
     See Also:
-        :class:`~metrics_prototype.base.Metric` : Base class
+        :class:`~metrics_prototype2.base.Metric` : Base class
     """
 
     def validate_inputs(self, data: NDArray[np.float32]) -> bool:
         """Validate input landmark data.
-        
+
         Args:
             data: Landmark array with shape (frames, keypoints, coordinates).
-        
+
         Returns:
             True if data is valid (3D array with at least 3 frames).
-        
+
         Raises:
             ValueError: If data has invalid shape or too few frames.
         """
@@ -147,23 +147,23 @@ class TemporalConsistencyMetric(Metric):
                 f"Expected 3D array (frames, keypoints, coords), "
                 f"got {data.ndim}D array with shape {data.shape}"
             )
-        
+
         if data.shape[0] < 3:
             raise ValueError(
                 f"Temporal consistency requires at least 3 frames, "
                 f"got {data.shape[0]} frames"
             )
-        
+
         return True
 
     def calculate(self, data: NDArray[np.float32], **kwargs: Any) -> MetricResult:
         """Calculate temporal consistency metrics.
-        
+
         Args:
             data: Landmark array with shape (frames, keypoints, coordinates).
                 Expected to be float32.
             **kwargs: Unused for this metric (maintained for interface compatibility).
-        
+
         Returns:
             MetricResult containing:
                 - metric_name: "temporal_consistency"
@@ -178,11 +178,11 @@ class TemporalConsistencyMetric(Metric):
                     - velocity_frames: Number of velocity samples (T-1)
                     - acceleration_frames: Number of acceleration samples (T-2)
                     - shape: Original data shape
-        
+
         Raises:
             ValueError: If data has invalid shape or too few frames.
             TypeError: If data is not a NumPy array.
-        
+
         Example:
             >>> import numpy as np
             >>> metric = TemporalConsistencyMetric()
@@ -197,19 +197,19 @@ class TemporalConsistencyMetric(Metric):
         # Calculate velocity (frame-to-frame displacement)
         # Shape: (T-1, K, D)
         velocity = data[1:] - data[:-1]
-        
+
         # Calculate acceleration (velocity change)
         # Shape: (T-2, K, D)
         acceleration = velocity[1:] - velocity[:-1]
-        
+
         # Compute statistics
         # Use nanmean/nanstd to handle NaN values in data
         mean_velocity = float(np.nanmean(np.abs(velocity)))
         std_velocity = float(np.nanstd(velocity))
-        
+
         mean_acceleration = float(np.nanmean(np.abs(acceleration)))
         std_acceleration = float(np.nanstd(acceleration))
-        
+
         # Smoothness: lower is better (less jitter)
         smoothness = std_acceleration
 
@@ -232,7 +232,7 @@ class TemporalConsistencyMetric(Metric):
 
     def get_description(self) -> str:
         """Return description of the temporal consistency metric.
-        
+
         Returns:
             Human-readable description of the metric.
         """
@@ -247,4 +247,7 @@ class TemporalConsistencyMetric(Metric):
 # Plugin Registration (for simulated Entry Points)
 # ============================================================================
 
-temporal_consistency_info = (TemporalConsistencyMetric, {})  # pyright: ignore[reportUnknownVariableType]
+temporal_consistency_info: tuple[type[TemporalConsistencyMetric], dict[str, Any]] = (
+    TemporalConsistencyMetric,
+    {},
+)

@@ -20,7 +20,9 @@ representing individual samples in a sign language dataset.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Mapping, Never, TypeGuard
+from typing import (
+    TYPE_CHECKING, Any, Callable, Mapping, Never, TypeGuard, Self, Literal
+)
 from pathlib import Path
 
 import numpy as np
@@ -43,6 +45,9 @@ from ..array_loader import (
     ContainerLoadFunc,
 )
 from .holder import SLKeyHolder
+
+
+type CategoryGroup = Literal["videos", "landmarks", "targets"]
 
 
 ######## Type Aliases ########
@@ -158,6 +163,46 @@ class SLDatasetItem[
             target_group.create_array(ktgt, data=np.asarray(vtgt))
 
         return item_group
+
+    def get_map_from_category_group(
+        self, group: CategoryGroup
+    ) -> Mapping[str, ArrayLike]:
+
+        """Get mapping from category group name.
+
+        Args:
+            group: Category group name ('videos', 'landmarks', or 'targets').
+        Returns:
+            Mapping from keys to NumPy arrays for the specified category group.
+        """
+
+        match group:
+            case "videos":
+                return {**self.videos}
+            case "landmarks":
+                return {**self.landmarks}
+            case "targets":
+                return {**self.targets}
+            case _:
+                raise ValueError(f"Invalid category group: {group}")
+
+    @classmethod
+    def from_item(
+        cls, item: DefaultSLDatasetItem[Kvid, Klm, Ktgt]
+    ) -> Self:
+        """Create a new item from an existing one.
+
+        Args:
+            item: Existing dataset item.
+        Returns:
+            New dataset item with the same data.
+        """
+
+        return cls(
+            videos=item.videos,
+            landmarks=item.landmarks,
+            targets=item.targets,
+        )
 
     @classmethod
     def from_file_system(

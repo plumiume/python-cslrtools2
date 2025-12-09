@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Anatomical constraint metrics for landmark quality evaluation.
+# pyright: reportUnknownArgumentType=false
+# Reason: NumPy statistical functions have complex return type inference
+
+"""Anatomical constraint metrics for landmark quality evaluation (PROTOTYPE v2).
 
 This module implements metrics that evaluate whether landmark data satisfies
 basic anatomical constraints (e.g., consistent bone lengths, valid joint angles).
@@ -43,7 +46,7 @@ Given landmark data X with shape (T, K, D):
 For a bone connecting joints i and j::
 
     bone_length[t] = ||X[t, i] - X[t, j]||_2
-    
+
     variation_coefficient = std(bone_length) / mean(bone_length)
 
 Lower variation coefficients indicate more consistent bone lengths across frames.
@@ -54,7 +57,7 @@ Usage
 Basic usage::
 
     >>> import numpy as np
-    >>> from metrics_prototype.plugins.anatomical import (
+    >>> from metrics_prototype2.plugins.anatomical import (
     ...     AnatomicalConstraintMetric
     ... )
     >>>
@@ -85,8 +88,8 @@ References
 
 See Also
 --------
-:class:`~metrics_prototype.base.Metric` : Base class for all metrics
-:class:`~metrics_prototype.plugins.temporal.TemporalConsistencyMetric` :
+:class:`~metrics_prototype2.base.Metric` : Base class for all metrics
+:class:`~metrics_prototype2.plugins.temporal.TemporalConsistencyMetric` :
     Temporal consistency metric
 
 Notes
@@ -103,7 +106,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from metrics_prototype.base import Metric, MetricResult
+from metrics_prototype2.base import LandmarkMetric, MetricResult
 
 # Default bone pairs for MediaPipe Pose (33 keypoints)
 # Based on MediaPipe Pose landmark topology
@@ -128,7 +131,7 @@ MEDIAPIPE_POSE_BONES = [
 ]
 
 
-class AnatomicalConstraintMetric(Metric):
+class AnatomicalConstraintMetric(LandmarkMetric):
     """Calculate anatomical constraint violations in landmark data.
 
     This metric evaluates the physical plausibility of landmark trajectories
@@ -150,7 +153,7 @@ class AnatomicalConstraintMetric(Metric):
         - Metric is scale-dependent
 
     See Also:
-        :class:`~metrics_prototype.base.Metric` : Base class
+        :class:`~metrics_prototype2.base.Metric` : Base class
     """
 
     def validate_inputs(self, data: NDArray[np.float32]) -> bool:
@@ -260,11 +263,11 @@ class AnatomicalConstraintMetric(Metric):
 
         # Compute summary statistics
         if len(variation_coefficients) == 0:
-            raise ValueError(
-                "All bones have invalid lengths (NaN or zero mean)"
-            )
+            raise ValueError("All bones have invalid lengths (NaN or zero mean)")
 
-        variation_array = np.array(variation_coefficients)
+        # pyright: ignore[reportUnknownArgumentType]
+        # Reason: List[float] to ndarray conversion is type-safe
+        variation_array = np.array(variation_coefficients, dtype=np.float32)
 
         return MetricResult(
             metric_name="anatomical_constraint",
@@ -299,7 +302,7 @@ class AnatomicalConstraintMetric(Metric):
 # Plugin Registration (for simulated Entry Points)
 # ============================================================================
 
-anatomical_constraint_info = (
+anatomical_constraint_info: tuple[type[AnatomicalConstraintMetric], dict[str, Any]] = (
     AnatomicalConstraintMetric,
     {},
-)  # pyright: ignore[reportUnknownVariableType]
+)

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""NaN rate metric plugin (PROTOTYPE).
+"""NaN rate metric plugin (PROTOTYPE v2).
 
 This module implements a completeness metric that calculates the rate of
 missing (NaN) values in landmark data. This is a demo implementation showing
@@ -67,7 +67,7 @@ Example
 Basic usage::
 
     >>> import numpy as np
-    >>> from metrics_prototype.plugins.completeness import NaNRateMetric
+    >>> from metrics_prototype2.plugins.completeness import NaNRateMetric
     >>>
     >>> # Create sample data
     >>> landmarks = np.random.rand(100, 33, 3)
@@ -100,10 +100,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from metrics_prototype.base import Metric, MetricResult
+from metrics_prototype2.base import LandmarkMetric, MetricResult
 
 
-class NaNRateMetric(Metric):
+class NaNRateMetric(LandmarkMetric):
     """Calculate the proportion of frames containing NaN (missing) values.
 
     This metric measures frame-level completeness by calculating what fraction
@@ -124,7 +124,7 @@ class NaNRateMetric(Metric):
         - Returns metadata about frames for debugging
 
     See Also:
-        :class:`~metrics_prototype.base.Metric` : Base class
+        :class:`~metrics_prototype2.base.Metric` : Base class
     """
 
     def calculate(self, data: NDArray[np.float32], **kwargs: Any) -> MetricResult:
@@ -214,4 +214,4 @@ class NaNRateMetric(Metric):
 # In real implementation, this would be registered in pyproject.toml:
 # [project.entry-points."cslrtools2.sldataset.metrics"]
 # "completeness.nan_rate" = "cslrtools2.plugins.metrics.completeness:nan_rate_info"
-nan_rate_info = (NaNRateMetric, {})
+nan_rate_info: tuple[type[NaNRateMetric], dict[str, Any]] = (NaNRateMetric, {})

@@ -44,3 +44,5 @@ docker-compose.override.yaml
 # Temporary documentation
 # github-issue-*.md
 src/cslrtools2/_version.py
+
+temp.arrays.pkl
